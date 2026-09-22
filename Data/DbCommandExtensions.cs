@@ -5,7 +5,7 @@ namespace CourierService.Data
     /// <summary>
     /// Small helper so every repository builds parameters the same way. Always use this (or
     /// the equivalent) instead of concatenating values into command text — every query in this
-    /// project must be parameterised, no exceptions (CLAUDE.md / SR-03).
+    /// project must be parameterised, no exceptions (SR-03).
     /// </summary>
     public static class DbCommandExtensions
     {

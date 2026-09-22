@@ -1,9 +1,9 @@
 # CMPG323-Courier-Service-Management-and-Tracking-System
 
 Staff-only intake, storage and collection tracking system for North-West University's
-F20 courier point. See [CLAUDE.md](CLAUDE.md) for the architecture/decisions summary,
-[DECISIONS.md](DECISIONS.md) for the full decisions log, [docs/API_CONTRACT.md](docs/API_CONTRACT.md)
-for the REST contract, and [db/schema.sql](db/schema.sql) for the database schema.
+F20 courier point. See [DECISIONS.md](DECISIONS.md) for the architecture/decisions log,
+[docs/API_CONTRACT.md](docs/API_CONTRACT.md) for the REST contract, and
+[db/schema.sql](db/schema.sql) for the database schema.
 
 ## Solution layout
 
