@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>CourierService.Services</RootNamespace>
+    <AssemblyName>CourierService.Services</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <ProjectGuid>{8A86D618-C681-48D6-9BE3-3F2B122E8353}</ProjectGuid>
+  </PropertyGroup>
+
+  <!--
+    Business logic: package lifecycle, status state machine, fee calc, notifications.
+    Depends on Domain (interfaces/POCOs) only — never on Data or Web directly.
+  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\CourierService.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>CourierService.Data</RootNamespace>
+    <AssemblyName>CourierService.Data</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <ProjectGuid>{EA777D62-35CB-46FA-90EE-F9D62515765C}</ProjectGuid>
+  </PropertyGroup>
+
+  <!--
+    ADO.NET repository implementations (T05) — parameterized queries only, no raw SQL
+    string concatenation. Depends on Domain for the interfaces it implements.
+  -->
+
+  <ItemGroup>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\CourierService.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
