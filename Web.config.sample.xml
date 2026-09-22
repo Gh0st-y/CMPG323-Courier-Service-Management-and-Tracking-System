@@ -1,0 +1,31 @@
+<!--
+T06: Externalised configuration sample.
+Copy the <appSettings> block into your ASP.NET MVC project's Web.config.
+Do NOT commit real SMTP credentials — use Web.config.Local (gitignored) or
+environment-specific transforms for anything secret. Fee values below are the
+DEFAULTS; the AppConfig table (schema.sql) is the source of truth at runtime
+so values can change without a redeploy (NFR-024) — this file only needs the
+things the app can't get from the database yet (connection string, SMTP host).
+-->
+<configuration>
+  <connectionStrings>
+    <add name="CourierServiceDb"
+         connectionString="Server=(localdb)\MSSQLLocalDB;Database=CourierService;Trusted_Connection=True;"
+         providerName="System.Data.SqlClient" />
+  </connectionStrings>
+
+  <appSettings>
+    <!-- SMTP (T26). Point this at a local dev inbox (smtp4dev / Papercut) during development. -->
+    <add key="Smtp.Host" value="localhost" />
+    <add key="Smtp.Port" value="25" />
+    <add key="Smtp.FromAddress" value="courier-noreply@f20.local" />
+    <add key="Smtp.UseSsl" value="false" />
+
+    <!-- SMS (T29). Leave disabled until a real gateway is confirmed (DECISIONS.md #6). -->
+    <add key="Sms.Enabled" value="false" />
+    <add key="Sms.Provider" value="Stub" />
+
+    <!-- Session -->
+    <add key="Session.InactivityTimeoutMinutes" value="30" />
+  </appSettings>
+</configuration>
