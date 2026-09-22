@@ -1,0 +1,41 @@
+{
+  "_readme": "T09 mock fixtures. Matches API_CONTRACT.md shapes exactly. Frontend dev toggles a mock-mode flag in the shared JS fetch wrapper to serve these instead of hitting the real backend, so FE work isn't blocked on backend endpoints landing.",
+
+  "POST /api/auth/login": { "userId": 1, "role": "IntakeClerk", "displayName": "Demo Clerk" },
+
+  "GET /api/dashboard/stats": { "receivedToday": 14, "readyForCollection": 6, "collectedToday": 9, "outstanding": 3 },
+
+  "GET /api/packages": {
+    "items": [
+      { "packageId": 1, "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi", "status": "ReadyForCollection", "classification": "Personal", "fee": 10.00, "createdAtUtc": "2026-09-22T08:15:00Z" },
+      { "packageId": 2, "f20Identifier": "F20-0002", "recipientName": "Lerato Dlamini", "status": "InStorage", "classification": "WorkRelated", "fee": 0.00, "createdAtUtc": "2026-09-22T09:02:00Z" }
+    ],
+    "totalCount": 2
+  },
+
+  "GET /api/packages/{f20Identifier}/detail": {
+    "package": { "packageId": 1, "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi", "status": "ReadyForCollection", "storageLocation": "Shelf A-3", "fee": 10.00, "paymentStatus": "Unpaid" },
+    "statusHistory": [
+      { "fromStatus": null, "toStatus": "Registered", "changedBy": "Demo Clerk", "changedAtUtc": "2026-09-22T08:15:00Z" },
+      { "fromStatus": "Registered", "toStatus": "ReadyForCollection", "changedBy": "Demo Storage", "changedAtUtc": "2026-09-22T10:30:00Z" }
+    ],
+    "notifications": [
+      { "channel": "Email", "status": "Sent", "sentAtUtc": "2026-09-22T10:30:05Z" }
+    ]
+  },
+
+  "POST /api/packages": { "packageId": 3, "f20Identifier": "F20-0003", "fee": 10.00, "status": "Registered" },
+
+  "GET /api/packages/scan/{f20Identifier}": { "packageId": 1, "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi", "status": "ReadyForCollection", "storageLocation": "Shelf A-3" },
+
+  "POST /api/packages/{f20Identifier}/status": { "packageId": 1, "status": "ReadyForCollection", "storageLocation": "Shelf A-3" },
+
+  "POST /api/packages/{f20Identifier}/collect": { "status": "Collected", "collectedAtUtc": "2026-09-22T14:05:00Z" },
+
+  "GET /api/storage-locations": [
+    { "storageLocationId": 1, "code": "Shelf A-3", "description": "Wall A, shelf 3" },
+    { "storageLocationId": 2, "code": "Shelf B-1", "description": "Wall B, shelf 1" }
+  ],
+
+  "error_example": { "error": { "code": "InvalidTransition", "message": "Package cannot move to Collected from Registered." } }
+}
