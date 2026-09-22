@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>CourierService.Domain</RootNamespace>
+    <AssemblyName>CourierService.Domain</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <ProjectGuid>{77B69A22-76BC-43A1-B463-52FE13CD53E0}</ProjectGuid>
+  </PropertyGroup>
+
+  <!--
+    POCOs and repository interfaces shared across layers (T05). No dependencies on
+    Services, Data or Web — everything else depends on this, not the other way round.
+  -->
+
+</Project>
