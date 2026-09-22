@@ -6,7 +6,7 @@ namespace CourierService.Domain
     /// <summary>
     /// A single connection + transaction shared across multiple repository calls, so a
     /// multi-step operation (e.g. status change + history row + audit entry) commits
-    /// atomically as one transaction, per CLAUDE.md's conventions.
+    /// atomically as one transaction, per the project's conventions.
     ///
     /// Usage:
     /// <code>
