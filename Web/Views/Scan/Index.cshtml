@@ -1,0 +1,46 @@
+@{
+    ViewBag.Title = "Scan";
+}
+
+<h1 class="app-page-title">Scan (T10 spike)</h1>
+<p>Demonstrates two ways to feed a package identifier into the same lookup call
+    (<code>GET /api/packages/scan/{f20Identifier}</code>). See
+    <code>docs/SCANNING_SPIKE.md</code> in the repo for findings. Mock mode must be on
+    for this page to return data — toggle it from the
+    <a href="@Url.Action("Index", "Home")">home page</a> first.</p>
+
+<div class="card" style="margin-bottom: 16px;">
+    <h2 style="margin-top: 0;">(a) USB scanner (keyboard/HID mode)</h2>
+    <p>Click into the box below and scan (or, without hardware, type an identifier like
+        <code>F20-0001</code> and press Enter — that's exactly what a HID-mode scanner sends).</p>
+    <input type="text" id="usb-scan-input" placeholder="Scan or type an F20 identifier, then Enter"
+           style="width: 320px; padding: 8px; font-size: 14px; border: 1px solid var(--color-border); border-radius: var(--radius);" />
+    <button type="button" class="btn btn-secondary" id="usb-refocus">Refocus input</button>
+</div>
+
+<div class="card" style="margin-bottom: 16px;">
+    <h2 style="margin-top: 0;">(b) Phone camera (QR, via html5-qrcode)</h2>
+
+    <div id="qr-secure-warning" style="display: none; background: var(--color-error-bg); border-left: 4px solid var(--color-error); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
+        <strong>Camera access needs a secure context.</strong> This page is being served over
+        plain HTTP from a non-localhost origin, so the browser will refuse camera access —
+        this is flagged instead of letting it fail silently. Use HTTPS (or open this from
+        <code>localhost</code> on the same machine) to test the camera path.
+    </div>
+
+    <div id="qr-reader" style="width: 320px;"></div>
+    <p>
+        <button type="button" class="btn btn-primary" id="qr-start">Start camera scan</button>
+        <button type="button" class="btn btn-secondary" id="qr-stop" disabled>Stop</button>
+    </p>
+</div>
+
+<div class="card">
+    <h2 style="margin-top: 0;">Result</h2>
+    <pre id="scan-result" style="background: var(--color-bg); padding: 12px; border-radius: var(--radius); min-height: 40px;">(nothing scanned yet)</pre>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="~/Scripts/app/scan-demo.js"></script>
+}
