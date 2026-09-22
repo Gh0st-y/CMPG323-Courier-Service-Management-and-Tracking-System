@@ -2,5 +2,64 @@
     ViewBag.Title = "Courier Service";
 }
 
-<h1>Courier Service Management and Tracking System</h1>
-<p>Solution skeleton (T02). Real pages land in later tasks.</p>
+<h1 class="app-page-title">Courier Service Management and Tracking System</h1>
+
+<div class="card">
+    <p>Solution skeleton (T02) and frontend scaffold (T07). Real pages replace this as each feature lands.</p>
+
+    <p>
+        Mock mode: <strong id="mock-mode-label"></strong>
+        <button type="button" class="btn btn-secondary" id="toggle-mock-mode">Toggle</button>
+    </p>
+
+    <p>
+        <button type="button" class="btn btn-primary" id="demo-toast-success">Show success toast</button>
+        <button type="button" class="btn btn-primary" id="demo-toast-error">Show error toast</button>
+        <button type="button" class="btn btn-secondary" id="demo-confirm">Show confirm dialog</button>
+        <button type="button" class="btn btn-secondary" id="demo-fetch-stats">Load dashboard stats</button>
+    </p>
+
+    <pre id="demo-output" class="card" style="margin-top: 12px; background: var(--color-bg);"></pre>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            var outputEl = document.getElementById("demo-output");
+            var mockLabelEl = document.getElementById("mock-mode-label");
+
+            function refreshMockLabel() {
+                mockLabelEl.textContent = CourierApp.config.mockMode ? "ON" : "OFF";
+            }
+            refreshMockLabel();
+
+            document.getElementById("toggle-mock-mode").addEventListener("click", function () {
+                CourierApp.config.setMockMode(!CourierApp.config.mockMode);
+                refreshMockLabel();
+            });
+
+            document.getElementById("demo-toast-success").addEventListener("click", function () {
+                CourierApp.toast.success("Package registered successfully.");
+            });
+
+            document.getElementById("demo-toast-error").addEventListener("click", function () {
+                CourierApp.toast.error("Package cannot move to Collected from Registered.");
+            });
+
+            document.getElementById("demo-confirm").addEventListener("click", function () {
+                CourierApp.confirm("Mark this package as collected?", { confirmLabel: "Mark collected" })
+                    .then(function (confirmed) {
+                        outputEl.textContent = "Confirm result: " + confirmed;
+                    });
+            });
+
+            document.getElementById("demo-fetch-stats").addEventListener("click", function () {
+                CourierApp.api.get("/dashboard/stats").then(function (data) {
+                    outputEl.textContent = JSON.stringify(data, null, 2);
+                }).catch(function () {
+                    outputEl.textContent = "Request failed (see toast).";
+                });
+            });
+        })();
+    </script>
+}

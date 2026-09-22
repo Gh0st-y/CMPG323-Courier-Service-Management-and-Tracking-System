@@ -2,10 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewBag.Title - Courier Service</title>
+    <link rel="stylesheet" href="~/Content/site.css" />
 </head>
 <body>
-    <!-- Replaced by the shared master layout, nav and NWU-inspired theme in T07. -->
-    @RenderBody()
+    <header class="app-header">
+        <a class="app-header__brand" href="@Url.Action("Index", "Home")">F20 Courier Service</a>
+        <nav class="app-nav" aria-label="Main">
+            @{
+                var currentController = (string)ViewContext.RouteData.Values["controller"];
+            }
+            <a class="app-nav__link @(currentController == "Home" ? "is-active" : "")" href="@Url.Action("Index", "Home")">Dashboard</a>
+            <!-- The links below are placeholders until their controllers land in later tasks. -->
+            <a class="app-nav__link" href="#">Packages</a>
+            <a class="app-nav__link" href="#">Scan</a>
+            <a class="app-nav__link" href="#">Import</a>
+            <a class="app-nav__link" href="#">Audit Log</a>
+            <a class="app-nav__link" href="#">Users</a>
+            <a class="app-nav__link" href="#">Config</a>
+        </nav>
+        <span class="app-header__user">Signed in as: — (auth lands in a later task)</span>
+    </header>
+
+    <main class="app-main">
+        @RenderBody()
+    </main>
+
+    <script src="~/Scripts/app/courier-app.js"></script>
+    @RenderSection("scripts", required: false)
 </body>
 </html>
