@@ -16,7 +16,7 @@
             <a class="app-nav__link @(currentController == "Home" ? "is-active" : "")" href="@Url.Action("Index", "Home")">Dashboard</a>
             <!-- The links below are placeholders until their controllers land in later tasks. -->
             <a class="app-nav__link" href="#">Packages</a>
-            <a class="app-nav__link" href="#">Scan</a>
+            <a class="app-nav__link @(currentController == "Scan" ? "is-active" : "")" href="@Url.Action("Index", "Scan")">Scan</a>
             <a class="app-nav__link" href="#">Import</a>
             <a class="app-nav__link" href="#">Audit Log</a>
             <a class="app-nav__link" href="#">Users</a>

@@ -57,6 +57,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MockController.cs" />
+    <Compile Include="Controllers\ScanController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -71,6 +72,8 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Content\site.css" />
     <Content Include="Scripts\app\courier-app.js" />
+    <Content Include="Scripts\app\scan-demo.js" />
+    <Content Include="Views\Scan\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Domain\CourierService.Domain.csproj">
