@@ -8,6 +8,9 @@ namespace CourierService.Web
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            
+            // Lets controllers declare URLs like [Route("api/packages")]
+            routes.MapMvcAttributeRoutes();
 
             routes.MapRoute(
                 name: "Default",
