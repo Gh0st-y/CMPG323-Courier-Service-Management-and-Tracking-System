@@ -10,7 +10,7 @@ namespace CourierService.Tests
         {
             // Placeholder so `dotnet test` / VS Test Explorer has something to discover
             // until real Domain/Services/Data tests land (T05 onward).
-            Assert.IsTrue(true);
+            Assert.IsNotNull(true);
         }
     }
 }
