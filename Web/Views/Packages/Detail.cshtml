@@ -1,0 +1,231 @@
+﻿@model string
+
+@{
+    ViewBag.Title = "Package Detail";
+    var f20Identifier = Model;
+}
+
+<div class="detail-page">
+
+    <!-- ============================== -->
+    <!-- Back link                       -->
+    <!-- ============================== -->
+    <div class="detail-back">
+        <a href="@Url.Action("Search", "Packages")">&larr; Back to Search</a>
+    </div>
+
+    <!-- ============================== -->
+    <!-- Header                          -->
+    <!-- ============================== -->
+    <!-- ============================== -->
+    <!-- Header (hidden until data loads, or shown on error) -->
+    <!-- ============================== -->
+    <div class="detail-header" id="detail-header" style="display:none;">
+        <div>
+            <h1 class="detail-header__id" id="detail-id">@f20Identifier</h1>
+            <span class="detail-header__sub">Package Details</span>
+        </div>
+        <div class="detail-header__actions">
+            <a class="btn btn-secondary" id="detail-label-link" href="#">
+                Print label
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- Error state (shown if fetch fails) -->
+    <!-- ============================== -->
+    <div class="detail-error" id="detail-error" style="display:none;"></div>
+
+    <!-- ============================== -->
+    <!-- Two-column layout                -->
+    <!-- ============================== -->
+    <div class="detail-grid" id="detail-content" style="display:none;">
+
+        <!-- ---------- Left column: summary ---------- -->
+        <div class="detail-card detail-card--summary">
+            <h2 class="detail-card__title">Summary</h2>
+            <dl class="detail-list">
+                <dt>Status</dt>
+                <dd><span class="detail-status" id="d-status">—</span></dd>
+
+                <dt>Recipient</dt>
+                <dd id="d-recipient">—</dd>
+
+                <dt>Classification</dt>
+                <dd id="d-classification">—</dd>
+
+                <dt>Fee</dt>
+                <dd id="d-fee">—</dd>
+
+                <dt>Payment Status</dt>
+                <dd id="d-payment">—</dd>
+
+                <dt>Storage Location</dt>
+                <dd id="d-location">—</dd>
+
+                <dt>Date Received</dt>
+                <dd id="d-created">—</dd>
+            </dl>
+        </div>
+
+        <!-- ---------- Right column: timeline + notifications ---------- -->
+        <div class="detail-column">
+
+            <!-- Timeline -->
+            <div class="detail-card">
+                <h2 class="detail-card__title">Status Timeline</h2>
+                <ol class="timeline" id="d-timeline">
+                    <!-- Populated via JS -->
+                </ol>
+            </div>
+
+            <!-- Notifications -->
+            <div class="detail-card">
+                <h2 class="detail-card__title">Notifications</h2>
+                <ul class="notification-list" id="d-notifications">
+                    <!-- Populated via JS -->
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            "use strict";
+
+            var f20Identifier = "@Html.Raw(f20Identifier)";
+
+            var errorEl = document.getElementById("detail-error");
+            var contentEl = document.getElementById("detail-content");
+            var labelLink = document.getElementById("detail-label-link");
+
+            // Point the label link at the right package
+            labelLink.href = "@Url.Action("Label", "Packages")/" + encodeURIComponent(f20Identifier);
+
+            function showError(message) {
+                errorEl.textContent = message;
+                errorEl.style.display = "block";
+                document.getElementById("detail-header").style.display = "flex";
+            }
+
+            function statusLabel(status) {
+                if (status === "InStorage") return "In Storage";
+                if (status === "ReadyForCollection") return "Ready for Collection";
+                return status || "—";
+            }
+
+            function formatDateTime(iso) {
+                if (!iso) return "—";
+                var d = new Date(iso);
+                if (isNaN(d)) return "—";
+                return d.toLocaleString();
+            }
+
+            function formatDate(iso) {
+                if (!iso) return "—";
+                var d = new Date(iso);
+                if (isNaN(d)) return "—";
+                return d.toLocaleDateString();
+            }
+
+            function formatFee(fee) {
+                return "R" + (fee != null ? Number(fee).toFixed(2) : "0.00");
+            }
+
+            function setText(id, value) {
+                var el = document.getElementById(id);
+                if (el) el.textContent = value || "—";
+            }
+
+            // -----------------------------------------------------------------
+            // Fetch detail
+            // -----------------------------------------------------------------
+            CourierApp.api.get("/packages/" + encodeURIComponent(f20Identifier) + "/detail")
+                .then(function (data) {
+                    var pkg = data.package || {};
+                    var history = data.statusHistory || [];
+                    var notifications = data.notifications || [];
+
+                    // ---- Summary card ----
+                    var statusEl = document.getElementById("d-status");
+                    statusEl.textContent = statusLabel(pkg.status);
+                    statusEl.className = "detail-status results-table__status results-table__status--" + (pkg.status || "");
+
+                    setText("d-recipient", pkg.recipientName);
+                    setText("d-classification", pkg.classification === "WorkRelated" ? "Work" : (pkg.classification || "—"));
+                    setText("d-fee", formatFee(pkg.fee));
+                    setText("d-payment", pkg.paymentStatus || "—");
+                    setText("d-location", pkg.storageLocation);
+                    setText("d-created", formatDate(pkg.createdAtUtc));
+
+                    // ---- Timeline ----
+                    var timelineEl = document.getElementById("d-timeline");
+                    timelineEl.innerHTML = "";
+                    if (!history.length) {
+                        timelineEl.innerHTML = '<li class="timeline__empty">No status changes recorded.</li>';
+                    } else {
+                        history.forEach(function (entry) {
+                            var li = document.createElement("li");
+                            li.className = "timeline__item";
+
+                            var transition = entry.fromStatus
+                                ? statusLabel(entry.fromStatus) + " \u2192 " + statusLabel(entry.toStatus)
+                                : statusLabel(entry.toStatus);
+
+                            var title = document.createElement("div");
+                            title.className = "timeline__title";
+                            title.textContent = transition;
+
+                            var meta = document.createElement("div");
+                            meta.className = "timeline__meta";
+                            meta.textContent = (entry.changedBy || "System") + " \u00b7 " + formatDateTime(entry.changedAtUtc);
+
+                            li.appendChild(title);
+                            li.appendChild(meta);
+                            timelineEl.appendChild(li);
+                        });
+                    }
+
+                    // ---- Notifications ----
+                    var notifEl = document.getElementById("d-notifications");
+                    notifEl.innerHTML = "";
+                    if (!notifications.length) {
+                        notifEl.innerHTML = '<li class="notification-list__empty">No notifications sent yet.</li>';
+                    } else {
+                        notifications.forEach(function (n) {
+                            var li = document.createElement("li");
+                            li.className = "notification-list__item";
+
+                            var channel = document.createElement("span");
+                            channel.className = "notification-list__channel";
+                            channel.textContent = n.channel || "—";
+
+                            var badge = document.createElement("span");
+                            var status = n.status || "Unknown";
+                            badge.className = "notification-list__badge notification-list__badge--" + status;
+                            badge.textContent = status;
+
+                            var when = document.createElement("span");
+                            when.className = "notification-list__when";
+                            when.textContent = formatDateTime(n.sentAtUtc);
+
+                            li.appendChild(channel);
+                            li.appendChild(badge);
+                            li.appendChild(when);
+                            notifEl.appendChild(li);
+                        });
+                    }
+                    document.getElementById("detail-header").style.display = "flex";
+                    contentEl.style.display = "grid";
+                })
+                .catch(function (err) {
+                    var message = (err && err.error && err.error.message) || "Could not load package details.";
+                    showError(message);
+                });
+        })();
+    </script>
+}

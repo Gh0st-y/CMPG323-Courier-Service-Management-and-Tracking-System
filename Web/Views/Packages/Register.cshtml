@@ -1,0 +1,274 @@
+﻿@{
+    ViewBag.Title = "Register Package";
+}
+
+<h1 class="app-page-title">Register Package</h1>
+
+<div class="card">
+    <form id="register-form" novalidate>
+        <!-- ============================== -->
+        <!-- Group 1: Recipient Details      -->
+        <!-- ============================== -->
+        <fieldset class="form-section">
+            <legend>Recipient Details</legend>
+
+            <div class="form-row">
+                <label for="recipient-fullName">Full Name <span class="required">*</span></label>
+                <input type="text" id="recipient-fullName" name="recipient.fullName" autocomplete="off" />
+                <span class="field-error" data-error-for="recipient-fullName"></span>
+            </div>
+
+            <div class="form-row">
+                <label for="recipient-identifierNo">Staff / Student Number <span class="required">*</span></label>
+                <input type="text" id="recipient-identifierNo" name="recipient.identifierNo" autocomplete="off" />
+                <span class="field-error" data-error-for="recipient-identifierNo"></span>
+            </div>
+
+            <div class="form-row">
+                <label for="recipient-email">Email <span class="required">*</span></label>
+                <input type="email" id="recipient-email" name="recipient.email" autocomplete="off" />
+                <span class="field-error" data-error-for="recipient-email"></span>
+            </div>
+
+            <div class="form-row">
+                <label for="recipient-phone">Phone <span class="required">*</span></label>
+                <input type="tel" id="recipient-phone" name="recipient.phone" autocomplete="off" placeholder="e.g. 0821234567" />
+                <span class="field-error" data-error-for="recipient-phone"></span>
+            </div>
+
+            <div class="form-row">
+                <label for="recipient-department">Department <span class="optional">(optional)</span></label>
+                <input type="text" id="recipient-department" name="recipient.department" autocomplete="off" />
+            </div>
+        </fieldset>
+
+        <!-- ============================== -->
+        <!-- Group 2: Package Details        -->
+        <!-- ============================== -->
+        <fieldset class="form-section">
+            <legend>Package Details</legend>
+
+            <div class="form-row">
+                <label for="senderName">Sender Name <span class="required">*</span></label>
+                <input type="text" id="senderName" name="senderName" autocomplete="off" />
+                <span class="field-error" data-error-for="senderName"></span>
+            </div>
+
+            <div class="form-row">
+                <label for="packageType">Package Type <span class="required">*</span></label>
+                <select id="packageType" name="packageType">
+                    <option value="">— Select —</option>
+                    <option value="Envelope">Envelope</option>
+                    <option value="Box">Box</option>
+                    <option value="Parcel">Parcel</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span class="field-error" data-error-for="packageType"></span>
+            </div>
+
+            <div class="form-row">
+                <label>Classification <span class="required">*</span></label>
+                <div class="radio-group">
+                    <label class="radio">
+                        <input type="radio" name="classification" value="Personal" />
+                        Personal
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="classification" value="WorkRelated" />
+                        Work-related
+                    </label>
+                </div>
+                <span class="field-error" data-error-for="classification"></span>
+            </div>
+
+            <div class="form-row fee-row">
+                <label>Fee</label>
+                <div id="fee-display" class="fee-display">Select a classification to see the fee</div>
+            </div>
+
+            <div class="form-row">
+                <label for="notes">Notes <span class="optional">(optional)</span></label>
+                <textarea id="notes" name="notes" rows="3"></textarea>
+            </div>
+        </fieldset>
+
+        <!-- ============================== -->
+        <!-- Group 3: Storage                -->
+        <!-- ============================== -->
+        <fieldset class="form-section">
+            <legend>Storage</legend>
+
+            <div class="form-row">
+                <label for="storageLocationId">Storage Location <span class="required">*</span></label>
+                <select id="storageLocationId" name="storageLocationId">
+                    <option value="">Loading locations…</option>
+                </select>
+                <span class="field-error" data-error-for="storageLocationId"></span>
+            </div>
+        </fieldset>
+
+        <!-- ============================== -->
+        <!-- Actions                         -->
+        <!-- ============================== -->
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Home")">Cancel</a>
+            <button type="submit" class="btn btn-primary" id="register-submit">Register Package</button>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            "use strict";
+
+            // -----------------------------------------------------------------
+            // Fee config (loaded from /api/config; falls back to fixed values)
+            // -----------------------------------------------------------------
+            var fees = { Personal: null, WorkRelated: null };
+            var DEFAULT_FEES = { Personal: 10.00, WorkRelated: 0.00 };
+
+            CourierApp.api.get("/config", { silent: true }).then(function (config) {
+                config.forEach(function (entry) {
+                    if (entry.key === "PersonalPackageFee") fees.Personal = parseFloat(entry.value);
+                    if (entry.key === "WorkPackageFee") fees.WorkRelated = parseFloat(entry.value);
+                });
+            }).catch(function () {
+                fees = Object.assign({}, DEFAULT_FEES);
+            });
+
+            // -----------------------------------------------------------------
+            // Storage locations dropdown
+            // -----------------------------------------------------------------
+            var storageSelect = document.getElementById("storageLocationId");
+
+            CourierApp.api.get("/storage-locations").then(function (locations) {
+                storageSelect.innerHTML = '<option value="">— Select —</option>';
+                locations.forEach(function (loc) {
+                    var opt = document.createElement("option");
+                    opt.value = loc.storageLocationId;
+                    opt.textContent = loc.code + " — " + loc.description;
+                    storageSelect.appendChild(opt);
+                });
+            }).catch(function () {
+                storageSelect.innerHTML = '<option value="">Could not load locations</option>';
+            });
+
+            // -----------------------------------------------------------------
+            // Live fee display (FR-03, FR-15)
+            // -----------------------------------------------------------------
+            var feeDisplay = document.getElementById("fee-display");
+            var classificationRadios = document.querySelectorAll('input[name="classification"]');
+
+            function updateFee() {
+                var selected = document.querySelector('input[name="classification"]:checked');
+                if (!selected) {
+                    feeDisplay.textContent = "Select a classification to see the fee";
+                    feeDisplay.className = "fee-display";
+                    return;
+                }
+
+                var cls = selected.value;
+                var amount = fees[cls] != null ? fees[cls] : DEFAULT_FEES[cls];
+                var label = cls === "Personal" ? "Personal" : "Work-related";
+
+                feeDisplay.textContent = label + " — R" + amount.toFixed(2);
+                feeDisplay.className = "fee-display " + (amount > 0 ? "fee-display--charged" : "fee-display--free");
+            }
+
+            classificationRadios.forEach(function (radio) {
+                radio.addEventListener("change", updateFee);
+            });
+
+            // -----------------------------------------------------------------
+            // Validation (UR-03)
+            // -----------------------------------------------------------------
+            function showError(fieldId, message) {
+                var el = document.querySelector('[data-error-for="' + fieldId + '"]');
+                if (el) el.textContent = message;
+            }
+
+            function clearErrors() {
+                document.querySelectorAll(".field-error").forEach(function (el) {
+                    el.textContent = "";
+                });
+            }
+
+            function validate() {
+                clearErrors();
+                var valid = true;
+
+                function require(fieldId, message) {
+                    var el = document.getElementById(fieldId);
+                    if (!el || !el.value.trim()) {
+                        showError(fieldId, message);
+                        valid = false;
+                    }
+                }
+
+                require("recipient-fullName", "Recipient full name is required.");
+                require("recipient-identifierNo", "Staff / student number is required.");
+                require("recipient-email", "Recipient email is required.");
+                require("recipient-phone", "Recipient phone is required.");
+                require("senderName", "Sender name is required.");
+                require("packageType", "Please select a package type.");
+                require("storageLocationId", "Please select a storage location.");
+
+                var emailEl = document.getElementById("recipient-email");
+                if (emailEl.value.trim() && !/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(emailEl.value.trim())) {
+                    showError("recipient-email", "Please enter a valid email address.");
+                    valid = false;
+                }
+
+                if (!document.querySelector('input[name="classification"]:checked')) {
+                    showError("classification", "Please choose a classification.");
+                    valid = false;
+                }
+
+                return valid;
+            }
+
+            // -----------------------------------------------------------------
+            // Submit (FR-03)
+            // -----------------------------------------------------------------
+            var form = document.getElementById("register-form");
+            var submitBtn = document.getElementById("register-submit");
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                if (!validate()) {
+                    CourierApp.toast.error("Please fix the errors above.");
+                    return;
+                }
+
+                var selectedClassification = document.querySelector('input[name="classification"]:checked').value;
+
+                var payload = {
+                    recipient: {
+                        fullName: document.getElementById("recipient-fullName").value.trim(),
+                        identifierNo: document.getElementById("recipient-identifierNo").value.trim(),
+                        email: document.getElementById("recipient-email").value.trim(),
+                        phone: document.getElementById("recipient-phone").value.trim(),
+                        department: document.getElementById("recipient-department").value.trim() || null
+                    },
+                    senderName: document.getElementById("senderName").value.trim(),
+                    packageType: document.getElementById("packageType").value,
+                    classification: selectedClassification,
+                    storageLocationId: parseInt(document.getElementById("storageLocationId").value, 10),
+                    notes: document.getElementById("notes").value.trim() || null
+                };
+
+                submitBtn.disabled = true;
+
+                CourierApp.api.post("/packages", payload).then(function (response) {
+                CourierApp.toast.success("Package " + response.f20Identifier + " registered.");
+                // Redirect to the print-friendly label view (T32)
+                window.location.href = "@Url.Action("Label", "Packages")/" + encodeURIComponent(response.f20Identifier);
+                }).catch(function () {
+                    submitBtn.disabled = false;
+                });
+            });
+        })();
+    </script>
+}
