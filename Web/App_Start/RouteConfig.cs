@@ -9,6 +9,9 @@ namespace CourierService.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // T12: enables [Route("api/...")] attributes on controllers 
+            routes.MapMvcAttributeRoutes();
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
