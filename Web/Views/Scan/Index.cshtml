@@ -13,8 +13,10 @@
 
 <div class="card" style="margin-bottom: 16px;">
     <h2 style="margin-top: 0;">(a) USB scanner (keyboard/HID mode)</h2>
-    <p>Click into the box below and scan (or, without hardware, type an identifier like
-        <code>F20-0001</code> and press Enter — that's exactly what a HID-mode scanner sends).</p>
+    <p>
+        Click into the box below and scan (or, without hardware, type an identifier like
+        <code>F20-0001</code> and press Enter &#8208; that's exactly what a HID-mode scanner sends).
+    </p>
     <input type="text" id="usb-scan-input" placeholder="Scan or type an F20 identifier, then Enter"
            style="width: 320px; padding: 8px; font-size: 14px; border: 1px solid var(--color-border); border-radius: var(--radius);" />
     <button type="button" class="btn btn-secondary" id="usb-refocus">Refocus input</button>
@@ -33,6 +35,7 @@
     <div id="qr-reader" style="width: 320px;"></div>
     <p>
         <button type="button" class="btn btn-primary" id="qr-start">Start camera scan</button>
+        <button type="button" class="btn btn-primary" id="qr-start-mobile" style="margin-left: 8px;">Scan with Mobile Camera</button>
         <button type="button" class="btn btn-secondary" id="qr-stop" disabled>Stop</button>
     </p>
 </div>
