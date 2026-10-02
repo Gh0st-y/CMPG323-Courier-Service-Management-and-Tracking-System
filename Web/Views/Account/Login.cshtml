@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Sign in";
+}
+
+<h1 class="app-page-title">Sign in</h1>
+
+<div class="card">
+    <p>Enter your username and password to continue.</p>
+
+    <form>
+        <fieldset class="form-section">
+            <legend>Account details</legend>
+
+            <div class="form-row">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" autocomplete="username" />
+            </div>
+
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" />
+            </div>
+
+            <div class="form-row">
+                <label class="radio">
+                    <input type="checkbox" name="rememberMe" />
+                    Remember me
+                </label>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Sign in</button>
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Home")">Cancel</a>
+        </div>
+    </form>
+</div>
