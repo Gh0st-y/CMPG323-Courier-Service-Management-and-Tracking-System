@@ -43,6 +43,29 @@
 <div class="card">
     <h2 style="margin-top: 0;">Result</h2>
     <pre id="scan-result" style="background: var(--color-bg); padding: 12px; border-radius: var(--radius); min-height: 40px;">(nothing scanned yet)</pre>
+
+    <!-- Status & Storage Location Update Section placed directly below result -->
+    <div id="status-update-card" class="card" style="display: none; margin-top: 20px;">
+        <h3 class="app-page-title" style="font-size: 18px; margin-bottom: 16px;">Update Package Status & Storage Location</h3>
+
+        <div class="form-row">
+            <label for="status-select">Next Status <span class="required">*</span></label>
+            <select id="status-select">
+                <!-- Dynamic options populated via JavaScript -->
+            </select>
+            <span class="field-error" id="status-select-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label for="location-input">Storage Location <span class="optional">(e.g. Shelf A-3)</span></label>
+            <input type="text" id="location-input" placeholder="e.g. Shelf A-3" />
+            <span class="field-error" id="location-input-error"></span>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" id="confirm-status-update" class="btn btn-primary">Confirm Update</button>
+        </div>
+    </div>
 </div>
 
 @section scripts {

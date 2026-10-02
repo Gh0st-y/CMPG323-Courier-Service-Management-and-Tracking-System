@@ -9,6 +9,7 @@
     var resultEl = document.getElementById("scan-result");
     var html5QrCode = null;
     var resultCardEl = document.getElementById("scan-result-card") || resultEl.parentElement;
+    var currentPackage = null;
 
     // =========================================================================
     // [T35 HELPERS] These functions handle audio feedback and UI card updates
@@ -60,6 +61,8 @@
             "</div>";
 
         resultEl.innerHTML = html;
+        // Show and populate the status update UI card
+        setupStatusUpdateUI(pkg);
     }
 
     function renderErrorUI(source, message) {
@@ -253,6 +256,158 @@
         });
     }
 
+    // State machine matching seed data statuses
+    // State machine matching both PascalCase ("ReadyForCollection") and spaced formats ("Ready for Collection")
+    var VALID_TRANSITIONS = {
+        "REGISTERED": ["INSTORAGE", "RECEIVED"],
+        "INSTORAGE": ["READYFORCOLLECTION", "INTRANSIT"],
+        "RECEIVED": ["INSTORAGE", "READYFORCOLLECTION"],
+        "INTRANSIT": ["READYFORCOLLECTION", "OUTFORDELIVERY"],
+        "READYFORCOLLECTION": ["COLLECTED", "DELIVERED", "RETURNED"],
+        "OUTFORDELIVERY": ["COLLECTED", "FAILEDDELIVERY"],
+        "COLLECTED": [],
+        "DELIVERED": [],
+        "RETURNED": []
+    };
+
+    var ALL_STATUSES = [
+        "Registered",
+        "In Storage",
+        "Received",
+        "In Transit",
+        "ReadyForCollection",
+        "Out for Delivery",
+        "Collected",
+        "Returned",
+        "Failed Delivery"
+    ];
+
+    function setupStatusUpdateUI(pkg) {
+        if (!pkg) return;
+
+        currentPackage = pkg;
+        var updateCard = document.getElementById("status-update-card");
+        var statusSelect = document.getElementById("status-select");
+        var locationInput = document.getElementById("location-input");
+
+        // Exit quietly if DOM elements are missing from the page
+        if (!updateCard || !statusSelect || !locationInput) {
+            console.warn("Status update card elements not found in DOM.");
+            return;
+        }
+
+        // Safely extract status and normalize it (handles null/undefined)
+        var rawStatus = (pkg.status || pkg.Status || "Received").toString();
+        var currentStatusNormalized = rawStatus.replace(/\s+/g, "").toUpperCase();
+
+        // Retrieve allowed next transitions
+        var allowedNextNormalized = VALID_TRANSITIONS[currentStatusNormalized] || [];
+
+        statusSelect.innerHTML = "";
+
+        ALL_STATUSES.forEach(function (st) {
+            var opt = document.createElement("option");
+            opt.value = st;
+            opt.textContent = st;
+
+            var stNormalized = st.replace(/\s+/g, "").toUpperCase();
+
+            var isCurrent = (stNormalized === currentStatusNormalized);
+            var isValidNext = (allowedNextNormalized.indexOf(stNormalized) !== -1);
+
+            if (!isCurrent && !isValidNext) {
+                opt.disabled = true;
+            }
+
+            if (isCurrent) {
+                opt.selected = true;
+            }
+
+            statusSelect.appendChild(opt);
+        });
+
+        // Safely assign storage location value
+        locationInput.value = pkg.storageLocation || pkg.location || pkg.StorageLocation || "";
+
+        // Unhide the update section
+        updateCard.style.display = "block";
+    }
+
+    // Handle the "Confirm Update" button click
+    var confirmBtn = document.getElementById("confirm-status-update") || document.getElementById("update-status-btn");
+
+    if (confirmBtn) {
+        // Clone to remove stale/duplicate event listeners
+        var newBtn = confirmBtn.cloneNode(true);
+        if (confirmBtn.parentNode) {
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        }
+        confirmBtn = newBtn;
+
+        confirmBtn.addEventListener("click", function (e) {
+            // Prevent default form submission reload
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+
+            console.log("Confirm button clicked. Processing status update...");
+
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = "Updating...";
+
+            try {
+                // Check current package context
+                if (typeof currentPackage === "undefined" || !currentPackage) {
+                    alert("Please scan or load a package before confirming an update.");
+                    return;
+                }
+
+                var packageId = currentPackage.f20Identifier || currentPackage.packageId || currentPackage.code || currentPackage.id;
+                var statusSelect = document.getElementById("status-select");
+                var locationInput = document.getElementById("location-input");
+
+                var newStatus = statusSelect ? statusSelect.value : "";
+                var newLocation = locationInput ? locationInput.value.trim() : "";
+
+                // Update local state object
+                currentPackage.status = newStatus;
+                currentPackage.storageLocation = newLocation;
+
+                console.log("Updating package " + packageId + " -> Status: " + newStatus + ", Location: " + newLocation);
+
+                // Re-render package UI with updated values
+                if (typeof renderPackageUI === "function") {
+                    renderPackageUI(currentPackage, "Status Update", false);
+                }
+
+                // Append confirmation message to result container
+                var targetResultEl = document.getElementById("scan-result") || document.getElementById("result");
+                if (targetResultEl) {
+                    var confirmMsg = document.createElement("div");
+                    confirmMsg.className = "alert alert-success mt-2";
+                    confirmMsg.style.color = "#155724";
+                    confirmMsg.style.backgroundColor = "#d4edda";
+                    confirmMsg.style.padding = "8px 12px";
+                    confirmMsg.style.borderRadius = "4px";
+                    confirmMsg.style.marginTop = "10px";
+                    confirmMsg.textContent = "✓ Status successfully updated to \"" + newStatus + "\" (Location: " + (newLocation || "N/A") + ")";
+                    targetResultEl.appendChild(confirmMsg);
+                }
+
+                if (typeof CourierApp !== "undefined" && CourierApp.toast) {
+                    CourierApp.toast.success("Package status updated successfully!");
+                }
+
+            } catch (err) {
+                console.error("Error updating status:", err);
+                alert("An error occurred during update: " + err.message);
+            } finally {
+                // ALWAYS restore button state regardless of success or failure
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = "Confirm Update";
+            }
+        });
+    }
     function stopScanning() {
         if (!html5QrCode) {
             return;
