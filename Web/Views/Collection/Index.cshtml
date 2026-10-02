@@ -1,0 +1,107 @@
+﻿@* Web/Views/Collection/Index.cshtml *@
+
+<div class="detail-page">
+    <h2 class="app-page-title">Package Collection</h2>
+
+    <!-- Scan / Look Up Card -->
+    <div class="card mb-4">
+        <h3 class="card-title mb-3" style="font-size: 16px; font-weight: 600;">Scan or Look Up Package</h3>
+
+        <div class="search-form__grid">
+            <div class="form-row" style="grid-column: span 2;">
+                <label for="package-lookup-input">Package ID / Barcode <span class="required">*</span></label>
+                <input type="text" id="package-lookup-input" placeholder="Scan barcode or enter ID (e.g. PKG-10024)" autofocus />
+                <span class="field-error" id="lookup-error"></span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" id="btn-lookup" class="btn btn-primary">Find Package</button>
+            <button type="button" id="btn-trigger-scan" class="btn btn-secondary">
+                Start Camera Scan
+            </button>
+        </div>
+
+        <!-- Scanner Container -->
+        <div id="scanner-container" style="display: none;" class="mt-3">
+            <!-- MUST be a div (not a video element) with id="qr-reader" -->
+            <div id="qr-reader" style="width: 100%; max-width: 400px; min-height: 250px; margin: 0 auto; background-color: #000;"></div>
+
+            <div class="mt-2 text-center">
+                <button type="button" id="btn-stop-scan" class="btn btn-secondary btn-sm" disabled>Cancel Scan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Card (Hidden until package is found) -->
+    <div id="collection-details-card" class="card" style="display: none;">
+        <div class="detail-header">
+            <div>
+                <span class="detail-header__sub">Package Identifier</span>
+                <h3 class="detail-header__id" id="display-package-id">--</h3>
+            </div>
+            <div>
+                <span id="display-package-status" class="detail-status">--</span>
+            </div>
+        </div>
+
+        <!-- Acceptance Criteria: Blocked Message for invalid status -->
+        <div id="status-blocked-alert" class="toast toast--error mb-3" style="display: none; position: static; max-width: 100%;">
+            This package is currently not <strong>Ready for Collection</strong> and cannot be collected.
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-column">
+                <div class="detail-card">
+                    <h4 class="detail-card__title">Recipient Information</h4>
+                    <dl class="detail-list">
+                        <dt>Recipient Name</dt>
+                        <dd id="display-recipient-name">--</dd>
+
+                        <dt>Contact Number</dt>
+                        <dd id="display-recipient-phone">--</dd>
+
+                        <dt>Storage Location</dt>
+                        <dd id="display-storage-location">--</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="detail-column">
+                <div class="detail-card">
+                    <h4 class="detail-card__title">Identity Verification</h4>
+                    <div class="form-row">
+                        <label class="radio">
+                            <input type="checkbox" id="chk-verify-id" />
+                            <span>Staff verified recipient ID / Collector authorization</span>
+                        </label>
+                    </div>
+                    <div class="form-actions" style="margin-top: 16px;">
+                        <button type="button" id="btn-confirm-collection" class="btn btn-primary" disabled>
+                            Confirm Collection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal Dialog -->
+<div id="collection-confirm-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+        <p class="modal-dialog__message">
+            Are you sure you want to mark package <strong id="modal-pkg-id"></strong> as <strong>Collected</strong>?
+        </p>
+        <div class="modal-dialog__actions">
+            <button type="button" class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btn-modal-submit">Confirm</button>
+        </div>
+    </div>
+</div>
+
+@* Script Reference Section *@
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="~/Scripts/app/collection.js"></script>
+}
