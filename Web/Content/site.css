@@ -61,10 +61,14 @@ a {
 .app-header {
   height: auto;
   min-height: var(--header-height);
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 12px 16px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding: 10px 20px;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  box-shadow: var(--shadow);
 }
 
 .app-header__brand {
@@ -883,10 +887,14 @@ html, body {
 .app-header {
     height: auto;
     min-height: var(--header-height);
+    display: flex;
+    align-items: center;
     flex-wrap: wrap;
     gap: 12px 16px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px 20px;
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    box-shadow: var(--shadow);
 }
 
 .app-nav {
