@@ -1,4 +1,5 @@
 using CourierService.Domain.Entities;
+using CourierService.Domain.Models;
 
 namespace CourierService.Domain.Repositories
 {
@@ -22,5 +23,10 @@ namespace CourierService.Domain.Repositories
         /// calls sharing the same <paramref name="unitOfWork"/> so the whole change is one commit.
         /// </summary>
         void UpdateStatus(int packageId, PackageStatus newStatus, int? storageLocationId, IUnitOfWork unitOfWork = null);
+
+        /// <summary>
+        /// Filtered, paged package search (T21). Newest first. Parameterised queries only.
+        /// </summary>
+        PagedResult<Package> Search(PackageSearchCriteria criteria);
     }
 }
