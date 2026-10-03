@@ -113,3 +113,17 @@ frontend work isn't blocked on a backend endpoint landing.
   is applied automatically.
 - `main` requires a PR and 1 approval (relaxed to a fast review from any teammate for the
   M0 foundation tasks — see `DECISIONS.md`).
+
+  ## Demo logins (development only)
+
+Load them with `db/seed.sql` after `db/schema.sql`. All five demo users share one password: `Demo@2026!`
+
+| Role | Username |
+|---|---|
+| Intake clerk | intake.demo |
+| Storage staff | storage.demo |
+| Collection staff | collection.demo |
+| Supervisor | supervisor.demo |
+| System admin | admin.demo |
+
+Optional: `db/seed-50k.sql` adds 50,000 synthetic packages for the performance test. Don't run it unless you need it.

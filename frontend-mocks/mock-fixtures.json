@@ -1,101 +1,378 @@
 {
   "_readme": "T09 mock fixtures. Matches API_CONTRACT.md shapes exactly. Frontend dev toggles a mock-mode flag in the shared JS fetch wrapper to serve these instead of hitting the real backend, so FE work isn't blocked on backend endpoints landing.",
-
-  "POST /api/auth/login": { "userId": 1, "role": "IntakeClerk", "displayName": "Demo Clerk" },
+  "POST /api/auth/login": {
+    "userId": 1,
+    "role": "IntakeClerk",
+    "displayName": "Demo Clerk"
+  },
   "POST /api/auth/logout": null,
-
-  "GET /api/dashboard/stats": { "receivedToday": 14, "readyForCollection": 6, "collectedToday": 9, "outstanding": 3 },
-
+  "GET /api/dashboard/stats": {
+    "receivedToday": 14,
+    "readyForCollection": 6,
+    "collectedToday": 9,
+    "outstanding": 3
+  },
   "GET /api/packages": {
     "items": [
-      { "packageId": 1,  "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi",     "status": "ReadyForCollection", "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-22T08:15:00Z" },
-      { "packageId": 2,  "f20Identifier": "F20-0002", "recipientName": "Lerato Dlamini",  "status": "InStorage",          "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-22T09:02:00Z" },
-      { "packageId": 3,  "f20Identifier": "F20-0003", "recipientName": "Sipho Mahlangu",  "status": "Collected",          "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-21T10:30:00Z" },
-      { "packageId": 4,  "f20Identifier": "F20-0004", "recipientName": "Zanele Khumalo",  "status": "ReadyForCollection", "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-21T13:45:00Z" },
-      { "packageId": 5,  "f20Identifier": "F20-0005", "recipientName": "Pieter van Wyk",  "status": "InStorage",          "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-20T11:00:00Z" },
-      { "packageId": 6,  "f20Identifier": "F20-0006", "recipientName": "Naledi Mokoena",  "status": "Registered",         "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-23T08:00:00Z" },
-      { "packageId": 7,  "f20Identifier": "F20-0007", "recipientName": "Ahmed Patel",     "status": "ReadyForCollection", "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-19T14:20:00Z" },
-      { "packageId": 8,  "f20Identifier": "F20-0008", "recipientName": "Maria Botha",     "status": "Collected",          "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-19T09:15:00Z" },
-      { "packageId": 9,  "f20Identifier": "F20-0009", "recipientName": "Jabulani Zulu",   "status": "InStorage",          "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-18T15:30:00Z" },
-      { "packageId": 10, "f20Identifier": "F20-0010", "recipientName": "Elsie Pretorius", "status": "ReadyForCollection", "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-18T10:00:00Z" },
-      { "packageId": 11, "f20Identifier": "F20-0011", "recipientName": "Kagiso Molefe",   "status": "Registered",         "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-23T09:30:00Z" },
-      { "packageId": 12, "f20Identifier": "F20-0012", "recipientName": "Fatima Khan",     "status": "Collected",          "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-17T11:45:00Z" },
-      { "packageId": 13, "f20Identifier": "F20-0013", "recipientName": "Andile Ngcobo",   "status": "InStorage",          "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-17T08:20:00Z" },
-      { "packageId": 14, "f20Identifier": "F20-0014", "recipientName": "Christine Adams", "status": "ReadyForCollection", "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-16T13:00:00Z" },
-      { "packageId": 15, "f20Identifier": "F20-0015", "recipientName": "Tebogo Sithole",  "status": "Collected",          "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-16T09:45:00Z" },
-      { "packageId": 16, "f20Identifier": "F20-0016", "recipientName": "Nomvula Dube",    "status": "InStorage",          "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-15T14:10:00Z" },
-      { "packageId": 17, "f20Identifier": "F20-0017", "recipientName": "Dean Petersen",   "status": "Registered",         "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-23T10:15:00Z" },
-      { "packageId": 18, "f20Identifier": "F20-0018", "recipientName": "Precious Mthembu","status": "ReadyForCollection", "classification": "WorkRelated", "fee": 0.00,  "createdAtUtc": "2026-09-15T10:30:00Z" }
+      {
+        "packageId": 1,
+        "f20Identifier": "F20-0001",
+        "recipientName": "Thabo Nkosi",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-22T08:15:00Z"
+      },
+      {
+        "packageId": 2,
+        "f20Identifier": "F20-0002",
+        "recipientName": "Lerato Dlamini",
+        "status": "InStorage",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-22T09:02:00Z"
+      },
+      {
+        "packageId": 3,
+        "f20Identifier": "F20-0003",
+        "recipientName": "Sipho Mahlangu",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-21T10:30:00Z"
+      },
+      {
+        "packageId": 4,
+        "f20Identifier": "F20-0004",
+        "recipientName": "Zanele Khumalo",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-21T13:45:00Z"
+      },
+      {
+        "packageId": 5,
+        "f20Identifier": "F20-0005",
+        "recipientName": "Pieter van Wyk",
+        "status": "InStorage",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-20T11:00:00Z"
+      },
+      {
+        "packageId": 6,
+        "f20Identifier": "F20-0006",
+        "recipientName": "Naledi Mokoena",
+        "status": "Registered",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-23T08:00:00Z"
+      },
+      {
+        "packageId": 7,
+        "f20Identifier": "F20-0007",
+        "recipientName": "Ahmed Patel",
+        "status": "Collected",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-19T14:20:00Z"
+      },
+      {
+        "packageId": 8,
+        "f20Identifier": "F20-0008",
+        "recipientName": "Maria Botha",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-19T09:15:00Z"
+      },
+      {
+        "packageId": 9,
+        "f20Identifier": "F20-0009",
+        "recipientName": "Jabulani Zulu",
+        "status": "InStorage",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-18T15:30:00Z"
+      },
+      {
+        "packageId": 10,
+        "f20Identifier": "F20-0010",
+        "recipientName": "Elsie Pretorius",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-18T10:00:00Z"
+      },
+      {
+        "packageId": 11,
+        "f20Identifier": "F20-0011",
+        "recipientName": "Kagiso Molefe",
+        "status": "Registered",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-23T09:30:00Z"
+      },
+      {
+        "packageId": 12,
+        "f20Identifier": "F20-0012",
+        "recipientName": "Fatima Khan",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-17T11:45:00Z"
+      },
+      {
+        "packageId": 13,
+        "f20Identifier": "F20-0013",
+        "recipientName": "Andile Ngcobo",
+        "status": "InStorage",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-17T08:20:00Z"
+      },
+      {
+        "packageId": 14,
+        "f20Identifier": "F20-0014",
+        "recipientName": "Christine Adams",
+        "status": "Collected",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-16T13:00:00Z"
+      },
+      {
+        "packageId": 15,
+        "f20Identifier": "F20-0015",
+        "recipientName": "Tebogo Sithole",
+        "status": "Collected",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-16T09:45:00Z"
+      },
+      {
+        "packageId": 16,
+        "f20Identifier": "F20-0016",
+        "recipientName": "Nomvula Dube",
+        "status": "InStorage",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-15T14:10:00Z"
+      },
+      {
+        "packageId": 17,
+        "f20Identifier": "F20-0017",
+        "recipientName": "Dean Petersen",
+        "status": "Registered",
+        "classification": "Personal",
+        "fee": 10.0,
+        "createdAtUtc": "2026-09-23T10:15:00Z"
+      },
+      {
+        "packageId": 18,
+        "f20Identifier": "F20-0018",
+        "recipientName": "Precious Mthembu",
+        "status": "Collected",
+        "classification": "WorkRelated",
+        "fee": 0.0,
+        "createdAtUtc": "2026-09-15T10:30:00Z"
+      }
     ],
     "totalCount": 18
   },
-
   "GET /api/packages/{f20Identifier}/detail": {
-    "package": { "packageId": 1, "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi", "status": "ReadyForCollection", "storageLocation": "Shelf A-3", "fee": 10.00, "paymentStatus": "Unpaid", "createdAtUtc": "2026-09-22T08:15:00Z" },
+    "package": {
+      "packageId": 1,
+      "f20Identifier": "F20-0001",
+      "recipientName": "Thabo Nkosi",
+      "status": "ReadyForCollection",
+      "storageLocation": "Shelf A-3",
+      "fee": 10.0,
+      "paymentStatus": "Unpaid",
+      "createdAtUtc": "2026-09-22T08:15:00Z"
+    },
     "statusHistory": [
-      { "fromStatus": null, "toStatus": "Registered", "changedBy": "Demo Clerk", "changedAtUtc": "2026-09-22T08:15:00Z" },
-      { "fromStatus": "Registered", "toStatus": "ReadyForCollection", "changedBy": "Demo Storage", "changedAtUtc": "2026-09-22T10:30:00Z" }
+      {
+        "fromStatus": null,
+        "toStatus": "Registered",
+        "changedBy": "Demo Clerk",
+        "changedAtUtc": "2026-09-22T08:15:00Z"
+      },
+      {
+        "fromStatus": "Registered",
+        "toStatus": "ReadyForCollection",
+        "changedBy": "Demo Storage",
+        "changedAtUtc": "2026-09-22T10:30:00Z"
+      }
     ],
     "notifications": [
-      { "channel": "Email", "status": "Sent", "sentAtUtc": "2026-09-22T10:30:05Z" }
+      {
+        "channel": "Email",
+        "status": "Sent",
+        "sentAtUtc": "2026-09-22T10:30:05Z"
+      }
     ]
   },
-
-  "POST /api/packages": { "packageId": 3, "f20Identifier": "F20-0003", "fee": 10.00, "status": "Registered" },
-
+  "POST /api/packages": {
+    "packageId": 3,
+    "f20Identifier": "F20-0003",
+    "fee": 10.0,
+    "status": "Registered"
+  },
   "GET /api/packages/{f20Identifier}/qr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
-
-  "GET /api/packages/scan/{f20Identifier}": { "packageId": 1, "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi", "status": "ReadyForCollection", "storageLocation": "Shelf A-3" },
-
-  "POST /api/packages/{f20Identifier}/status": { "packageId": 1, "status": "ReadyForCollection", "storageLocation": "Shelf A-3" },
-
-  "POST /api/packages/{f20Identifier}/collect": { "status": "Collected", "collectedAtUtc": "2026-09-22T14:05:00Z" },
-
-  "POST /api/packages/{f20Identifier}/notifications/resend": { "channel": "Email", "status": "Queued", "queuedAtUtc": "2026-09-23T09:00:00Z" },
-
+  "GET /api/packages/scan/{f20Identifier}": {
+    "packageId": 1,
+    "f20Identifier": "F20-0001",
+    "recipientName": "Thabo Nkosi",
+    "status": "ReadyForCollection",
+    "storageLocation": "Shelf A-3"
+  },
+  "POST /api/packages/{f20Identifier}/status": {
+    "packageId": 1,
+    "status": "ReadyForCollection",
+    "storageLocation": "Shelf A-3"
+  },
+  "POST /api/packages/{f20Identifier}/collect": {
+    "status": "Collected",
+    "collectedAtUtc": "2026-09-22T14:05:00Z"
+  },
+  "POST /api/packages/{f20Identifier}/notifications/resend": {
+    "channel": "Email",
+    "status": "Queued",
+    "queuedAtUtc": "2026-09-23T09:00:00Z"
+  },
   "GET /api/storage-locations": [
-    { "storageLocationId": 1, "code": "Shelf A-3", "description": "Wall A, shelf 3" },
-    { "storageLocationId": 2, "code": "Shelf B-1", "description": "Wall B, shelf 1" }
+    {
+      "storageLocationId": 1,
+      "code": "Shelf A-3",
+      "description": "Wall A, shelf 3"
+    },
+    {
+      "storageLocationId": 2,
+      "code": "Shelf B-1",
+      "description": "Wall B, shelf 1"
+    }
   ],
-
-  "POST /api/storage-locations": { "storageLocationId": 3, "code": "Shelf C-2", "description": "Wall C, shelf 2" },
-
+  "POST /api/storage-locations": {
+    "storageLocationId": 3,
+    "code": "Shelf C-2",
+    "description": "Wall C, shelf 2"
+  },
   "POST /api/import/csv": {
     "importedCount": 12,
     "failedRows": [
-      { "row": 5, "reason": "Missing recipient email address" },
-      { "row": 9, "reason": "Invalid fee format" }
+      {
+        "row": 5,
+        "reason": "Missing recipient email address"
+      },
+      {
+        "row": 9,
+        "reason": "Invalid fee format"
+      }
     ]
   },
-
   "GET /api/users": [
-    { "userId": 1, "username": "clerk01", "email": "clerk01@nwu.ac.za", "role": "IntakeClerk", "isActive": true },
-    { "userId": 2, "username": "storage01", "email": "storage01@nwu.ac.za", "role": "StorageStaff", "isActive": true },
-    { "userId": 3, "username": "supervisor01", "email": "supervisor01@nwu.ac.za", "role": "Supervisor", "isActive": true },
-    { "userId": 4, "username": "admin01", "email": "admin01@nwu.ac.za", "role": "SystemAdmin", "isActive": true }
+    {
+      "userId": 1,
+      "username": "clerk01",
+      "email": "clerk01@nwu.ac.za",
+      "role": "IntakeClerk",
+      "isActive": true
+    },
+    {
+      "userId": 2,
+      "username": "storage01",
+      "email": "storage01@nwu.ac.za",
+      "role": "StorageStaff",
+      "isActive": true
+    },
+    {
+      "userId": 3,
+      "username": "supervisor01",
+      "email": "supervisor01@nwu.ac.za",
+      "role": "Supervisor",
+      "isActive": true
+    },
+    {
+      "userId": 4,
+      "username": "admin01",
+      "email": "admin01@nwu.ac.za",
+      "role": "SystemAdmin",
+      "isActive": true
+    }
   ],
-
-  "POST /api/users": { "userId": 5, "username": "newuser", "email": "newuser@nwu.ac.za", "role": "CollectionStaff", "isActive": true },
-
-  "PATCH /api/users/{id}": { "userId": 3, "username": "supervisor01", "email": "supervisor01@nwu.ac.za", "role": "Supervisor", "isActive": false },
-
+  "POST /api/users": {
+    "userId": 5,
+    "username": "newuser",
+    "email": "newuser@nwu.ac.za",
+    "role": "CollectionStaff",
+    "isActive": true
+  },
+  "PATCH /api/users/{id}": {
+    "userId": 3,
+    "username": "supervisor01",
+    "email": "supervisor01@nwu.ac.za",
+    "role": "Supervisor",
+    "isActive": false
+  },
   "GET /api/audit-log": {
     "items": [
-      { "auditId": 1, "userId": 1, "action": "UserLogin", "context": "IP: 10.0.0.5", "timestampUtc": "2026-09-22T08:00:00Z" },
-      { "auditId": 2, "userId": 1, "action": "PackageCreated", "context": "Package F20-0001", "timestampUtc": "2026-09-22T08:15:00Z" },
-      { "auditId": 3, "userId": 2, "action": "StatusChanged", "context": "F20-0001 -> ReadyForCollection", "timestampUtc": "2026-09-22T10:30:00Z" },
-      { "auditId": 4, "userId": 2, "action": "PackageCollected", "context": "Package F20-0002", "timestampUtc": "2026-09-22T14:05:00Z" }
+      {
+        "auditId": 1,
+        "userId": 1,
+        "action": "UserLogin",
+        "context": "IP: 10.0.0.5",
+        "timestampUtc": "2026-09-22T08:00:00Z"
+      },
+      {
+        "auditId": 2,
+        "userId": 1,
+        "action": "PackageCreated",
+        "context": "Package F20-0001",
+        "timestampUtc": "2026-09-22T08:15:00Z"
+      },
+      {
+        "auditId": 3,
+        "userId": 2,
+        "action": "StatusChanged",
+        "context": "F20-0001 -> ReadyForCollection",
+        "timestampUtc": "2026-09-22T10:30:00Z"
+      },
+      {
+        "auditId": 4,
+        "userId": 2,
+        "action": "PackageCollected",
+        "context": "Package F20-0002",
+        "timestampUtc": "2026-09-22T14:05:00Z"
+      }
     ],
     "totalCount": 4
   },
-
   "GET /api/config": [
-    { "key": "PersonalPackageFee", "value": "10.00", "description": "Fee for personal package collection (Rands)" },
-    { "key": "WorkPackageFee", "value": "0.00", "description": "Fee for work-related package collection (Rands)" },
-    { "key": "NotificationTemplate_Ready", "value": "Your package {f20Identifier} is ready for collection.", "description": "Template for ready-for-collection notification" }
+    {
+      "key": "PersonalPackageFee",
+      "value": "10.00",
+      "description": "Fee for personal package collection (Rands)"
+    },
+    {
+      "key": "WorkPackageFee",
+      "value": "0.00",
+      "description": "Fee for work-related package collection (Rands)"
+    },
+    {
+      "key": "NotificationTemplate_Ready",
+      "value": "Your package {f20Identifier} is ready for collection.",
+      "description": "Template for ready-for-collection notification"
+    }
   ],
-
-  "PATCH /api/config/{key}": { "key": "PersonalPackageFee", "value": "15.00", "description": "Fee for personal package collection (Rands)" },
-
-  "error_example": { "error": { "code": "InvalidTransition", "message": "Package cannot move to Collected from Registered." } }
+  "PATCH /api/config/{key}": {
+    "key": "PersonalPackageFee",
+    "value": "15.00",
+    "description": "Fee for personal package collection (Rands)"
+  },
+  "error_example": {
+    "error": {
+      "code": "InvalidTransition",
+      "message": "Package cannot move to Collected from Registered."
+    }
+  }
 }
