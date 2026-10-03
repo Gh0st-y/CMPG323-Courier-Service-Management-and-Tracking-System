@@ -9,10 +9,6 @@ using CourierService.Domain.Repositories;
 
 namespace CourierService.Web.Controllers
 {
-    /// <summary>T22: GET /api/packages/{f20Identifier}/detail.</summary>
-    // TODO: add [Authorize] once login (FR-01) lands.
-    // NOTE: T21 (search endpoint) also creates this file, with GET /api/packages (Search).
-    // These two branches will conflict on this file when merged — combine both actions then.
     public class PackagesController : Controller
     {
         private readonly IPackageRepository _packages;
@@ -30,9 +26,56 @@ namespace CourierService.Web.Controllers
             _packageDetail = packageDetail;
         }
 
+        /// <summary>
+        /// Renders the package registration form (FR-03, UR-01).
+        /// All API calls are made client-side via CourierApp.api, so this action just returns the view.
+        /// </summary>
+        public ActionResult Register()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Renders the print-friendly label view for a package (FR-03, CON-008).
+        /// The f20Identifier is passed through to the view, which fetches details via CourierApp.api.
+        /// </summary>
+        public ActionResult Label(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return RedirectToAction("Register");
+            }
+
+            return View(model: id);
+        }
+
+        /// <summary>
+        /// Renders the search and results page (FR-05, UR-01).
+        /// Filtering and paging happen client-side via CourierApp.api against Get/api/packages.
+        /// </summary>
+        public ActionResult Search()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Renders the package detail page with status, location, fee, timeline, and notifications (FR-05, DR-012).
+        /// The f20Identifier is passed to the view, which fetches details via CourierApp.api.
+        /// </summary>
+        public ActionResult Detail(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return RedirectToAction("Search");
+            }
+            return View(model: id);
+        }
+
+        /// <summary>T22: GET /api/packages/{f20Identifier}/detail — JSON data for the Detail page above.</summary>
+        // TODO: add [Authorize] once login (FR-01) lands.
         [HttpGet]
         [Route("api/packages/{f20Identifier}/detail")]
-        public ActionResult Detail(string f20Identifier)
+        public ActionResult DetailJson(string f20Identifier)
         {
             if (string.IsNullOrWhiteSpace(f20Identifier))
                 return ErrorJson(400, "ValidationError", "f20Identifier is required.");

@@ -1,0 +1,125 @@
+﻿@model string
+
+@{
+    ViewBag.Title = "Package Label";
+    var f20Identifier = Model;
+}
+
+<div class="label-page">
+
+    <!-- ============================== -->
+    <!-- Print area (what gets printed) -->
+    <!-- ============================== -->
+    <div class="label-card" id="label-card">
+        <div class="label-card__header">
+            <span class="label-card__brand">F20 Courier Service</span>
+            <span class="label-card__facility">North-West University</span>
+        </div>
+
+        <div class="label-card__body">
+            <div class="label-card__qr">
+                <img id="qr-image" alt="Package QR code" />
+            </div>
+            <div class="label-card__id">
+                <span class="label-card__id-label">Package ID</span>
+                <span class="label-card__id-value" id="f20-id">@f20Identifier</span>
+            </div>
+        </div>
+
+        <dl class="label-card__details" id="label-details">
+            <!-- Populated via JS -->
+        </dl>
+
+        <div class="label-card__footer">
+            <span>Please bring your staff/student card when collecting.</span>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- Screen-only actions             -->
+    <!-- ============================== -->
+    <div class="label-actions no-print">
+        <a class="btn btn-secondary" href="@Url.Action("Register", "Packages")" id="register-next">
+            Register next
+        </a>
+        <button type="button" class="btn btn-primary" id="print-label">
+            Print label
+        </button>
+    </div>
+
+    <!-- Error state -->
+    <div class="label-error no-print" id="label-error" style="display: none;"></div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            "use strict";
+
+            var f20Identifier = "@Html.Raw(f20Identifier)";
+
+            var qrImg = document.getElementById("qr-image");
+            var detailsEl = document.getElementById("label-details");
+            var errorEl = document.getElementById("label-error");
+
+            function showError(message) {
+                errorEl.textContent = message;
+                errorEl.style.display = "block";
+                document.getElementById("label-card").style.opacity = "0.4";
+            }
+
+            // -----------------------------------------------------------------
+            // Fetch package detail (mock-mode aware)
+            // -----------------------------------------------------------------
+            CourierApp.api.get("/packages/" + encodeURIComponent(f20Identifier) + "/detail")
+                .then(function (data) {
+                    var pkg = data.package;
+
+                    // QR image (mock returns a base64 data URI)
+                    qrImg.src = CourierApp.config.mockMode
+                        ? "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                        : "/api/packages/" + encodeURIComponent(f20Identifier) + "/qr";
+
+                    // Details (minimal — Option B)
+                    var rows = [
+                        { label: "Recipient", value: pkg.recipientName },
+                        //{ label: "Classification", value: pkg.classification || "—" },
+                        { label: "Fee", value: pkg.fee != null ? "R" + pkg.fee.toFixed(2) : "—" },
+                        { label: "Storage Location", value: pkg.storageLocation },
+                        { label: "Date Received", value: pkg.createdAtUtc ? new Date(pkg.createdAtUtc).toLocaleDateString() : "—" }                        
+                    ];
+
+                    detailsEl.innerHTML = "";
+                    rows.forEach(function (row) {
+                        var dt = document.createElement("dt");
+                        dt.textContent = row.label;
+                        var dd = document.createElement("dd");
+                        dd.textContent = row.value || "—";
+                        detailsEl.appendChild(dt);
+                        detailsEl.appendChild(dd);
+                    });
+                })
+                .catch(function (err) {
+                    var message = (err && err.error && err.error.message) || "Could not load package details.";
+                    showError(message);
+                });
+
+            // -----------------------------------------------------------------
+            // Print button
+            // -----------------------------------------------------------------
+            document.getElementById("print-label").addEventListener("click", function () {
+                window.print();
+            });
+
+            // -----------------------------------------------------------------
+            // Keyboard shortcut: Alt+R = Register next
+            // -----------------------------------------------------------------
+            document.addEventListener("keydown", function (event) {
+                if (event.altKey && event.key.toLowerCase() === "r") {
+                    event.preventDefault();
+                    window.location.href = document.getElementById("register-next").href;
+                }
+            });
+        })();
+    </script>
+}
