@@ -1,65 +1,204 @@
 @{
-    ViewBag.Title = "Courier Service";
+    ViewBag.Title = "Dashboard";
 }
 
-<h1 class="app-page-title">Courier Service Management and Tracking System</h1>
+<h1 class="app-page-title">F20 Courier Service Dashboard</h1>
 
-<div class="card">
-    <p>Solution skeleton (T02) and frontend scaffold (T07). Real pages replace this as each feature lands.</p>
+<div class="dashboard-page">
+    <section class="card dashboard-hero" aria-labelledby="dashboard-hero-title">
+        <div class="dashboard-hero__copy">
+            <p class="dashboard-kicker">North-West University F20</p>
+            <h2 class="dashboard-hero__title" id="dashboard-hero-title">Package activity overview</h2>
+            <p class="dashboard-hero__text">
+                Use this screen to track daily package activity and jump straight into the core workflows.
+                No recipient details are shown here.
+            </p>
+        </div>
 
-    <p>
-        Mock mode: <strong id="mock-mode-label"></strong>
-        <button type="button" class="btn btn-secondary" id="toggle-mock-mode">Toggle</button>
-    </p>
+        <div class="dashboard-hero__aside">
+            <span class="dashboard-pill">Role-aware quick actions</span>
+            <button type="button" class="btn btn-secondary" id="dashboard-refresh">Refresh summary</button>
+        </div>
+    </section>
 
-    <p>
-        <button type="button" class="btn btn-primary" id="demo-toast-success">Show success toast</button>
-        <button type="button" class="btn btn-primary" id="demo-toast-error">Show error toast</button>
-        <button type="button" class="btn btn-secondary" id="demo-confirm">Show confirm dialog</button>
-        <button type="button" class="btn btn-secondary" id="demo-fetch-stats">Load dashboard stats</button>
-    </p>
+    <section class="dashboard-section" aria-labelledby="dashboard-summary-title">
+        <div class="dashboard-section__header">
+            <div>
+                <h2 class="dashboard-section__title" id="dashboard-summary-title">Package summary</h2>
+                <p class="dashboard-section__text">Counts are loaded from the backend API.</p>
+            </div>
+            <p class="dashboard-section__meta" id="dashboard-updated-at">Loading current counts…</p>
+        </div>
 
-    <pre id="demo-output" class="card" style="margin-top: 12px; background: var(--color-bg);"></pre>
+        <div class="dashboard-stats" id="dashboard-stats" aria-live="polite" aria-busy="true">
+            <article class="card dashboard-stat dashboard-stat--received">
+                <span class="dashboard-stat__label">Received</span>
+                <strong class="dashboard-stat__value" id="stat-received">—</strong>
+                <span class="dashboard-stat__note">Packages received today</span>
+            </article>
+
+            <article class="card dashboard-stat dashboard-stat--ready">
+                <span class="dashboard-stat__label">Ready for Collection</span>
+                <strong class="dashboard-stat__value" id="stat-ready">—</strong>
+                <span class="dashboard-stat__note">Waiting for pickup</span>
+            </article>
+
+            <article class="card dashboard-stat dashboard-stat--collected">
+                <span class="dashboard-stat__label">Collected</span>
+                <strong class="dashboard-stat__value" id="stat-collected">—</strong>
+                <span class="dashboard-stat__note">Packages collected today</span>
+            </article>
+
+            <article class="card dashboard-stat dashboard-stat--outstanding">
+                <span class="dashboard-stat__label">Outstanding</span>
+                <strong class="dashboard-stat__value" id="stat-outstanding">—</strong>
+                <span class="dashboard-stat__note">Not yet collected</span>
+            </article>
+        </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="dashboard-actions-title">
+        <div class="dashboard-section__header">
+            <div>
+                <h2 class="dashboard-section__title" id="dashboard-actions-title">Quick actions</h2>
+                <p class="dashboard-section__text">Only actions available to the current role are shown.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <a class="dashboard-action dashboard-action--register" data-dashboard-action="register" href="@Url.Action("Register", "Packages")">
+                <span class="dashboard-action__title">Register package</span>
+                <span class="dashboard-action__description">Capture a new package record and generate the F20 identifier.</span>
+                <span class="dashboard-action__footnote">Intake and reception staff</span>
+            </a>
+
+            <a class="dashboard-action dashboard-action--search" data-dashboard-action="search" href="@Url.Action("Search", "Packages")">
+                <span class="dashboard-action__title">Search / Scan</span>
+                <span class="dashboard-action__description">Look up a package or jump into the scan workflow.</span>
+                <span class="dashboard-action__footnote">Search, tracking and QR scanning</span>
+            </a>
+
+            <a class="dashboard-action dashboard-action--collect" data-dashboard-action="collect" href="@Url.Action("Index", "Scan")">
+                <span class="dashboard-action__title">Collect package</span>
+                <span class="dashboard-action__description">Verify a package and move it through the collection flow.</span>
+                <span class="dashboard-action__footnote">Collection verification staff</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-alert" id="dashboard-error" hidden aria-live="polite">
+        <p class="dashboard-alert__title">Dashboard summary unavailable</p>
+        <p class="dashboard-alert__text" id="dashboard-error-text">
+            The package counts could not be loaded right now. Please try again in a moment.
+        </p>
+        <div class="dashboard-alert__actions">
+            <button type="button" class="btn btn-primary" id="dashboard-retry">Try again</button>
+        </div>
+    </section>
 </div>
 
 @section scripts {
     <script>
         (function () {
-            var outputEl = document.getElementById("demo-output");
-            var mockLabelEl = document.getElementById("mock-mode-label");
+            "use strict";
 
-            function refreshMockLabel() {
-                mockLabelEl.textContent = CourierApp.config.mockMode ? "ON" : "OFF";
+            var statReceivedEl = document.getElementById("stat-received");
+            var statReadyEl = document.getElementById("stat-ready");
+            var statCollectedEl = document.getElementById("stat-collected");
+            var statOutstandingEl = document.getElementById("stat-outstanding");
+            var dashboardStatsEl = document.getElementById("dashboard-stats");
+            var updatedAtEl = document.getElementById("dashboard-updated-at");
+            var dashboardErrorEl = document.getElementById("dashboard-error");
+            var dashboardErrorTextEl = document.getElementById("dashboard-error-text");
+            var refreshButtonEl = document.getElementById("dashboard-refresh");
+            var retryButtonEl = document.getElementById("dashboard-retry");
+
+            var actionPermissions = {
+                register: ["IntakeClerk", "Supervisor", "SystemAdmin"],
+                search: ["IntakeClerk", "StorageStaff", "CollectionStaff", "Supervisor", "SystemAdmin"],
+                collect: ["CollectionStaff", "Supervisor", "SystemAdmin"]
+            };
+
+            var currentRole = (window.CourierApp && CourierApp.currentUserRole)
+                || window.sessionStorage.getItem("courier.userRole")
+                || "Supervisor";
+
+            if (window.CourierApp) {
+                CourierApp.currentUserRole = currentRole;
             }
-            refreshMockLabel();
 
-            document.getElementById("toggle-mock-mode").addEventListener("click", function () {
-                CourierApp.config.setMockMode(!CourierApp.config.mockMode);
-                refreshMockLabel();
-            });
+            function canUseAction(actionName) {
+                return actionPermissions[actionName].indexOf(currentRole) !== -1;
+            }
 
-            document.getElementById("demo-toast-success").addEventListener("click", function () {
-                CourierApp.toast.success("Package registered successfully.");
-            });
+            function formatCount(value) {
+                if (value === null || value === undefined) {
+                    return "—";
+                }
 
-            document.getElementById("demo-toast-error").addEventListener("click", function () {
-                CourierApp.toast.error("Package cannot move to Collected from Registered.");
-            });
+                return Number(value).toLocaleString("en-ZA");
+            }
 
-            document.getElementById("demo-confirm").addEventListener("click", function () {
-                CourierApp.confirm("Mark this package as collected?", { confirmLabel: "Mark collected" })
-                    .then(function (confirmed) {
-                        outputEl.textContent = "Confirm result: " + confirmed;
-                    });
-            });
+            function setStatValues(data) {
+                statReceivedEl.textContent = formatCount(data.receivedToday);
+                statReadyEl.textContent = formatCount(data.readyForCollection);
+                statCollectedEl.textContent = formatCount(data.collectedToday);
+                statOutstandingEl.textContent = formatCount(data.outstanding);
+            }
 
-            document.getElementById("demo-fetch-stats").addEventListener("click", function () {
-                CourierApp.api.get("/dashboard/stats").then(function (data) {
-                    outputEl.textContent = JSON.stringify(data, null, 2);
-                }).catch(function () {
-                    outputEl.textContent = "Request failed (see toast).";
+            function setLoadingState(isLoading) {
+                dashboardStatsEl.setAttribute("aria-busy", isLoading ? "true" : "false");
+                if (isLoading) {
+                    updatedAtEl.textContent = "Loading current counts…";
+                    dashboardErrorEl.hidden = true;
+                }
+            }
+
+            function showError(message) {
+                dashboardErrorTextEl.textContent = message;
+                dashboardErrorEl.hidden = false;
+            }
+
+            function hideError() {
+                dashboardErrorEl.hidden = true;
+            }
+
+            function applyActionVisibility() {
+                Object.keys(actionPermissions).forEach(function (actionName) {
+                    var actionEl = document.querySelector('[data-dashboard-action="' + actionName + '"]');
+                    if (actionEl) {
+                        actionEl.hidden = !canUseAction(actionName);
+                    }
                 });
-            });
+            }
+
+            function loadDashboardStats() {
+                setLoadingState(true);
+                hideError();
+
+                return CourierApp.api.get("/dashboard/stats", { silent: true }).then(function (data) {
+                    setStatValues(data || {});
+                    updatedAtEl.textContent = "Updated just now";
+                }).catch(function (failure) {
+                    var message = "The package counts could not be loaded right now. Please try again in a moment.";
+
+                    if (failure && failure.status === 401) {
+                        message = "Your session has expired. Sign in again to view the dashboard.";
+                    } else if (failure && failure.status === 403) {
+                        message = "Your role does not allow access to dashboard statistics.";
+                    }
+
+                    showError(message);
+                }).then(function () {
+                    setLoadingState(false);
+                });
+            }
+
+            refreshButtonEl.addEventListener("click", loadDashboardStats);
+            retryButtonEl.addEventListener("click", loadDashboardStats);
+
+            applyActionVisibility();
+            loadDashboardStats();
         })();
     </script>
 }
