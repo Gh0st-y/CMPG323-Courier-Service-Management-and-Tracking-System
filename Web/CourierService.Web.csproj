@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\CollectionController.cs" />
+    <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MockController.cs" />
     <Compile Include="Controllers\PackagesApiController.cs" />
@@ -70,6 +71,7 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
+    <Content Include="Scripts\app\csv-import.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -129,9 +131,17 @@
   <ItemGroup>
     <Content Include="Views\Packages\Detail.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Views\CsvImport\Index.cshtml" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Collection\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\templetes\sample-package-import.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\templetes\Sample-package-importV2.csv" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

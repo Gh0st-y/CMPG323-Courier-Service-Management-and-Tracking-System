@@ -1,0 +1,108 @@
+﻿@{
+    ViewBag.Title = "CSV Data Import";
+}
+
+<div class="card">
+    <h2 class="app-page-title">CSV Package Import</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 20px;">
+        Upload a <code>.csv</code> file to simulate bulk-importing package records into the system.
+    </p>
+
+    <!-- Sample Template Download Button -->
+    <div style="margin-bottom: 24px;">
+        <button type="button" id="btn-download-template" class="btn btn-secondary">
+            &#128190; Download Sample CSV Template
+        </button>
+    </div>
+
+    <!-- Upload Form -->
+    <form id="csv-upload-form" class="form-section">
+        <fieldset>
+            <legend>Upload CSV File</legend>
+
+            <div class="form-row">
+                <label for="csvFile">Select CSV File <span class="required">*</span></label>
+                <input type="file" id="csvFile" name="csvFile" accept=".csv" required />
+                <span id="file-error" class="field-error"></span>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="btn-upload" class="btn btn-primary">
+                    Upload &amp; Process CSV
+                </button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<!-- Import Results Container -->
+<div id="import-summary-card" class="card results-card" style="display: none; margin-top: 24px;">
+    <div class="results-header">
+        <h3 class="results-header__title">Import Results</h3>
+        <span class="results-header__meta" id="import-timestamp"></span>
+    </div>
+
+    <!-- Metric Summary Cards -->
+    <div class="csv-stats-grid">
+        <div class="stat-box">
+            <span class="stat-box__label">Total Processed</span>
+            <span class="stat-box__value" id="stat-total">0</span>
+        </div>
+        <div class="stat-box stat-box--success">
+            <span class="stat-box__label">Successfully Imported</span>
+            <span class="stat-box__value" id="stat-succeeded">0</span>
+        </div>
+        <div class="stat-box stat-box--error">
+            <span class="stat-box__label">Failed Validation</span>
+            <span class="stat-box__value" id="stat-failed">0</span>
+        </div>
+    </div>
+
+    <!-- Section: Successfully Processed Packages -->
+    <div id="successful-rows-container" style="margin-top: 24px;">
+        <h4 style="margin-bottom: 10px; color: var(--color-success);">Successfully Imported Packages</h4>
+        <div style="overflow-x: auto;">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Row</th>
+                        <th>Tracking #</th>
+                        <th>Recipient</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Fee</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="successful-rows-tbody">
+                    <!-- Populated dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section: Failed Rows Detail -->
+    <div id="failed-rows-container" style="margin-top: 28px;">
+        <h4 style="margin-bottom: 10px; color: var(--color-error);">Failed Rows Detail</h4>
+        <div style="overflow-x: auto;">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Row</th>
+                        <th>Raw Data</th>
+                        <th colspan="5"></th>
+                        <th>Failure Reason</th>
+                    </tr>
+                </thead>
+                <tbody id="failed-rows-tbody">
+                    <!-- Populated dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/app/csv-import.js"></script>
+}
