@@ -17,5 +17,11 @@ namespace CourierService.Web.Models
 
         // Dropdown for Action Type Filter
         public IEnumerable<SelectListItem> ActionTypes { get; set; }
+
+        // Auto-complete suggestions for Search Keywords
+        public IEnumerable<string> SearchSuggestions { get; set; }
+
+        // Authorization status flag
+        public bool IsAuthorized { get; set; }
     }
 }

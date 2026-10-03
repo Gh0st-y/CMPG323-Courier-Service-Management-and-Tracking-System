@@ -881,12 +881,12 @@ a {
 }
 
 .audit-filter-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #e0dcea);
+    border-radius: var(--radius, 6px);
     padding: 16px 20px;
     margin-bottom: 24px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow, 0 1px 4px rgba(0, 0, 0, 0.05));
 }
 
 .audit-filter-grid {
@@ -907,6 +907,47 @@ a {
     align-self: flex-end;
 }
 
+.audit-search-tip {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 12px;
+    color: var(--color-primary, #5c2d91);
+    cursor: help;
+    font-weight: bold;
+}
+
+/* Form Controls & Purple Hover/Focus States */
+.audit-filter-card .form-control {
+    width: 100%;
+    height: 38px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: 1px solid var(--color-border, #ccc);
+    border-radius: var(--radius, 6px);
+    background-color: #ffffff;
+    color: var(--color-text, #333333);
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-sizing: border-box;
+}
+
+    /* Hover state for all input fields, selects, and datepickers */
+    .audit-filter-card .form-control:hover {
+        border-color: var(--color-primary, #5c2d91) !important;
+        cursor: pointer;
+    }
+
+/* Text input shows standard I-beam text cursor on hover */
+.audit-filter-card input[type="text"]:not(.flatpickr-date):hover {
+    cursor: text;
+}
+
+    /* Focus state for active typing/selection */
+    .audit-filter-card .form-control:focus {
+        border-color: var(--color-primary, #5c2d91) !important;
+        box-shadow: 0 0 0 3px rgba(92, 45, 145, 0.18) !important;
+        outline: none;
+    }
+
 /* Mobile & Android responsiveness */
 @media (max-width: 576px) {
     .audit-filter-grid {
@@ -921,11 +962,11 @@ a {
         margin-top: 4px;
     }
 
-    .audit-filter-actions .btn {
-        flex: 1;
-        text-align: center;
-        justify-content: center;
-    }
+        .audit-filter-actions .btn {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+        }
 
     .audit-filter-grid .form-control {
         width: 100%;
@@ -934,10 +975,10 @@ a {
 }
 
 .audit-table-container {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #e0dcea);
+    border-radius: var(--radius, 6px);
+    box-shadow: var(--shadow, 0 1px 4px rgba(0, 0, 0, 0.05));
     overflow-x: auto;
 }
 
@@ -947,29 +988,29 @@ a {
     font-size: 14px;
 }
 
-.audit-table thead th {
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-    text-align: left;
-    padding: 12px 14px;
-    font-weight: 600;
-    white-space: nowrap;
-}
+    .audit-table thead th {
+        background: var(--color-primary, #5c2d91);
+        color: var(--color-text-on-primary, #ffffff);
+        text-align: left;
+        padding: 12px 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
 
-.audit-table tbody td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--color-border);
-    vertical-align: middle;
-}
+    .audit-table tbody td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--color-border, #e0dcea);
+        vertical-align: middle;
+    }
 
-.audit-table tbody tr:hover {
-    background: var(--color-bg);
-}
+    .audit-table tbody tr:hover {
+        background: var(--color-bg, #f8f6fb);
+    }
 
 .audit-table__id {
     font-family: "Courier New", monospace;
     font-weight: 600;
-    color: var(--color-text-muted);
+    color: var(--color-text-muted, #6c757d);
 }
 
 .audit-badge {
@@ -978,14 +1019,14 @@ a {
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
-    background: var(--color-info-bg);
-    color: var(--color-info);
-    border: 1px solid var(--color-border);
+    background: var(--color-info-bg, #e8f4fd);
+    color: var(--color-info, #2980b9);
+    border: 1px solid var(--color-border, #e0dcea);
 }
 
 .audit-detail {
-    font-family: var(--font-family);
-    color: var(--color-text);
+    font-family: var(--font-family, inherit);
+    color: var(--color-text, #333333);
     max-width: 320px;
     word-break: break-word;
 }
@@ -1022,10 +1063,10 @@ a {
     color: #721c24;
 }
 
-.audit-notice-alert__content strong {
-    font-weight: 700;
-    color: var(--color-error, #c0392b);
-}
+    .audit-notice-alert__content strong {
+        font-weight: 700;
+        color: var(--color-error, #c0392b);
+    }
 
 /* ============================================================ */
 /* Flatpickr Smooth Calendar Overrides                          */
@@ -1034,6 +1075,10 @@ a {
     cursor: pointer;
     background-color: #ffffff !important;
 }
+
+    .flatpickr-input[readonly]:hover {
+        border-color: var(--color-primary, #5c2d91) !important;
+    }
 
 .flatpickr-calendar {
     border-radius: var(--radius, 6px);

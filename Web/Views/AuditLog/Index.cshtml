@@ -9,26 +9,51 @@
     <h2 class="app-page-title">Audit Log Viewer</h2>
     <p class="text-muted">View system activity and security audit trail (Read-Only).</p>
 
-    <!-- Authorization Warning Banner -->
-    <div class="audit-notice-alert" role="alert">
-        <div class="audit-notice-alert__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
+    <!-- Authorization Warning Banner (Shown only when NOT authorized) -->
+    @if (!Model.IsAuthorized)
+    {
+        <div class="audit-notice-alert" role="alert">
+            <div class="audit-notice-alert__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <div class="audit-notice-alert__content">
+                <strong>Access Information:</strong> Full audit logs and filtering capabilities are visible only when an authorized user (Supervisor or System Admin) is logged in. Additional security features will be enabled over time.
+            </div>
         </div>
-        <div class="audit-notice-alert__content">
-            <strong>Access Information:</strong> Full audit logs and filtering capabilities are visible only when an authorized user (Supervisor or System Admin) is logged in. Additional security features will be enabled over time.
-        </div>
-    </div>
+    }
 
     <!-- Filter Form -->
     <form method="get" action="@Url.Action("Index", "AuditLog")" class="audit-filter-card">
         <div class="audit-filter-grid">
             <div class="form-row">
-                <label for="searchTerm">Search Keywords</label>
-                <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="User ID, Entity, Detail..." />
+                <label for="searchTerm">
+                    Search Keywords
+                    <span class="audit-search-tip" title="Tip: Start typing to filter database suggestions by Entity Type (e.g. Parcel), Entity ID, or User ID.">ⓘ</span>
+                </label>
+                <input type="text"
+                       id="searchTerm"
+                       name="searchTerm"
+                       value="@Model.SearchTerm"
+                       class="form-control"
+                       title="Clue: Type an Entity Type (e.g., Parcel), Entity ID, or User ID to filter database suggestions."
+                       placeholder="Type or select entity, user ID..."
+                       list="searchSuggestionsList"
+                       autocomplete="off" />
+
+                <!-- Dynamic Database Auto-Complete List -->
+                <datalist id="searchSuggestionsList">
+                    @if (Model.SearchSuggestions != null)
+                    {
+                        foreach (var suggestion in Model.SearchSuggestions)
+                        {
+                            <option value="@suggestion"></option>
+                        }
+                    }
+                </datalist>
             </div>
             <div class="form-row">
                 <label for="actionType">Action Type</label>

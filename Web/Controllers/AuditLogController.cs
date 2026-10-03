@@ -29,24 +29,38 @@ namespace CourierService.Web.Controllers
         public ActionResult Index(string searchTerm, string actionType, DateTime? startDate, DateTime? endDate)
         {
             // Fetch top recent entries (SR-04)
-            var entries = _auditLogRepository.GetRecent(500) ?? Enumerable.Empty<AuditLogEntry>();
+            var rawEntries = _auditLogRepository.GetRecent(500) ?? Enumerable.Empty<AuditLogEntry>();
+            var entriesList = rawEntries.ToList();
+
+            // Build distinct auto-complete suggestions from database records
+            var suggestions = entriesList
+                .SelectMany(e => new[] { e.EntityType, e.EntityId, e.UserId?.ToString() })
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .OrderBy(s => s)
+                .Take(50) // Limit suggestions for clean performance
+                .ToList();
+
 
             // Distinct action list for dropdown filter
-            var availableActions = entries
+            var availableActions = rawEntries
                 .Select(e => e.Action)
                 .Where(a => !string.IsNullOrWhiteSpace(a))
                 .Distinct()
                 .OrderBy(a => a)
                 .Select(a => new SelectListItem { Text = a, Value = a, Selected = (a == actionType) })
                 .ToList();
+            
 
             availableActions.Insert(0, new SelectListItem { Text = "-- All Action Types --", Value = "" });
+
+            IEnumerable<AuditLogEntry> filteredEntries = entriesList;
 
             // Apply Filters
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var term = searchTerm.Trim().ToLower();
-                entries = entries.Where(e =>
+                rawEntries = rawEntries.Where(e =>
                     (e.Action != null && e.Action.ToLower().Contains(term)) ||
                     (e.EntityType != null && e.EntityType.ToLower().Contains(term)) ||
                     (e.EntityId != null && e.EntityId.ToLower().Contains(term)) ||
@@ -57,27 +71,29 @@ namespace CourierService.Web.Controllers
 
             if (!string.IsNullOrWhiteSpace(actionType))
             {
-                entries = entries.Where(e => string.Equals(e.Action, actionType, StringComparison.OrdinalIgnoreCase));
+                rawEntries = rawEntries.Where(e => string.Equals(e.Action, actionType, StringComparison.OrdinalIgnoreCase));
             }
 
             if (startDate.HasValue)
             {
-                entries = entries.Where(e => e.OccurredAtUtc.Date >= startDate.Value.Date);
+                rawEntries = rawEntries.Where(e => e.OccurredAtUtc.Date >= startDate.Value.Date);
             }
 
             if (endDate.HasValue)
             {
-                entries = entries.Where(e => e.OccurredAtUtc.Date <= endDate.Value.Date);
+                rawEntries = rawEntries.Where(e => e.OccurredAtUtc.Date <= endDate.Value.Date);
             }
 
             var model = new AuditLogViewModel
             {
-                Entries = entries.ToList(),
+                Entries = rawEntries.ToList(),
                 SearchTerm = searchTerm,
                 ActionType = actionType,
                 StartDate = startDate,
                 EndDate = endDate,
-                ActionTypes = availableActions
+                ActionTypes = availableActions,
+                // Check if user is authenticated and in an authorized role
+                IsAuthorized = User.Identity.IsAuthenticated && (User.IsInRole("Supervisor") || User.IsInRole("SystemAdmin"))
             };
 
             return View(model);
