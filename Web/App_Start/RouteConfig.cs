@@ -9,6 +9,8 @@ namespace CourierService.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            routes.MapMvcAttributeRoutes();
+
             // Route for Status Updates
             routes.MapRoute(
                 name: "UpdatePackageStatus",
