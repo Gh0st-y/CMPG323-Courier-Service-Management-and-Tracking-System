@@ -1,0 +1,119 @@
+﻿@model CourierService.Web.Models.AuditLogViewModel
+@{
+    ViewBag.Title = "Audit Log Viewer";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div class="audit-log-page">
+    <h2 class="app-page-title">Audit Log Viewer</h2>
+    <p class="text-muted">View system activity and security audit trail (Read-Only).</p>
+
+    <!-- Authorization Warning Banner -->
+    <div class="audit-notice-alert" role="alert">
+        <div class="audit-notice-alert__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+        <div class="audit-notice-alert__content">
+            <strong>Access Information:</strong> Full audit logs and filtering capabilities are visible only when an authorized user (Supervisor or System Admin) is logged in. Additional security features will be enabled over time.
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" action="@Url.Action("Index", "AuditLog")" class="audit-filter-card">
+        <div class="audit-filter-grid">
+            <div class="form-row">
+                <label for="searchTerm">Search Keywords</label>
+                <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="User ID, Entity, Detail..." />
+            </div>
+            <div class="form-row">
+                <label for="actionType">Action Type</label>
+                @Html.DropDownListFor(m => m.ActionType, Model.ActionTypes, new { @class = "form-control", id = "actionType" })
+            </div>
+            <div class="form-row">
+                <label for="startDate">Start Date</label>
+                <input type="text"
+                       id="startDate"
+                       name="startDate"
+                       value="@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("yyyy-MM-dd") : "")"
+                       class="form-control flatpickr-date"
+                       placeholder="Select Start Date"
+                       readonly />
+            </div>
+
+            <div class="form-row">
+                <label for="endDate">End Date</label>
+                <input type="text"
+                       id="endDate"
+                       name="endDate"
+                       value="@(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("yyyy-MM-dd") : "")"
+                       class="form-control flatpickr-date"
+                       placeholder="Select End Date"
+                       readonly />
+            </div>
+            <div class="audit-filter-actions">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="@Url.Action("Index", "AuditLog")" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Audit Log Table -->
+    <div class="audit-table-container">
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Timestamp (UTC)</th>
+                    <th scope="col">User ID</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Entity Type</th>
+                    <th scope="col">Entity ID</th>
+                    <th scope="col">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Entries != null && Model.Entries.Any())
+                {
+                    foreach (var entry in Model.Entries)
+                    {
+                        <tr>
+                            <td class="audit-table__id">@entry.AuditLogId</td>
+                            <td>@entry.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@(entry.UserId.HasValue ? entry.UserId.Value.ToString() : "System / Anonymous")</td>
+                            <td><span class="audit-badge">@entry.Action</span></td>
+                            <td>@(string.IsNullOrEmpty(entry.EntityType) ? "-" : entry.EntityType)</td>
+                            <td>@(string.IsNullOrEmpty(entry.EntityId) ? "-" : entry.EntityId)</td>
+                            <td class="audit-detail">@(string.IsNullOrEmpty(entry.Detail) ? "-" : entry.Detail)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="results-empty">No audit log records found matching the specified filter.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Flatpickr JS Library -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Initialization Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        flatpickr(".flatpickr-date", {
+            dateFormat: "Y-m-d",
+            allowInput: false,
+            clickOpens: true,
+            disableMobile: true
+        });
+    });
+</script>

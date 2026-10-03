@@ -872,3 +872,196 @@ a {
     font-style: italic;
     padding: 4px 0;
 }
+
+/* ============================================================ */
+/* Audit Log Viewer Page (SR-04, T46)                           */
+/* ============================================================ */
+.audit-log-page {
+    padding-bottom: 24px;
+}
+
+.audit-filter-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+}
+
+.audit-filter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+    .audit-filter-grid .form-row {
+        flex: 1 1 180px; /* Expands horizontally and fills available row space */
+        margin-bottom: 0;
+    }
+
+.audit-filter-actions {
+    display: flex;
+    gap: 8px;
+    align-self: flex-end;
+}
+
+@media (max-width: 992px) {
+    .audit-filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .audit-filter-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.audit-table-container {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+    .audit-table thead th {
+        background: var(--color-primary);
+        color: var(--color-text-on-primary);
+        text-align: left;
+        padding: 12px 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .audit-table tbody td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--color-border);
+        vertical-align: middle;
+    }
+
+    .audit-table tbody tr:hover {
+        background: var(--color-bg);
+    }
+
+.audit-table__id {
+    font-family: "Courier New", monospace;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.audit-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--color-info-bg);
+    color: var(--color-info);
+    border: 1px solid var(--color-border);
+}
+
+.audit-detail {
+    font-family: var(--font-family);
+    color: var(--color-text);
+    max-width: 320px;
+    word-break: break-word;
+}
+
+/* ============================================================ */
+/* Readonly Date Picker Input Styling                           */
+/* ============================================================ */
+.form-control.date-picker-readonly {
+    cursor: pointer;
+    background-color: #ffffff !important;
+}
+
+.form-control.date-picker-readonly:hover {
+    border-color: var(--color-primary, #5c2d91);
+    background-color: #fcfbfe !important;
+}
+
+/* ============================================================ */
+/* Red Authorization Alert Box                                  */
+/* ============================================================ */
+.audit-notice-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-error-bg, #fbe9e7);
+    color: var(--color-error, #c0392b);
+    border: 1px solid var(--color-error, #c0392b);
+    border-left: 5px solid var(--color-error, #c0392b);
+    border-radius: var(--radius, 6px);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 1px 4px rgba(192, 57, 43, 0.12);
+}
+
+.audit-notice-alert__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-error, #c0392b);
+}
+
+.audit-notice-alert__content {
+    flex: 1;
+    color: #721c24; /* Clear dark-red text for maximum legibility */
+}
+
+.audit-notice-alert__content strong {
+    font-weight: 700;
+    color: var(--color-error, #c0392b);
+}
+
+/* ============================================================ */
+/* Clickable Dynamic Date Inputs                                */
+/* ============================================================ */
+.clickable-date-input {
+    cursor: pointer;
+    background-color: #ffffff !important;
+    caret-color: transparent; /* Hides blinking text cursor */
+}
+
+.clickable-date-input:hover {
+    border-color: var(--color-primary, #5c2d91);
+    background-color: #fcfbfe !important;
+}
+
+/* Ensure placeholder text is formatted clearly */
+.clickable-date-input::placeholder {
+    color: var(--color-text-muted, #6b6572);
+    opacity: 0.8;
+}
+
+/* ============================================================ */
+/* Flatpickr Smooth Calendar Overrides                          */
+/* ============================================================ */
+.flatpickr-input[readonly] {
+    cursor: pointer;
+    background-color: #ffffff !important;
+}
+
+.flatpickr-calendar {
+    border-radius: var(--radius, 6px);
+    box-shadow: var(--shadow, 0 2px 8px rgba(31, 27, 36, 0.12));
+    border: 1px solid var(--color-border, #e0dcea);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+    background: var(--color-primary, #5c2d91) !important;
+    border-color: var(--color-primary, #5c2d91) !important;
+}
