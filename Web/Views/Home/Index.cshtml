@@ -4,30 +4,29 @@
 
 <h1 class="app-page-title">F20 Courier Service Dashboard</h1>
 
+<section class="dashboard-alert" id="dashboard-error" role="alert" aria-live="assertive" hidden>
+    <p class="dashboard-alert__title">Package counts could not be loaded.</p>
+    <p class="dashboard-alert__text">
+        Refresh the page, or contact the system administrator if this continues.
+    </p>
+    <div class="dashboard-alert__actions">
+        <button type="button" class="btn btn-primary" id="dashboard-retry">Try again</button>
+    </div>
+</section>
+
 <div class="dashboard-page">
-    <section class="card dashboard-hero" aria-labelledby="dashboard-hero-title">
-        <div class="dashboard-hero__copy">
-            <p class="dashboard-kicker">North-West University F20</p>
-            <h2 class="dashboard-hero__title" id="dashboard-hero-title">Package activity overview</h2>
-            <p class="dashboard-hero__text">
-                Use this screen to track daily package activity and jump straight into the core workflows.
-                No recipient details are shown here.
-            </p>
-        </div>
-
-        <div class="dashboard-hero__aside">
-            <span class="dashboard-pill">Role-aware quick actions</span>
-            <button type="button" class="btn btn-secondary" id="dashboard-refresh">Refresh summary</button>
-        </div>
-    </section>
-
     <section class="dashboard-section" aria-labelledby="dashboard-summary-title">
         <div class="dashboard-section__header">
-            <div>
-                <h2 class="dashboard-section__title" id="dashboard-summary-title">Package summary</h2>
+            <div class="dashboard-section__heading">
+                <div class="dashboard-section__title-row">
+                    <h2 class="dashboard-section__title" id="dashboard-summary-title">Package summary</h2>
+                    <p class="dashboard-section__meta" id="dashboard-updated-at" hidden>Loading current counts...</p>
+                </div>
+                <span class="dashboard-section__divider" aria-hidden="true"></span>
                 <p class="dashboard-section__text">Counts are loaded from the backend API.</p>
             </div>
-            <p class="dashboard-section__meta" id="dashboard-updated-at">Loading current counts…</p>
+
+            <button type="button" class="btn btn-secondary" id="dashboard-refresh">Refresh summary</button>
         </div>
 
         <div class="dashboard-stats" id="dashboard-stats" aria-live="polite" aria-busy="true">
@@ -85,16 +84,6 @@
             </a>
         </div>
     </section>
-
-    <section class="dashboard-alert" id="dashboard-error" hidden aria-live="polite">
-        <p class="dashboard-alert__title">Dashboard summary unavailable</p>
-        <p class="dashboard-alert__text" id="dashboard-error-text">
-            The package counts could not be loaded right now. Please try again in a moment.
-        </p>
-        <div class="dashboard-alert__actions">
-            <button type="button" class="btn btn-primary" id="dashboard-retry">Try again</button>
-        </div>
-    </section>
 </div>
 
 @section scripts {
@@ -109,7 +98,6 @@
             var dashboardStatsEl = document.getElementById("dashboard-stats");
             var updatedAtEl = document.getElementById("dashboard-updated-at");
             var dashboardErrorEl = document.getElementById("dashboard-error");
-            var dashboardErrorTextEl = document.getElementById("dashboard-error-text");
             var refreshButtonEl = document.getElementById("dashboard-refresh");
             var retryButtonEl = document.getElementById("dashboard-retry");
 
@@ -149,14 +137,12 @@
 
             function setLoadingState(isLoading) {
                 dashboardStatsEl.setAttribute("aria-busy", isLoading ? "true" : "false");
-                if (isLoading) {
-                    updatedAtEl.textContent = "Loading current counts…";
-                    dashboardErrorEl.hidden = true;
-                }
+                updatedAtEl.hidden = !isLoading;
+                refreshButtonEl.disabled = isLoading;
+                retryButtonEl.disabled = isLoading;
             }
 
-            function showError(message) {
-                dashboardErrorTextEl.textContent = message;
+            function showError() {
                 dashboardErrorEl.hidden = false;
             }
 
@@ -179,17 +165,9 @@
 
                 return CourierApp.api.get("/dashboard/stats", { silent: true }).then(function (data) {
                     setStatValues(data || {});
-                    updatedAtEl.textContent = "Updated just now";
-                }).catch(function (failure) {
-                    var message = "The package counts could not be loaded right now. Please try again in a moment.";
-
-                    if (failure && failure.status === 401) {
-                        message = "Your session has expired. Sign in again to view the dashboard.";
-                    } else if (failure && failure.status === 403) {
-                        message = "Your role does not allow access to dashboard statistics.";
-                    }
-
-                    showError(message);
+                }).catch(function () {
+                    setStatValues({});
+                    showError();
                 }).then(function () {
                     setLoadingState(false);
                 });
