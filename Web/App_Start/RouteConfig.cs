@@ -9,6 +9,20 @@ namespace CourierService.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Route for Status Updates
+            routes.MapRoute(
+                name: "UpdatePackageStatus",
+                url: "api/packages/{id}/status",
+                defaults: new { controller = "Mock", action = "UpdateStatus" }
+            );
+
+            // Route for Package Lookup
+            routes.MapRoute(
+                name: "ApiPackages",
+                url: "api/packages/{id}",
+                defaults: new { controller = "Mock", action = "GetPackage", id = UrlParameter.Optional }
+            );
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
