@@ -14,6 +14,8 @@ namespace CourierService.Domain.Entities
         public string EntityType { get; set; }
         public string EntityId { get; set; }
         public string Detail { get; set; }
+        // Not a column in AuditLog. Only filled in by the viewer search, from the Users table.
+        public string Username { get; set; }
         public DateTime OccurredAtUtc { get; set; }
     }
 }
