@@ -1,4 +1,6 @@
 using System.Web.Mvc;
+using CourierService.Services.Security;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
@@ -13,7 +15,7 @@ namespace CourierService.Web.Controllers
         {
             return View();
         }
-
+        [RoleAuthorize]
         [HttpPost]
         public ActionResult LookupScannedPackage(string packageId)
         {
@@ -42,6 +44,7 @@ namespace CourierService.Web.Controllers
         /// <summary>
         /// API route invoked by Scripts/app/scan-demo.js (GET /api/packages/scan/{packageId}).
         /// </summary>
+        [RoleAuthorize]
         [HttpGet]
         [Route("api/packages/scan/{packageId}")]
         public ActionResult ApiScanLookup(string packageId)
