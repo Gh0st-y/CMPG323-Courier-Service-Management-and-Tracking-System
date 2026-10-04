@@ -9,6 +9,10 @@ namespace CourierService.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // T12: enables [Route("api/...")] attributes on controllers (AuthController,
+            // ScanController). Must come before the conventional routes below.
+            routes.MapMvcAttributeRoutes();
+
             // Route for Status Updates
             routes.MapRoute(
                 name: "UpdatePackageStatus",
