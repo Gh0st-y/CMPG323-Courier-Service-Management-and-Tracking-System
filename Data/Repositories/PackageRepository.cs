@@ -207,6 +207,42 @@ namespace CourierService.Data.Repositories
         {
             return value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
         }
+        public bool TryUpdateStatus(
+            int packageId,
+            PackageStatus newStatus,
+            int? storageLocationId,
+            int? collectedByUserId,
+            byte[] expectedRowVersion,
+            IUnitOfWork unitOfWork = null)
+        {
+            if (expectedRowVersion == null)
+            {
+                throw new ArgumentNullException(nameof(expectedRowVersion));
+            }
+
+            // The RowVersion in the WHERE clause is the concurrency check: if anyone changed the row since it
+            // was read, its RowVersion has moved on, nothing matches, and zero rows are updated.
+            const string sql = @"
+                UPDATE dbo.Packages
+                SET Status = @Status,
+                    StorageLocationId = COALESCE(@StorageLocationId, StorageLocationId),
+                    CollectedAtUtc = CASE WHEN @Status = 'Collected' THEN SYSUTCDATETIME() ELSE CollectedAtUtc END,
+                    CollectedByUserId = CASE WHEN @Status = 'Collected' THEN @CollectedByUserId ELSE CollectedByUserId END
+                WHERE PackageId = @PackageId AND RowVersion = @RowVersion;";
+
+            var rowsUpdated = RunOwnedOrShared(unitOfWork, sql, command =>
+            {
+                command.AddParameter("@Status", DbType.String, newStatus.ToString());
+                command.AddParameter("@StorageLocationId", DbType.Int32, (object)storageLocationId ?? DBNull.Value);
+                command.AddParameter("@CollectedByUserId", DbType.Int32, (object)collectedByUserId ?? DBNull.Value);
+                command.AddParameter("@PackageId", DbType.Int32, packageId);
+                command.AddParameter("@RowVersion", DbType.Binary, expectedRowVersion);
+                return command.ExecuteNonQuery();
+            });
+
+            return rowsUpdated == 1;
+        }
+
         private static Package MapPackage(IDataRecord record)
         {
             return new Package
