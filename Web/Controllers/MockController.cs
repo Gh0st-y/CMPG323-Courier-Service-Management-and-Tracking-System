@@ -65,50 +65,18 @@ namespace CourierService.Web.Controllers
 
             return Content(pkg.ToString(), "application/json");
         }
+
         // POST: /api/packages/{id}/status
+        // The real status endpoint is T19. This used to answer "marked as Collected" for any request, whatever
+        // status was asked for, and rewrote the git-tracked mock-fixtures.json on disk. It now says plainly that
+        // it isn't built yet. Role checks stay, so the contract's access rules still apply (SR-02).
         [RoleAuthorize(RoleNames.StorageStaff, RoleNames.Supervisor, RoleNames.SystemAdmin)]
         [HttpPost]
         public ActionResult UpdateStatus(string id)
         {
-            var fixturesPath = GetFixturesPath();
-            if (!System.IO.File.Exists(fixturesPath))
-            {
-                return HttpNotFound();
-            }
-
-            var jsonText = System.IO.File.ReadAllText(fixturesPath);
-            var root = JObject.Parse(jsonText);
-
-            if (!(root["GET /api/packages"]?["items"] is JArray packages))
-            {
-                return HttpNotFound();
-            }
-
-            // Match package by f20Identifier (e.g., F20-0007) or packageId
-            var pkg = packages.FirstOrDefault(p =>
-                string.Equals((string)p["f20Identifier"], id, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals((string)p["packageId"], id, StringComparison.OrdinalIgnoreCase));
-
-            if (pkg == null)
-            {
-                return HttpNotFound();
-            }
-
-            // 1. Update the main list status
-            pkg["status"] = "Collected";
-
-            // 2. Also update detail view fixture if present
-            var f20Id = (string)pkg["f20Identifier"];
-            var detailKey = $"GET /api/packages/{f20Id}/detail";
-            if (root[detailKey]?["package"] != null)
-            {
-                root[detailKey]["package"]["status"] = "Collected";
-            }
-
-            // 3. Save the modified JSON back to mock-fixtures.json on disk
-            System.IO.File.WriteAllText(fixturesPath, root.ToString(Newtonsoft.Json.Formatting.Indented));
-
-            return Content($"{{\"success\": true, \"message\": \"Package {id} marked as Collected.\"}}", "application/json");
+            Response.StatusCode = 501;
+            Response.TrySkipIisCustomErrors = true;
+            return Json(new { error = new { code = "NotImplemented", message = "Status updates are not available yet." } });
         }
     }
 }
