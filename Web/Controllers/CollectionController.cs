@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
+using CourierService.Services.Security;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
@@ -22,6 +24,7 @@ namespace CourierService.Web.Controllers
         }
 
         // GET: /Collection/GetPackageDetails?packageId=F20-0001
+        [RoleAuthorize]
         [HttpGet]
         public ActionResult GetPackageDetails(string packageId)
         {

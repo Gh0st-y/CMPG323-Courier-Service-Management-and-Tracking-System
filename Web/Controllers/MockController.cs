@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Newtonsoft.Json.Linq;
+using CourierService.Services.Security;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
@@ -16,6 +18,7 @@ namespace CourierService.Web.Controllers
         }
 
         // GET: /Mock/Fixtures
+        [RoleAuthorize]
         public ActionResult Fixtures()
         {
             var fixturesPath = GetFixturesPath();
@@ -29,6 +32,7 @@ namespace CourierService.Web.Controllers
         }
 
         // GET: /api/packages/{id}
+        [RoleAuthorize]
         [HttpGet]
         public ActionResult GetPackage(string id)
         {
@@ -62,6 +66,7 @@ namespace CourierService.Web.Controllers
             return Content(pkg.ToString(), "application/json");
         }
         // POST: /api/packages/{id}/status
+        [RoleAuthorize(RoleNames.StorageStaff, RoleNames.Supervisor, RoleNames.SystemAdmin)]
         [HttpPost]
         public ActionResult UpdateStatus(string id)
         {
