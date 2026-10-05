@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
@@ -12,6 +13,14 @@ namespace CourierService.Web
         {
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+            // Controllers read JSON request bodies themselves (RequestBody.Read) so they can answer 400 for a bad body.
+            // MVC's own JSON value provider would parse the body first and throw on bad JSON, which comes out as a 500.
+            var jsonProvider = ValueProviderFactories.Factories.OfType<JsonValueProviderFactory>().FirstOrDefault();
+            if (jsonProvider != null)
+            {
+                ValueProviderFactories.Factories.Remove(jsonProvider);
+            }
         }
 
         

@@ -12,6 +12,11 @@
     const btnModalCancel = document.getElementById('btn-modal-cancel');
     const btnModalSubmit = document.getElementById('btn-modal-submit');
 
+    // "InStorage" -> "In Storage", as the rest of the app shows it
+    function statusLabel(status) {
+        return ({ InStorage: "In Storage", ReadyForCollection: "Ready for Collection" })[status] || status;
+    }
+
     let currentPackage = null;
     let html5QrCode = null;
     let resetTimer = null;
@@ -129,26 +134,22 @@
     }
 
     function fetchPackageDetails(packageId) {
-        // Call the backend endpoint directly to query mock-fixtures.json
-        fetch(`/api/packages/${encodeURIComponent(packageId)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Package not found');
-                }
-                return response.json();
-            })
+        // The same lookup the scan screen uses (GET /api/packages/scan/{id}). silent: this screen words its own errors.
+        CourierApp.api.get('/packages/scan/' + encodeURIComponent(packageId), { silent: true })
             .then(data => {
                 currentPackage = data;
                 renderPackageDetails(data);
-            })
-            .catch(() => {
+            }, failure => {
                 detailsCard.style.display = 'none';
-                if (window.CourierApp && window.CourierApp.toast) {
-                    window.CourierApp.toast.error("Package not found or error retrieving details.");
-                }
+                currentPackage = null;
+
+                // Only a 404 means there is no such package. Anything else (not logged in, server trouble) says what happened.
+                const message = failure && failure.status === 404
+                    ? 'No package was found for that code.'
+                    : (failure && failure.error && failure.error.message) || 'Could not retrieve the package. Please try again.';
+                CourierApp.toast.error(message);
             });
     }
-
     function renderPackageDetails(pkg, isJustCollected = false) {
         detailsCard.style.display = 'block';
 
@@ -160,7 +161,7 @@
         document.getElementById('display-storage-location').textContent = pkg.storageLocation || 'N/A';
 
         const statusElem = document.getElementById('display-package-status');
-        statusElem.textContent = pkg.status;
+        statusElem.textContent = statusLabel(pkg.status);
 
         // Shared base box styles for padding, borders, and margins
         blockedAlert.style.padding = '12px 16px';
@@ -207,7 +208,7 @@
             blockedAlert.style.borderLeft = '4px solid #dc3545';
 
             // Dynamic message format: "{packageId} is {status} and cannot be updated"
-            blockedAlert.textContent = `${displayId} is ${pkg.status} and cannot be updated`;
+            blockedAlert.textContent = `${displayId} is ${statusLabel(pkg.status)} and cannot be updated`;
 
             blockedAlert.style.display = 'block';
 
@@ -242,31 +243,22 @@
         confirmModal.style.display = 'none';
         const pkgId = currentPackage.f20Identifier || currentPackage.packageId || currentPackage.id;
 
-        fetch(`/api/packages/${encodeURIComponent(pkgId)}/status`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'Collected' })
-        })
-            .then(res => {
-                if (res.ok) {
-                    if (window.CourierApp && window.CourierApp.toast) {
-                        window.CourierApp.toast.success(`Package ${pkgId} marked as Collected!`);
-                    }
+        // POST /api/packages/{id}/collect (T20). The server only allows it when the package is Ready for Collection,
+        // records who verified and when, and answers with the reason if not. The logged-in user is the verifier.
+        CourierApp.api.post('/packages/' + encodeURIComponent(pkgId) + '/collect', {})
+            .then(() => {
+                CourierApp.toast.success(`Package ${pkgId} marked as Collected!`);
 
-                    // Update current package status locally
-                    currentPackage.status = 'Collected';
+                // Update current package status locally
+                currentPackage.status = 'Collected';
 
-                    // Render UI with green alert flag (isJustCollected = true)
-                    renderPackageDetails(currentPackage, true);
-                } else {
-                    if (window.CourierApp && window.CourierApp.toast) {
-                        window.CourierApp.toast.error("Failed to update status.");
-                    }
-                }
-            })
-            .catch(() => {
-                if (window.CourierApp && window.CourierApp.toast) {
-                    window.CourierApp.toast.error("Network error while updating status.");
+                // Render UI with green alert flag (isJustCollected = true)
+                renderPackageDetails(currentPackage, true);
+            }, failure => {
+                // CourierApp.api has already shown the server's reason as a toast. If the package changed under us
+                // (409), reload it so the screen shows what is true now.
+                if (failure && failure.status === 409) {
+                    fetchPackageDetails(pkgId);
                 }
             });
     });

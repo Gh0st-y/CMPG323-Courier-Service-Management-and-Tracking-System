@@ -11,6 +11,50 @@
     var resultCardEl = document.getElementById("scan-result-card") || resultEl.parentElement;
     var currentPackage = null;
 
+    // The 4-state lifecycle (DECISIONS.md #7). The server enforces it (DR-009); this only decides which options to offer.
+    // Collection is its own screen with its own role, so it is never offered here.
+    var STATUS_LABELS = {
+        Registered: "Registered",
+        InStorage: "In Storage",
+        ReadyForCollection: "Ready for Collection",
+        Collected: "Collected"
+    };
+    var NEXT_STATUS = {
+        Registered: ["InStorage"],
+        InStorage: ["ReadyForCollection"],
+        ReadyForCollection: [],
+        Collected: []
+    };
+
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    // "ReadyForCollection" or "Ready for Collection" -> the key used above
+    function statusKey(status) {
+        return (status || "").toString().replace(/\s+/g, "").toLowerCase();
+    }
+
+    function canonicalStatus(status) {
+        var key = statusKey(status);
+        for (var name in STATUS_LABELS) {
+            if (name.toLowerCase() === key) {
+                return name;
+            }
+        }
+        return null;
+    }
+
+    function statusLabel(status) {
+        var canonical = canonicalStatus(status);
+        return canonical ? STATUS_LABELS[canonical] : status;
+    }
+
     // =========================================================================
     // [T35 HELPERS] These functions handle audio feedback and UI card updates
     // =========================================================================
@@ -52,12 +96,13 @@
         }
 
         var sourceLabel = isFallbackMatch ? source + " (Matched via Search)" : source;
+        // Everything here comes from the server or the scanner, so it is escaped: a recipient name must never run as script.
         var html = "<div>" +
-            "<div><strong>Source:</strong> " + sourceLabel + "</div>" +
-            "<div><strong>Package ID:</strong> " + (pkg.f20Identifier || pkg.packageId || pkg.code || "N/A") + "</div>" +
-            "<div><strong>Recipient:</strong> " + (pkg.recipientName || "N/A") + "</div>" +
-            "<div><strong>Status:</strong> " + (pkg.status || "Ready") + "</div>" +
-            "<div><strong>Storage Location:</strong> " + (pkg.storageLocation || "N/A") + "</div>" +
+            "<div><strong>Source:</strong> " + escapeHtml(sourceLabel) + "</div>" +
+            "<div><strong>Package ID:</strong> " + escapeHtml(pkg.f20Identifier || pkg.packageId || pkg.code || "N/A") + "</div>" +
+            "<div><strong>Recipient:</strong> " + escapeHtml(pkg.recipientName || "N/A") + "</div>" +
+            "<div><strong>Status:</strong> " + escapeHtml(statusLabel(pkg.status) || "N/A") + "</div>" +
+            "<div><strong>Storage Location:</strong> " + escapeHtml(pkg.storageLocation || "N/A") + "</div>" +
             "</div>";
 
         resultEl.innerHTML = html;
@@ -73,69 +118,48 @@
             resultCardEl.style.boxShadow = "0 0 10px rgba(220, 53, 69, 0.4)";
         }
 
-        resultEl.innerHTML = "<div style='color: #dc3545;'><strong>" + source + " Error:</strong> " + message + "</div>";
+        resultEl.innerHTML = "<div style='color: #dc3545;'><strong>" + escapeHtml(source) + " Error:</strong> " + escapeHtml(message) + "</div>";
+
+        // Nothing was found, so there is nothing to update
+        var updateCard = document.getElementById("status-update-card");
+        if (updateCard) {
+            updateCard.style.display = "none";
+        }
+        currentPackage = null;
     }
 
-    function handleNotFound(f20Identifier, source, customReason) {
-        var cleanInput = (f20Identifier || "").trim().toUpperCase();
-        var reasonText = customReason || ("Package code \"" + cleanInput + "\" was not found at standard endpoint.");
-
-        resultEl.textContent = source + " -> " + reasonText + " Searching all package records for a match...";
-        CourierApp.toast.error("Package \"" + cleanInput + "\" not found. Searching alternative records...");
-
-        // Search across package list dynamically without hardcoded names/data
-        CourierApp.api.get("/packages").then(function (packages) {
-            var match = null;
-
-            if (Array.isArray(packages)) {
-                match = packages.find(function (p) {
-                    var identifier = (p.f20Identifier || p.packageId || p.code || "").toString().toUpperCase();
-                    return identifier === cleanInput;
-                });
-            }
-
-            if (match) {
-                resultEl.textContent = source + " (Matched via Search) -> " + JSON.stringify(match, null, 2);
-                CourierApp.toast.success("Matching package details found!");
-
-                // Play sound and render formatted UI:
-                renderPackageUI(match, source, true);
-            } else {
-                resultEl.textContent = source + " -> No matching package code found for \"" + cleanInput + "\".";
-                CourierApp.toast.error("No matching package found.");
-
-                // Play error tone and highlight card in red:
-                renderErrorUI(source, "No matching package code found for \"" + cleanInput + "\".");
-            }
-        }, function () {
-            resultEl.textContent = source + " -> Search lookup failed completely for \"" + cleanInput + "\".";
-
-            // Play error tone and highlight card in red:
-            renderErrorUI(source, "Search lookup failed completely for \"" + cleanInput + "\".");
-        });
+    function showNotFound(cleanInput, source) {
+        var message = "No package was found for \"" + cleanInput + "\".";
+        CourierApp.toast.error(message);
+        renderErrorUI(source, message);
     }
 
+    // Both the USB scanner and the camera end up here (IR-007): they only differ in how the text arrived.
     function lookup(f20Identifier, source) {
         var cleanInput = (f20Identifier || "").trim().toUpperCase();
         resultEl.textContent = "Looking up " + cleanInput + " (via " + source + ")...";
 
-        CourierApp.api.get("/packages/scan/" + encodeURIComponent(cleanInput)).then(function (pkg) {
-            // Get the actual identifier returned from the response
-            var returnedId = ((pkg && (pkg.f20Identifier || pkg.packageId || pkg.code)) || "").toString().toUpperCase();
+        // silent: this screen reports the outcome itself, so the wrapper must not also toast
+        CourierApp.api.get("/packages/scan/" + encodeURIComponent(cleanInput), { silent: true }).then(function (pkg) {
+            var returnedId = ((pkg && pkg.f20Identifier) || "").toString().toUpperCase();
 
-            // Fallback if backend indicates missing package or returned mismatched dummy data
-            if (!pkg || pkg.success === false || pkg.notFound || pkg.error || (returnedId && returnedId !== cleanInput)) {
-                handleNotFound(cleanInput, source);
+            if (!pkg || pkg.error || (returnedId && returnedId !== cleanInput)) {
+                showNotFound(cleanInput, source);
                 return;
             }
 
-            resultEl.textContent = source + " -> " + JSON.stringify(pkg, null, 2);
             CourierApp.toast.success("Found " + cleanInput + " (" + source + ")");
-
-            // Play success beep and highlight card in green:
             renderPackageUI(pkg, source, false);
-        }, function () {
-            handleNotFound(cleanInput, source);
+        }, function (failure) {
+            // Only a 404 means "no such package". Anything else (not logged in, server trouble) says what really happened.
+            if (failure && failure.status === 404) {
+                showNotFound(cleanInput, source);
+                return;
+            }
+
+            var message = (failure && failure.error && failure.error.message) || "Could not look that package up. Please try again.";
+            CourierApp.toast.error(message);
+            renderErrorUI(source, message);
         });
     }
 
@@ -256,31 +280,51 @@
         });
     }
 
-    // State machine matching seed data statuses
-    // State machine matching both PascalCase ("ReadyForCollection") and spaced formats ("Ready for Collection")
-    var VALID_TRANSITIONS = {
-        "REGISTERED": ["INSTORAGE", "RECEIVED"],
-        "INSTORAGE": ["READYFORCOLLECTION", "INTRANSIT"],
-        "RECEIVED": ["INSTORAGE", "READYFORCOLLECTION"],
-        "INTRANSIT": ["READYFORCOLLECTION", "OUTFORDELIVERY"],
-        "READYFORCOLLECTION": ["COLLECTED", "DELIVERED", "RETURNED"],
-        "OUTFORDELIVERY": ["COLLECTED", "FAILEDDELIVERY"],
-        "COLLECTED": [],
-        "DELIVERED": [],
-        "RETURNED": []
-    };
+    // ---------------------------------------------------------------------
+    // Status update (T19): moves the scanned package to its next status with
+    // POST /api/packages/{id}/status. The server decides whether the move is
+    // allowed (DR-009); the dropdown only offers the next step so staff don't
+    // have to guess.
+    // ---------------------------------------------------------------------
 
-    var ALL_STATUSES = [
-        "Registered",
-        "In Storage",
-        "Received",
-        "In Transit",
-        "ReadyForCollection",
-        "Out for Delivery",
-        "Collected",
-        "Returned",
-        "Failed Delivery"
-    ];
+    var storageLocations = null;
+
+    function ensureStorageLocations(done) {
+        if (storageLocations) {
+            done();
+            return;
+        }
+
+        CourierApp.api.get("/storage-locations", { silent: true }).then(function (list) {
+            storageLocations = Array.isArray(list) ? list : [];
+            done();
+        }, function () {
+            storageLocations = [];
+            done();
+        });
+    }
+
+    function fillLocationOptions(selectedId) {
+        var select = document.getElementById("location-select");
+        if (!select) return;
+
+        select.innerHTML = "";
+
+        var keep = document.createElement("option");
+        keep.value = "";
+        keep.textContent = "(keep current location)";
+        select.appendChild(keep);
+
+        storageLocations.forEach(function (location) {
+            var option = document.createElement("option");
+            option.value = location.storageLocationId;
+            option.textContent = location.code;
+            if (selectedId != null && location.storageLocationId === selectedId) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    }
 
     function setupStatusUpdateUI(pkg) {
         if (!pkg) return;
@@ -288,126 +332,88 @@
         currentPackage = pkg;
         var updateCard = document.getElementById("status-update-card");
         var statusSelect = document.getElementById("status-select");
-        var locationInput = document.getElementById("location-input");
+        var noteEl = document.getElementById("status-update-note");
+        var confirmButton = document.getElementById("confirm-status-update");
 
-        // Exit quietly if DOM elements are missing from the page
-        if (!updateCard || !statusSelect || !locationInput) {
-            console.warn("Status update card elements not found in DOM.");
+        if (!updateCard || !statusSelect) {
             return;
         }
 
-        // Safely extract status and normalize it (handles null/undefined)
-        var rawStatus = (pkg.status || pkg.Status || "Received").toString();
-        var currentStatusNormalized = rawStatus.replace(/\s+/g, "").toUpperCase();
-
-        // Retrieve allowed next transitions
-        var allowedNextNormalized = VALID_TRANSITIONS[currentStatusNormalized] || [];
+        var current = canonicalStatus(pkg.status);
+        var next = current ? NEXT_STATUS[current] : [];
 
         statusSelect.innerHTML = "";
-
-        ALL_STATUSES.forEach(function (st) {
-            var opt = document.createElement("option");
-            opt.value = st;
-            opt.textContent = st;
-
-            var stNormalized = st.replace(/\s+/g, "").toUpperCase();
-
-            var isCurrent = (stNormalized === currentStatusNormalized);
-            var isValidNext = (allowedNextNormalized.indexOf(stNormalized) !== -1);
-
-            if (!isCurrent && !isValidNext) {
-                opt.disabled = true;
-            }
-
-            if (isCurrent) {
-                opt.selected = true;
-            }
-
-            statusSelect.appendChild(opt);
+        next.forEach(function (name) {
+            var option = document.createElement("option");
+            option.value = name;
+            option.textContent = STATUS_LABELS[name];
+            statusSelect.appendChild(option);
         });
 
-        // Safely assign storage location value
-        locationInput.value = pkg.storageLocation || pkg.location || pkg.StorageLocation || "";
+        var canUpdate = next.length > 0;
+        statusSelect.disabled = !canUpdate;
+        if (confirmButton) confirmButton.disabled = !canUpdate;
 
-        // Unhide the update section
-        updateCard.style.display = "block";
-    }
-
-    // Handle the "Confirm Update" button click
-    var confirmBtn = document.getElementById("confirm-status-update") || document.getElementById("update-status-btn");
-
-    if (confirmBtn) {
-        // Clone to remove stale/duplicate event listeners
-        var newBtn = confirmBtn.cloneNode(true);
-        if (confirmBtn.parentNode) {
-            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        if (noteEl) {
+            noteEl.textContent = !current ? "This package has a status this screen doesn't recognise."
+                : current === "ReadyForCollection" ? "Ready for collection. It is handed over on the Collection screen."
+                : current === "Collected" ? "This package has already been collected."
+                : "";
         }
-        confirmBtn = newBtn;
 
-        confirmBtn.addEventListener("click", function (e) {
-            // Prevent default form submission reload
-            if (e && e.preventDefault) {
-                e.preventDefault();
-            }
-
-            console.log("Confirm button clicked. Processing status update...");
-
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = "Updating...";
-
-            try {
-                // Check current package context
-                if (typeof currentPackage === "undefined" || !currentPackage) {
-                    alert("Please scan or load a package before confirming an update.");
-                    return;
-                }
-
-                var packageId = currentPackage.f20Identifier || currentPackage.packageId || currentPackage.code || currentPackage.id;
-                var statusSelect = document.getElementById("status-select");
-                var locationInput = document.getElementById("location-input");
-
-                var newStatus = statusSelect ? statusSelect.value : "";
-                var newLocation = locationInput ? locationInput.value.trim() : "";
-
-                // Update local state object
-                currentPackage.status = newStatus;
-                currentPackage.storageLocation = newLocation;
-
-                console.log("Updating package " + packageId + " -> Status: " + newStatus + ", Location: " + newLocation);
-
-                // Re-render package UI with updated values
-                if (typeof renderPackageUI === "function") {
-                    renderPackageUI(currentPackage, "Status Update", false);
-                }
-
-                // Append confirmation message to result container
-                var targetResultEl = document.getElementById("scan-result") || document.getElementById("result");
-                if (targetResultEl) {
-                    var confirmMsg = document.createElement("div");
-                    confirmMsg.className = "alert alert-success mt-2";
-                    confirmMsg.style.color = "#155724";
-                    confirmMsg.style.backgroundColor = "#d4edda";
-                    confirmMsg.style.padding = "8px 12px";
-                    confirmMsg.style.borderRadius = "4px";
-                    confirmMsg.style.marginTop = "10px";
-                    confirmMsg.textContent = "✓ Status successfully updated to \"" + newStatus + "\" (Location: " + (newLocation || "N/A") + ")";
-                    targetResultEl.appendChild(confirmMsg);
-                }
-
-                if (typeof CourierApp !== "undefined" && CourierApp.toast) {
-                    CourierApp.toast.success("Package status updated successfully!");
-                }
-
-            } catch (err) {
-                console.error("Error updating status:", err);
-                alert("An error occurred during update: " + err.message);
-            } finally {
-                // ALWAYS restore button state regardless of success or failure
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = "Confirm Update";
-            }
+        updateCard.style.display = "block";
+        ensureStorageLocations(function () {
+            fillLocationOptions(pkg.storageLocationId);
         });
     }
+
+    var confirmStatusButton = document.getElementById("confirm-status-update");
+
+    if (confirmStatusButton) {
+        confirmStatusButton.addEventListener("click", function () {
+            if (!currentPackage) {
+                CourierApp.toast.error("Scan a package first.");
+                return;
+            }
+
+            var packageId = currentPackage.f20Identifier || currentPackage.packageId;
+            var statusSelect = document.getElementById("status-select");
+            var locationSelect = document.getElementById("location-select");
+            var newStatus = statusSelect ? statusSelect.value : "";
+
+            if (!newStatus) {
+                return;
+            }
+
+            var body = { newStatus: newStatus };
+            if (locationSelect && locationSelect.value) {
+                body.storageLocationId = parseInt(locationSelect.value, 10);
+            }
+
+            confirmStatusButton.disabled = true;
+            confirmStatusButton.textContent = "Updating...";
+
+            CourierApp.api.post("/packages/" + encodeURIComponent(packageId) + "/status", body).then(function (updated) {
+                // The real API returns the whole updated record. Mock mode returns a stub, so fall back to what we know.
+                var record = (updated && updated.f20Identifier)
+                    ? updated
+                    : Object.assign({}, currentPackage, { status: (updated && updated.status) || newStatus });
+
+                CourierApp.toast.success("Status updated to " + statusLabel(record.status) + ".");
+                renderPackageUI(record, "Status Update", false);
+            }, function (failure) {
+                // CourierApp.api has already shown the server's reason (for example why that move isn't allowed).
+                // If someone else changed the package first (409), reload it so the options match what is true now.
+                if (failure && failure.status === 409) {
+                    lookup(packageId, "Reload");
+                }
+            }).then(function () {
+                confirmStatusButton.textContent = "Confirm Update";
+                confirmStatusButton.disabled = !statusSelect || statusSelect.options.length === 0;
+            });
+        });
+    }
+
     function stopScanning() {
         if (!html5QrCode) {
             return;
