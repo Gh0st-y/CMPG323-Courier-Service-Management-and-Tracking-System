@@ -125,6 +125,26 @@ namespace CourierService.Tests.Packages
             public IEnumerable<AuditLogEntry> GetRecent(int take) { return Entries.Take(take); }
         }
 
+        private sealed class FakeStorageLocationRepository : IStorageLocationRepository
+        {
+            public Dictionary<int, StorageLocation> Locations { get; } = new Dictionary<int, StorageLocation>();
+            public int GetByIdCalls { get; private set; }
+
+            public IEnumerable<StorageLocation> GetAll(bool activeOnly = true)
+            {
+                return Locations.Values.Where(l => !activeOnly || l.IsActive);
+            }
+
+            public StorageLocation GetById(int storageLocationId)
+            {
+                GetByIdCalls++;
+                StorageLocation location;
+                return Locations.TryGetValue(storageLocationId, out location) ? location : null;
+            }
+
+            public int Insert(StorageLocation location, IUnitOfWork unitOfWork = null) { throw new NotSupportedException(); }
+        }
+
         private sealed class FakeListener : IPackageStatusChangeListener
         {
             private readonly List<string> _events;
@@ -151,6 +171,7 @@ namespace CourierService.Tests.Packages
         private List<string> _events;
         private FakePackageRepository _packages;
         private FakeHistoryRepository _history;
+        private FakeStorageLocationRepository _locations;
         private FakeAuditLogRepository _auditRepository;
         private FakeUnitOfWorkFactory _unitOfWorkFactory;
         private FakeListener _listener;
@@ -162,6 +183,9 @@ namespace CourierService.Tests.Packages
             _events = new List<string>();
             _packages = new FakePackageRepository(_events);
             _history = new FakeHistoryRepository(_events);
+            _locations = new FakeStorageLocationRepository();
+            _locations.Locations[5] = new StorageLocation { StorageLocationId = 5, Code = "Shelf A-3", IsActive = true };
+            _locations.Locations[6] = new StorageLocation { StorageLocationId = 6, Code = "Old Store Room", IsActive = false };
             _auditRepository = new FakeAuditLogRepository(_events);
             _unitOfWorkFactory = new FakeUnitOfWorkFactory(_events);
             _listener = new FakeListener(_events);
@@ -173,7 +197,7 @@ namespace CourierService.Tests.Packages
         private PackageStatusService NewService(params IPackageStatusChangeListener[] listeners)
         {
             return new PackageStatusService(
-                _packages, _history, new AuditLogger(_auditRepository), _unitOfWorkFactory, listeners);
+                _packages, _history, _locations, new AuditLogger(_auditRepository), _unitOfWorkFactory, listeners);
         }
 
         private static Package APackage(PackageStatus status)
@@ -470,6 +494,64 @@ namespace CourierService.Tests.Packages
         }
 
         [TestMethod]
+        public void UnknownStorageLocation_IsRejectedAsInvalidInput_AndNothingIsWritten()
+        {
+            var result = _service.ChangeStatus("F20-0004", PackageStatus.InStorage, 99, UserId);
+
+            Assert.AreEqual(StatusChangeOutcome.InvalidInput, result.Outcome);
+            Assert.AreEqual("ValidationError", result.ErrorCode);
+            Assert.AreEqual(0, _unitOfWorkFactory.Started.Count);
+            Assert.AreEqual(0, _packages.TryUpdateCalls);
+            Assert.AreEqual(0, _history.Entries.Count);
+        }
+
+        [TestMethod]
+        public void RetiredStorageLocation_IsRejected()
+        {
+            var result = _service.ChangeStatus("F20-0004", PackageStatus.InStorage, 6, UserId);
+
+            Assert.AreEqual(StatusChangeOutcome.InvalidInput, result.Outcome);
+            Assert.AreEqual(0, _packages.TryUpdateCalls);
+        }
+
+        [TestMethod]
+        public void StorageLocation_IsOnlyCheckedWhenOneIsGiven()
+        {
+            _service.ChangeStatus("F20-0004", PackageStatus.InStorage, null, UserId);
+
+            Assert.AreEqual(0, _locations.GetByIdCalls);
+        }
+
+        [TestMethod]
+        public void InvalidTransition_IsReportedBeforeAStorageLocationIsLookedAt()
+        {
+            // Registered -> Collected is not allowed. That is the real problem, so that is what gets reported.
+            var result = _service.ChangeStatus("F20-0004", PackageStatus.Collected, 99, UserId);
+
+            Assert.AreEqual(StatusChangeOutcome.InvalidTransition, result.Outcome);
+        }
+
+        [TestMethod]
+        public void Collecting_RecordsTheVerifier_SeparatelyFromWhoProcessedIt()
+        {
+            _packages.Existing = APackage(PackageStatus.ReadyForCollection);
+
+            _service.ChangeStatus("F20-0004", PackageStatus.Collected, null, UserId, null, collectedByUserId: 77);
+
+            Assert.AreEqual(77, _packages.LastCollectedByUserId, "The package records who verified the collector.");
+            Assert.AreEqual(UserId, _history.Entries.Single().ChangedByUserId, "History records who processed it.");
+            Assert.AreEqual(UserId, _auditRepository.Entries.Single().UserId, "The audit log records who processed it.");
+        }
+
+        [TestMethod]
+        public void TheVerifier_IsIgnoredForAnythingOtherThanACollection()
+        {
+            _service.ChangeStatus("F20-0004", PackageStatus.InStorage, null, UserId, null, collectedByUserId: 77);
+
+            Assert.IsNull(_packages.LastCollectedByUserId);
+        }
+
+        [TestMethod]
         public void NoStorageLocation_IsPassedAsNull_SoTheExistingOneIsKept()
         {
             _service.ChangeStatus("F20-0004", PackageStatus.InStorage, null, UserId);
@@ -537,10 +619,11 @@ namespace CourierService.Tests.Packages
         {
             var audit = new AuditLogger(_auditRepository);
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(null, _history, audit, _unitOfWorkFactory));
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, null, audit, _unitOfWorkFactory));
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, _history, null, _unitOfWorkFactory));
-            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, _history, audit, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(null, _history, _locations, audit, _unitOfWorkFactory));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, null, _locations, audit, _unitOfWorkFactory));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, _history, _locations, null, _unitOfWorkFactory));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, _history, _locations, audit, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new PackageStatusService(_packages, _history, null, audit, _unitOfWorkFactory));
         }
 
         // Starts every case from a clean slate when a test loops over many pairs

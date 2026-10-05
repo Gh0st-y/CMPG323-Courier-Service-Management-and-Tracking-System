@@ -21,7 +21,8 @@ namespace CourierService.Data.Repositories
             p.CreatedAtUtc, p.CollectedAtUtc, p.CollectedByUserId, p.RowVersion,
             r.RecipientId AS R_RecipientId, r.FullName AS R_FullName, r.IdentifierNo AS R_IdentifierNo,
             r.Email AS R_Email, r.PhoneNumber AS R_PhoneNumber, r.Department AS R_Department,
-            r.CreatedAtUtc AS R_CreatedAtUtc";
+            r.CreatedAtUtc AS R_CreatedAtUtc,
+            sl.Code AS SL_Code";
 
         private readonly IDbConnectionFactory _connectionFactory;
 
@@ -36,6 +37,7 @@ namespace CourierService.Data.Repositories
                 SELECT " + SelectColumns + @"
                 FROM dbo.Packages p
                 INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId
+                LEFT JOIN dbo.StorageLocations sl ON sl.StorageLocationId = p.StorageLocationId
                 WHERE p.F20Identifier = @F20Identifier;";
 
             using (var connection = _connectionFactory.CreateOpenConnection())
@@ -57,6 +59,7 @@ namespace CourierService.Data.Repositories
                 SELECT " + SelectColumns + @"
                 FROM dbo.Packages p
                 INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId
+                LEFT JOIN dbo.StorageLocations sl ON sl.StorageLocationId = p.StorageLocationId
                 WHERE p.PackageId = @PackageId;";
 
             using (var connection = _connectionFactory.CreateOpenConnection())
@@ -164,7 +167,8 @@ namespace CourierService.Data.Repositories
 
             const string fromClause = @"
                 FROM dbo.Packages p
-                INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId";
+                INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId
+                LEFT JOIN dbo.StorageLocations sl ON sl.StorageLocationId = p.StorageLocationId";
 
             using (var connection = _connectionFactory.CreateOpenConnection())
             {
@@ -257,6 +261,7 @@ namespace CourierService.Data.Repositories
                 PaymentStatus = record.GetString(record.GetOrdinal("PaymentStatus")),
                 Status = (PackageStatus)Enum.Parse(typeof(PackageStatus), record.GetString(record.GetOrdinal("Status"))),
                 StorageLocationId = GetNullableInt(record, "StorageLocationId"),
+                StorageLocationCode = GetNullableString(record, "SL_Code"),
                 Notes = GetNullableString(record, "Notes"),
                 CreatedByUserId = record.GetInt32(record.GetOrdinal("CreatedByUserId")),
                 CreatedAtUtc = record.GetDateTime(record.GetOrdinal("CreatedAtUtc")),

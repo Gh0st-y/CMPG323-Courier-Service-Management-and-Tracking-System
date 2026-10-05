@@ -15,6 +15,7 @@ namespace CourierService.Services.Packages
 
         private readonly IPackageRepository _packages;
         private readonly IPackageStatusHistoryRepository _history;
+        private readonly IStorageLocationRepository _storageLocations;
         private readonly IAuditLogger _auditLogger;
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IReadOnlyList<IPackageStatusChangeListener> _listeners;
@@ -22,17 +23,20 @@ namespace CourierService.Services.Packages
         public PackageStatusService(
             IPackageRepository packages,
             IPackageStatusHistoryRepository history,
+            IStorageLocationRepository storageLocations,
             IAuditLogger auditLogger,
             IUnitOfWorkFactory unitOfWorkFactory,
             IEnumerable<IPackageStatusChangeListener> listeners = null)
         {
             if (packages == null) throw new ArgumentNullException(nameof(packages));
             if (history == null) throw new ArgumentNullException(nameof(history));
+            if (storageLocations == null) throw new ArgumentNullException(nameof(storageLocations));
             if (auditLogger == null) throw new ArgumentNullException(nameof(auditLogger));
             if (unitOfWorkFactory == null) throw new ArgumentNullException(nameof(unitOfWorkFactory));
 
             _packages = packages;
             _history = history;
+            _storageLocations = storageLocations;
             _auditLogger = auditLogger;
             _unitOfWorkFactory = unitOfWorkFactory;
             _listeners = (listeners ?? Enumerable.Empty<IPackageStatusChangeListener>()).ToList();
@@ -43,7 +47,8 @@ namespace CourierService.Services.Packages
             PackageStatus newStatus,
             int? storageLocationId,
             int changedByUserId,
-            string notes = null)
+            string notes = null,
+            int? collectedByUserId = null)
         {
             if (string.IsNullOrWhiteSpace(f20Identifier))
             {
@@ -71,8 +76,21 @@ namespace CourierService.Services.Packages
                 return StatusChangeResult.InvalidTransition(package.F20Identifier, from, newStatus);
             }
 
+            // A location that doesn't exist (or is retired) would otherwise surface as a database error
+            if (storageLocationId.HasValue)
+            {
+                var location = _storageLocations.GetById(storageLocationId.Value);
+                if (location == null || !location.IsActive)
+                {
+                    return StatusChangeResult.InvalidInput(
+                        package.F20Identifier, newStatus, "That storage location doesn't exist or is no longer in use.");
+                }
+            }
+
             var changedAtUtc = DateTime.UtcNow;
-            var collectedBy = newStatus == PackageStatus.Collected ? changedByUserId : (int?)null;
+
+            // For a collection: who verified the collector's identity. Usually the same person who is processing it.
+            var collectedBy = newStatus == PackageStatus.Collected ? (collectedByUserId ?? changedByUserId) : (int?)null;
 
             // Everything below shares one transaction. If we leave this block without reaching Commit(), including
             // by an exception, Dispose() rolls the lot back (DR-010).

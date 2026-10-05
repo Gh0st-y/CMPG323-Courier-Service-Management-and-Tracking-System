@@ -11,12 +11,15 @@ namespace CourierService.Services.Packages
         /// all come back as a <see cref="StatusChangeResult"/> that isn't a success, not as exceptions.
         /// </summary>
         /// <param name="storageLocationId">Optional. Leaves the current location alone when null.</param>
-        /// <param name="changedByUserId">Who is doing it. Goes on the history row and the audit entry, and on the package when it's collected.</param>
+        /// <param name="changedByUserId">The staff member processing the change. Goes on the history row and the audit entry.</param>
+        /// <param name="collectedByUserId">Only used when collecting: the staff member who verified the collector's identity
+        /// (recorded on the package). Defaults to <paramref name="changedByUserId"/>.</param>
         StatusChangeResult ChangeStatus(
             string f20Identifier,
             PackageStatus newStatus,
             int? storageLocationId,
             int changedByUserId,
-            string notes = null);
+            string notes = null,
+            int? collectedByUserId = null);
     }
 }

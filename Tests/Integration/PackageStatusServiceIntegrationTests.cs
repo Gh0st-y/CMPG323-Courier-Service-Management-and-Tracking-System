@@ -91,6 +91,7 @@ namespace CourierService.Tests.Integration
             return new PackageStatusService(
                 packages ?? _packages,
                 _history,
+                new StorageLocationRepository(_connectionFactory),
                 new AuditLogger(new AuditLogRepository(_connectionFactory)),
                 _unitOfWorkFactory,
                 listeners);
@@ -406,6 +407,120 @@ namespace CourierService.Tests.Integration
 
             service.ChangeStatus(package.F20Identifier, PackageStatus.ReadyForCollection, shelfB, _userId);
             Assert.AreEqual(shelfB, _packages.GetById(package.PackageId).StorageLocationId, "A location was given, so use it.");
+        }
+
+        // ---- T19 / T20 ------------------------------------------------------------------------
+
+        private int SeedVerifier()
+        {
+            return Scalar(@"
+                DECLARE @RoleId INT = (SELECT TOP (1) RoleId FROM dbo.Roles WHERE RoleName = 'Supervisor');
+                DECLARE @Existing INT = (SELECT UserId FROM dbo.Users WHERE Username = 'test.verifier.user');
+                IF @Existing IS NOT NULL SELECT @Existing;
+                ELSE
+                BEGIN
+                    INSERT INTO dbo.Users (Username, Email, PasswordHash, RoleId)
+                    VALUES ('test.verifier.user', 'test-verifier@f20.local', 'not-a-real-hash', @RoleId);
+                    SELECT CAST(SCOPE_IDENTITY() AS int);
+                END");
+        }
+
+        [TestMethod]
+        public void Lookup_ReturnsTheStorageLocationCode_AndTheRecipient()
+        {
+            var locationId = CreateLocation();
+            var code = new StorageLocationRepository(_connectionFactory).GetById(locationId).Code;
+            var package = CreatePackage(PackageStatus.InStorage, locationId);
+
+            var found = new PackageLookupService(_packages).Find("  " + package.F20Identifier + "\r\n");
+
+            Assert.IsNotNull(found);
+            Assert.AreEqual(package.PackageId, found.PackageId);
+            Assert.AreEqual(code, found.StorageLocationCode);
+            Assert.AreEqual("Status Test Recipient", found.Recipient.FullName);
+        }
+
+        [TestMethod]
+        public void Lookup_ForAPackageWithNoLocation_HasANullCode_NotAnError()
+        {
+            var package = CreatePackage(PackageStatus.Registered);
+
+            var found = new PackageLookupService(_packages).Find(package.F20Identifier);
+
+            Assert.IsNotNull(found);
+            Assert.IsNull(found.StorageLocationId);
+            Assert.IsNull(found.StorageLocationCode);
+        }
+
+        [TestMethod]
+        public void Lookup_OfAnUnknownOrMalformedCode_IsNull_NotAnException()
+        {
+            var service = new PackageLookupService(_packages);
+
+            Assert.IsNull(service.Find("TEST-DOES-NOT-EXIST"));
+            Assert.IsNull(service.Find("x'; DROP TABLE dbo.Packages;--"));
+        }
+
+        [TestMethod]
+        public void Collecting_RecordsTheVerifier_TheProcessor_AndTheTime_Together()
+        {
+            var verifierId = SeedVerifier();
+            var package = CreatePackage(PackageStatus.ReadyForCollection);
+            var collection = new PackageCollectionService(NewService(), _packages, new UserRepository(_connectionFactory));
+
+            var result = collection.Collect(package.F20Identifier, _userId, verifierId);
+
+            Assert.IsTrue(result.Success);
+
+            var after = _packages.GetById(package.PackageId);
+            Assert.AreEqual(PackageStatus.Collected, after.Status);
+            Assert.AreEqual(verifierId, after.CollectedByUserId, "The package records who verified the collector.");
+            Assert.AreEqual(after.CollectedAtUtc, result.CollectedAtUtc, "The time reported is the time stored.");
+
+            var history = _history.GetByPackageId(package.PackageId).Single();
+            Assert.AreEqual(_userId, history.ChangedByUserId, "History records who processed it.");
+            Assert.AreEqual(1, AuditCount(package.F20Identifier));
+        }
+
+        [TestMethod]
+        public void Collecting_ThatIsNotReadyForCollection_ChangesNothing()
+        {
+            var package = CreatePackage(PackageStatus.InStorage);
+            var collection = new PackageCollectionService(NewService(), _packages, new UserRepository(_connectionFactory));
+
+            var result = collection.Collect(package.F20Identifier, _userId);
+
+            Assert.AreEqual(StatusChangeOutcome.InvalidTransition, result.Change.Outcome);
+            Assert.AreEqual("Package cannot move to Collected from In Storage.", result.Change.Message);
+
+            var after = _packages.GetById(package.PackageId);
+            Assert.AreEqual(PackageStatus.InStorage, after.Status);
+            Assert.IsNull(after.CollectedAtUtc);
+            Assert.IsNull(after.CollectedByUserId);
+            Assert.AreEqual(0, _history.GetByPackageId(package.PackageId).Count());
+        }
+
+        [TestMethod]
+        public void Collecting_WithAVerifierWhoDoesNotExist_IsRejected_NotADatabaseError()
+        {
+            var package = CreatePackage(PackageStatus.ReadyForCollection);
+            var collection = new PackageCollectionService(NewService(), _packages, new UserRepository(_connectionFactory));
+
+            var result = collection.Collect(package.F20Identifier, _userId, 2000000000);
+
+            Assert.AreEqual(StatusChangeOutcome.InvalidInput, result.Change.Outcome);
+            Assert.AreEqual(PackageStatus.ReadyForCollection, _packages.GetById(package.PackageId).Status);
+        }
+
+        [TestMethod]
+        public void ChangingStatus_WithAStorageLocationThatDoesNotExist_IsRejected_NotADatabaseError()
+        {
+            var package = CreatePackage(PackageStatus.Registered);
+
+            var result = NewService().ChangeStatus(package.F20Identifier, PackageStatus.InStorage, 2000000000, _userId);
+
+            Assert.AreEqual(StatusChangeOutcome.InvalidInput, result.Outcome);
+            Assert.AreEqual(PackageStatus.Registered, _packages.GetById(package.PackageId).Status);
         }
     }
 }

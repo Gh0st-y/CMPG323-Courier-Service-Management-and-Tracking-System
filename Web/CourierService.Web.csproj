@@ -63,13 +63,18 @@
     <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MockController.cs" />
+    <Compile Include="Controllers\PackageActionsController.cs" />
     <Compile Include="Controllers\PackagesController.cs" />
     <Compile Include="Controllers\ScanController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\CourierServices.cs" />
+    <Compile Include="Infrastructure\RequestBody.cs" />
     <Compile Include="Infrastructure\RoleAuthorizeAttribute.cs" />
     <Compile Include="Models\Api\Auth\LoginRequest.cs" />
+    <Compile Include="Models\Api\Packages\CollectRequest.cs" />
+    <Compile Include="Models\Api\Packages\StatusChangeRequest.cs" />
     <Compile Include="Infrastructure\HttpsRedirectModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

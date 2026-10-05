@@ -17,7 +17,10 @@ namespace CourierService.Services.Packages
         /// Someone else changed the package between us reading it and saving. Nothing was written.
         /// The API turns this into a 409; the user should reload and try again.
         /// </summary>
-        ConcurrentUpdate
+        ConcurrentUpdate,
+
+        /// <summary>Something the caller sent is wrong, e.g. a storage location that doesn't exist. The API turns this into a 400.</summary>
+        InvalidInput
     }
 
     /// <summary>What happened to a status change request. Expected business outcomes come back here rather than as exceptions.</summary>
@@ -81,6 +84,18 @@ namespace CourierService.Services.Packages
                 FromStatus = from,
                 ToStatus = to,
                 AllowedNextStatuses = PackageStatusTransitions.AllowedNext(from)
+            };
+        }
+
+        public static StatusChangeResult InvalidInput(string f20Identifier, PackageStatus to, string message)
+        {
+            return new StatusChangeResult
+            {
+                Outcome = StatusChangeOutcome.InvalidInput,
+                ErrorCode = "ValidationError",
+                Message = message,
+                F20Identifier = f20Identifier,
+                ToStatus = to
             };
         }
 
