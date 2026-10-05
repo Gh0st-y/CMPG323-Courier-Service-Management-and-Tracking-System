@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Infrastructure\RoleAuthorizeAttribute.cs" />
     <Compile Include="Models\Api\Auth\LoginRequest.cs" />
+    <Compile Include="Infrastructure\HttpsRedirectModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
