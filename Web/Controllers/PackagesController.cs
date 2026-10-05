@@ -8,6 +8,7 @@ using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
 using CourierService.Domain.Models;
 using CourierService.Domain.Repositories;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
@@ -70,8 +71,8 @@ namespace CourierService.Web.Controllers
             return View(model: id);
         }
 
-        /// <summary>T21: GET /api/packages — JSON data for the Search page above.</summary>
-        // TODO: add [Authorize] once login (FR-01) lands.
+        /// <summary>T21: GET /api/packages — JSON data for the Search page above. Any logged-in user (SR-02).</summary>
+        [RoleAuthorize]
         [HttpGet]
         [Route("api/packages")]
         public ActionResult SearchJson(string query, string status, string dateFrom, string dateTo, int? page, int? pageSize)
