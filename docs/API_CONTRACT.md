@@ -71,7 +71,8 @@ Standard status codes: `400` validation, `401` not authenticated, `403` wrong ro
 ## Audit log (SR-04)
 | Method | Path | Roles | Body → Response |
 |---|---|---|---|
-| GET | `/api/audit-log?user=&action=&dateFrom=&dateTo=&page=` | Supervisor, SystemAdmin | → `{items:[...], totalCount}` |
+| GET | `/api/audit-log?user=&action=&dateFrom=&dateTo=&page=&pageSize=` | Supervisor, SystemAdmin | → `{items:[...], totalCount, page, pageSize}` |
+ `user` is a username (exact match). `dateFrom` and `dateTo` are `yyyy-MM-dd` (UTC) and both days are included. Newest first. `pageSize` defaults to 25, max 100. Each item: `{auditId, userId, username, action, entityType, entityId, detail, context, timestampUtc}`.
 
 ## Config (OR-01)
 | Method | Path | Roles | Body → Response |

@@ -56,7 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
+
     <Compile Include="Controllers\Api\AuthController.cs" />
+    <Compile Include="Controllers\Api\AuditLogController.cs" />
     <Compile Include="Controllers\CollectionController.cs" />
     <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
