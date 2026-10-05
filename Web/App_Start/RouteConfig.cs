@@ -8,6 +8,9 @@ namespace CourierService.Web
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            
+            // Lets controllers declare URLs like [Route("api/packages")]
+            routes.MapMvcAttributeRoutes();
 
             // T12: enables [Route("api/...")] attributes on controllers (AuthController,
             // ScanController). Must come before the conventional routes below.
