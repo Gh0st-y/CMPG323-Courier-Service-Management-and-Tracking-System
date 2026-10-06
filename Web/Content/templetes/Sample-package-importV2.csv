@@ -1,0 +1,201 @@
+TrackingNumber,RecipientName,RecipientEmail,RecipientPhone,Classification,Fee,Status,StorageLocation,DateReceived
+F20-1001,Lerato Mahlangu,lerato.mahlangu@example.com,0781234567,Personal,10.00,Ready for Collection,Shelf A-3,2026-09-15
+F20-1002,Thabo Nkosi,thabo.nkosi@example.com,0829876543,WorkRelated,0.00,In Storage,Shelf B-1,2026-09-18
+F20-1003,Sipho Khumalo,sipho.khumalo@example.com,0614567890,Personal,10.00,Registered,,2026-09-22
+F20-1004,Zanele Mokoena,zanele.mokoena@example.com,0731112233,WorkRelated,0.00,In Storage,Shelf C-2,2026-09-12
+F20-1005,Ahmed Patel,ahmed.patel@example.com,0845556677,Personal,10.00,Collected,,2026-09-10
+F20-1006,Maria Botha,maria.botha@example.com,0718889900,Personal,10.00,Ready for Collection,Shelf A-1,2026-09-21
+F20-1007,Jabulani Zulu,jabulani.zulu@example.com,0834445566,WorkRelated,0.00,In Storage,Shelf B-2,2026-09-19
+F20-1008,Elsie Pretorius,elsie.pretorius@example.com,0657778899,Personal,10.00,Ready for Collection,Shelf A-2,2026-09-17
+F20-1009,Kagiso Molefe,kagiso.molefe@example.com,0723334455,WorkRelated,0.00,Registered,,2026-09-23
+F20-1010,Fatima Khan,fatima.khan@example.com,0791238877,Personal,10.00,Ready for Collection,Shelf B-1,2026-09-16
+F20-1011,Andile Ngcobo,andile.ngcobo@example.com,0814441122,Personal,10.00,Registered,,2026-09-14
+F20-1012,Christine Adams,christine.adams@example.com,0632223344,WorkRelated,0.00,In Storage,Shelf C-1,2026-09-18
+F20-1013,Pieter van Wyk,pieter.vanwyk@example.com,0761110099,Personal,10.00,Ready for Collection,Shelf A-3,2026-09-11
+F20-1014,Naledi Mokoena,naledi.mokoena@example.com,0823334411,Personal,10.00,Registered,,2026-09-25
+F20-1015,Dean Petersen,dean.petersen@example.com,0685554433,WorkRelated,0.00,Collected,,2026-09-08
+F20-1016,Nomvula Sithole,nomvula.sithole@example.com,0716667788,Personal,10.00,In Storage,Shelf B-2,2026-09-19
+F20-1017,Precious Mthembu,precious.mthembu@example.com,0832221100,Personal,10.00,Ready for Collection,Shelf C-2,2026-09-13
+F20-1018,Tebogo Dube,tebogo.dube@example.com,0648889911,WorkRelated,0.00,Registered,,2026-09-20
+F20-1019,Thabo Mahlangu,thabo.mahlangu@example.com,0782223344,Personal,10.00,In Storage,Shelf A-1,2026-09-15
+F20-1020,Lerato Dlamini,lerato.dlamini@example.com,0821114455,WorkRelated,0.00,Ready for Collection,Shelf B-1,2026-09-17
+F20-1021,Sipho Khumalo,sipho.khumalo@example.com,0619998877,Personal,10.00,Registered,,2026-09-09
+F20-1022,Zanele Nkosi,zanele.nkosi@example.com,0734445566,Personal,10.00,In Storage,Shelf C-1,2026-09-22
+F20-1023,Ahmed Patel,ahmed.patel@example.com,0841112233,WorkRelated,0.00,Collected,,2026-09-14
+F20-1024,Maria van Wyk,maria.vanwyk@example.com,0715556677,Personal,10.00,Ready for Collection,Shelf A-2,2026-09-16
+F20-1025,Jabulani Botha,jabulani.botha@example.com,0838889900,WorkRelated,0.00,In Storage,Shelf B-2,2026-09-21
+F20-1026,Elsie Pretorius,elsie.pretorius@example.com,0652223344,Personal,10.00,Registered,,2026-09-24
+F20-1027,Kagiso Molefe,kagiso.molefe@example.com,0726667788,Personal,10.00,Ready for Collection,Shelf C-2,2026-09-10
+F20-1028,Fatima Khan,fatima.khan@example.com,0794445566,WorkRelated,0.00,In Storage,Shelf A-3,2026-09-18
+F20-1029,Andile Ngcobo,andile.ngcobo@example.com,0811112233,Personal,10.00,Registered,,2026-09-12
+F20-1030,Christine Adams,christine.adams@example.com,0635556677,Personal,10.00,Collected,,2026-09-19
+F20-1031,Pieter Petersen,pieter.petersen@example.com,0768889900,WorkRelated,0.00,In Storage,Shelf B-1,2026-09-13
+F20-1032,Naledi Sithole,naledi.sithole@example.com,0822223344,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-26
+F20-1033,Dean Dube,dean.dube@example.com,0686667788,Personal,10.00,Registered,,2026-09-11
+F20-1034,Nomvula Mthembu,nomvula.mthembu@example.com,0714445566,WorkRelated,0.00,In Storage,Shelf A-2,2026-09-15
+F20-1035,Precious Nkosi,precious.nkosi@example.com,0831112233,Personal,10.00,Ready for Collection,Shelf B-2,2026-09-17
+F20-1036,Tebogo Dlamini,tebogo.dlamini@example.com,0645556677,Personal,10.00,Registered,,2026-09-23
+F20-1037,Thabo Mahlangu,thabo.mahlangu@example.com,0788889900,WorkRelated,0.00,Collected,,2026-09-09
+F20-1038,Lerato Khumalo,lerato.khumalo@example.com,0824445566,Personal,10.00,In Storage,Shelf C-2,2026-09-14
+F20-1039,Sipho Mokoena,sipho.mokoena@example.com,0611112233,Personal,10.00,Ready for Collection,Shelf A-1,2026-09-20
+F20-1040,Zanele Patel,zanele.patel@example.com,0735556677,WorkRelated,0.00,Registered,,2026-09-18
+F20-1041,Ahmed Botha,ahmed.botha@example.com,0848889900,Personal,10.00,In Storage,Shelf B-1,2026-09-16
+F20-1042,Maria Zulu,maria.zulu@example.com,0712223344,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-22
+F20-1043,Jabulani Pretorius,jabulani.pretorius@example.com,0836667788,WorkRelated,0.00,Registered,,2026-09-10
+F20-1044,Elsie Molefe,elsie.molefe@example.com,0654445566,Personal,10.00,Collected,,2026-09-25
+F20-1045,Kagiso Khan,kagiso.khan@example.com,0721112233,Personal,10.00,In Storage,Shelf A-3,2026-09-12
+F20-1046,Fatima Ngcobo,fatima.ngcobo@example.com,0795556677,WorkRelated,0.00,Ready for Collection,Shelf B-2,2026-09-19
+F20-1047,Andile Adams,andile.adams@example.com,0818889900,Personal,10.00,Registered,,2026-09-17
+F20-1048,Christine Sithole,christine.sithole@example.com,0632221100,Personal,10.00,In Storage,Shelf C-2,2026-09-21
+F20-1049,Pieter Dube,pieter.dube@example.com,0765554433,WorkRelated,0.00,Ready for Collection,Shelf A-1,2026-09-13
+F20-1050,Naledi Petersen,naledi.petersen@example.com,0828887766,Personal,10.00,Registered,,2026-09-15
+F20-1051,Dean Mthembu,dean.mthembu@example.com,0681112233,Personal,10.00,In Storage,Shelf B-1,2026-09-24
+F20-1052,Nomvula Nkosi,nomvula.nkosi@example.com,0714443322,WorkRelated,0.00,Collected,,2026-09-11
+F20-1053,Precious Dlamini,precious.dlamini@example.com,0837778899,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-18
+F20-1054,Tebogo Mahlangu,tebogo.mahlangu@example.com,0641110099,Personal,10.00,Registered,,2026-09-16
+F20-1055,Thabo Khumalo,thabo.khumalo@example.com,0784445566,WorkRelated,0.00,In Storage,Shelf A-2,2026-09-20
+F20-1056,Lerato Mokoena,lerato.mokoena@example.com,0827778899,Personal,10.00,Ready for Collection,Shelf B-2,2026-09-14
+F20-1057,Sipho Patel,sipho.patel@example.com,0610001122,Personal,10.00,Registered,,2026-09-22
+F20-1058,Zanele Botha,zanele.botha@example.com,0733334455,WorkRelated,0.00,Collected,,2026-09-10
+F20-1059,Ahmed Zulu,ahmed.zulu@example.com,0846667788,Personal,10.00,In Storage,Shelf C-2,2026-09-19
+F20-1060,Maria Pretorius,maria.pretorius@example.com,0719990011,Personal,10.00,Ready for Collection,Shelf A-3,2026-09-17
+F20-1061,Jabulani Molefe,jabulani.molefe@example.com,0832223344,WorkRelated,0.00,Registered,,2026-09-25
+F20-1062,Elsie Khan,elsie.khan@example.com,0655556677,Personal,10.00,In Storage,Shelf B-1,2026-09-12
+F20-1063,Kagiso Ngcobo,kagiso.ngcobo@example.com,0728889900,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-18
+F20-1064,Fatima Adams,fatima.adams@example.com,0791112233,WorkRelated,0.00,Registered,,2026-09-15
+F20-1065,Andile Sithole,andile.sithole@example.com,0814445566,Personal,10.00,Collected,,2026-09-21
+F20-1066,Christine Dube,christine.dube@example.com,0637778899,Personal,10.00,In Storage,Shelf A-1,2026-09-13
+F20-1067,Pieter Petersen,pieter.petersen@example.com,0760001122,WorkRelated,0.00,Ready for Collection,Shelf B-2,2026-09-23
+F20-1068,Naledi Mthembu,naledi.mthembu@example.com,0823334455,Personal,10.00,Registered,,2026-09-16
+F20-1069,Dean Nkosi,dean.nkosi@example.com,0686667788,Personal,10.00,In Storage,Shelf C-2,2026-09-19
+F20-1070,Nomvula Dlamini,nomvula.dlamini@example.com,0719990011,WorkRelated,0.00,Ready for Collection,Shelf A-2,2026-09-14
+F20-1071,Precious Mahlangu,precious.mahlangu@example.com,0832223344,Personal,10.00,Registered,,2026-09-20
+F20-1072,Tebogo Khumalo,tebogo.khumalo@example.com,0645556677,Personal,10.00,Collected,,2026-09-11
+F20-1073,Thabo Mokoena,thabo.mokoena@example.com,0788889900,WorkRelated,0.00,In Storage,Shelf B-1,2026-09-17
+F20-1074,Lerato Patel,lerato.patel@example.com,0821112233,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-24
+F20-1075,Sipho Botha,sipho.botha@example.com,0614445566,Personal,10.00,Registered,,2026-09-12
+F20-1076,Zanele Zulu,zanele.zulu@example.com,0737778899,WorkRelated,0.00,In Storage,Shelf A-3,2026-09-18
+F20-1077,Ahmed Pretorius,ahmed.pretorius@example.com,0840001122,Personal,10.00,Ready for Collection,Shelf B-2,2026-09-15
+F20-1078,Maria Molefe,maria.molefe@example.com,0713334455,Personal,10.00,Registered,,2026-09-21
+F20-1079,Jabulani Khan,jabulani.khan@example.com,0836667788,WorkRelated,0.00,Collected,,2026-09-13
+F20-1080,Elsie Ngcobo,elsie.ngcobo@example.com,0659990011,Personal,10.00,In Storage,Shelf C-2,2026-09-16
+F20-1081,Kagiso Adams,kagiso.adams@example.com,0722223344,Personal,10.00,Ready for Collection,Shelf A-1,2026-09-22
+F20-1082,Fatima Sithole,fatima.sithole@example.com,0795556677,WorkRelated,0.00,Registered,,2026-09-10
+F20-1083,Andile Dube,andile.dube@example.com,0818889900,Personal,10.00,In Storage,Shelf B-1,2026-09-19
+F20-1084,Christine Petersen,christine.petersen@example.com,0631112233,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-14
+F20-1085,Pieter Mthembu,pieter.mthembu@example.com,0764445566,WorkRelated,0.00,Registered,,2026-09-26
+F20-1086,Naledi Nkosi,naledi.nkosi@example.com,0827778899,Personal,10.00,Collected,,2026-09-12
+F20-1087,Dean Dlamini,dean.dlamini@example.com,0680001122,Personal,10.00,In Storage,Shelf A-2,2026-09-18
+F20-1088,Nomvula Mahlangu,nomvula.mahlangu@example.com,0713334455,WorkRelated,0.00,Ready for Collection,Shelf B-2,2026-09-15
+F20-1089,Precious Khumalo,precious.khumalo@example.com,0836667788,Personal,10.00,Registered,,2026-09-20
+F20-1090,Tebogo Mokoena,tebogo.mokoena@example.com,0649990011,Personal,10.00,In Storage,Shelf C-2,2026-09-17
+F20-1091,Thabo Patel,thabo.patel@example.com,0782223344,WorkRelated,0.00,Ready for Collection,Shelf A-3,2026-09-23
+F20-1092,Lerato Botha,lerato.botha@example.com,0825556677,Personal,10.00,Registered,,2026-09-11
+F20-1093,Sipho Zulu,sipho.zulu@example.com,0618889900,Personal,10.00,Collected,,2026-09-16
+F20-1094,Zanele Pretorius,zanele.pretorius@example.com,0731112233,WorkRelated,0.00,In Storage,Shelf B-1,2026-09-21
+F20-1095,Ahmed Molefe,ahmed.molefe@example.com,0844445566,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-14
+F20-1096,Maria Khan,maria.khan@example.com,0717778899,Personal,10.00,Registered,,2026-09-19
+F20-1097,Jabulani Ngcobo,jabulani.ngcobo@example.com,0830001122,WorkRelated,0.00,In Storage,Shelf A-1,2026-09-13
+F20-1098,Elsie Adams,elsie.adams@example.com,0653334455,Personal,10.00,Ready for Collection,Shelf B-2,2026-09-25
+F20-1099,Andile Ngcobo,andile.ngcobo@example.com,0814441122,Personal,10.00,Registered,,2026-09-14
+F20-1100,Christine Adams,christine.adams@example.com,0632223344,WorkRelated,0.00,In Storage,Shelf C-1,2026-09-18
+,Maria Botha,maria.botha@example.com,0718889900,Personal,10.00,Registered,,2026-09-21
+F20-2002,,jabulani.zulu@example.com,0834445566,WorkRelated,0.00,In Storage,Shelf B-2,2026-09-19
+F20-2003,Elsie Pretorius,invalid-email-address,0657778899,Personal,10.00,Ready for Collection,Shelf A-2,2026-09-17
+F20-2004,Kagiso Molefe,kagiso.molefe@example.com,,WorkRelated,0.00,Registered,,2026-09-23
+F20-2005,Fatima Khan,fatima.khan@example.com,0791238877,Personal,-15.00,Ready for Collection,Shelf B-1,2026-09-16
+F20-2006,Andile Ngcobo,andile.ngcobo@example.com,0814441122,Personal,INVALID_FEE,Registered,,2026-09-14
+F20-2007,Christine Adams,christine.adams@example.com,0632223344,WorkRelated,0.00,In Storage,,2026-09-18
+,,,0749990011,Personal,-5.00,Registered,,2026-09-22
+,Pieter van Wyk,pieter.vanwyk@example.com,0761110099,Personal,10.00,Registered,,2026-09-11
+F20-2010,,naledi.mokoena@example.com,0823334411,Personal,10.00,In Storage,Shelf A-3,2026-09-25
+F20-2011,Dean Petersen,bad-email-format,0685554433,WorkRelated,0.00,Ready for Collection,Shelf B-1,2026-09-08
+F20-2012,Nomvula Sithole,nomvula.sithole@example.com,,Personal,10.00,Registered,,2026-09-19
+F20-2013,Precious Mthembu,precious.mthembu@example.com,0832221100,Personal,-20.00,Ready for Collection,Shelf C-2,2026-09-13
+F20-2014,Tebogo Dube,tebogo.dube@example.com,0648889911,WorkRelated,FEE_ERROR,Registered,,2026-09-20
+F20-2015,Thabo Mahlangu,thabo.mahlangu@example.com,0782223344,Personal,10.00,In Storage,,2026-09-15
+,,,0821114455,WorkRelated,-10.00,Registered,,2026-09-17
+,Sipho Khumalo,sipho.khumalo@example.com,0619998877,Personal,10.00,Ready for Collection,Shelf A-1,2026-09-09
+F20-2018,,zanele.nkosi@example.com,0734445566,Personal,10.00,In Storage,Shelf C-1,2026-09-22
+F20-2019,Ahmed Patel,not_an_email,0841112233,WorkRelated,0.00,Collected,,2026-09-14
+F20-2020,Maria van Wyk,maria.vanwyk@example.com,,Personal,10.00,Ready for Collection,Shelf A-2,2026-09-16
+F20-2021,Jabulani Botha,jabulani.botha@example.com,0838889900,WorkRelated,-5.00,In Storage,Shelf B-2,2026-09-21
+F20-2022,Elsie Pretorius,elsie.pretorius@example.com,0652223344,Personal,XYZ,Registered,,2026-09-24
+F20-2023,Kagiso Molefe,kagiso.molefe@example.com,0726667788,Personal,10.00,In Storage,,2026-09-10
+,,,0794445566,WorkRelated,0.00,Registered,,2026-09-18
+,Andile Ngcobo,andile.ngcobo@example.com,0811112233,Personal,10.00,Registered,,2026-09-12
+F20-2026,,christine.adams@example.com,0635556677,Personal,10.00,Collected,,2026-09-19
+F20-2027,Pieter Petersen,invalid-mail,0768889900,WorkRelated,0.00,In Storage,Shelf B-1,2026-09-13
+F20-2028,Naledi Sithole,naledi.sithole@example.com,,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-26
+F20-2029,Dean Dube,dean.dube@example.com,0686667788,Personal,-10.00,Registered,,2026-09-11
+F20-2030,Nomvula Mthembu,nomvula.mthembu@example.com,0714445566,WorkRelated,NO_FEE,In Storage,Shelf A-2,2026-09-15
+F20-2031,Precious Nkosi,precious.nkosi@example.com,0831112233,Personal,10.00,In Storage,,2026-09-17
+,,,0645556677,Personal,-2.50,Registered,,2026-09-23
+,Thabo Mahlangu,thabo.mahlangu@example.com,0788889900,WorkRelated,0.00,Collected,,2026-09-09
+F20-2034,,lerato.khumalo@example.com,0824445566,Personal,10.00,In Storage,Shelf C-2,2026-09-14
+F20-2035,Sipho Mokoena,sipho_at_example.com,0611112233,Personal,10.00,Ready for Collection,Shelf A-1,2026-09-20
+F20-2036,Zanele Patel,zanele.patel@example.com,,WorkRelated,0.00,Registered,,2026-09-18
+F20-2037,Ahmed Botha,ahmed.botha@example.com,0848889900,Personal,-12.00,In Storage,Shelf B-1,2026-09-16
+F20-2038,Maria Zulu,maria.zulu@example.com,0712223344,Personal,ERR,Ready for Collection,Shelf C-1,2026-09-22
+F20-2039,Jabulani Pretorius,jabulani.pretorius@example.com,0836667788,WorkRelated,0.00,In Storage,,2026-09-10
+,,,0654445566,Personal,-15.00,Collected,,2026-09-25
+,Kagiso Khan,kagiso.khan@example.com,0721112233,Personal,10.00,In Storage,Shelf A-3,2026-09-12
+F20-2042,,fatima.ngcobo@example.com,0795556677,WorkRelated,0.00,Ready for Collection,Shelf B-2,2026-09-19
+F20-2043,Andile Adams,andile.adams_at_domain,0818889900,Personal,10.00,Registered,,2026-09-17
+F20-2044,Christine Sithole,christine.sithole@example.com,,Personal,10.00,In Storage,Shelf C-2,2026-09-21
+F20-2045,Pieter Dube,pieter.dube@example.com,0765554433,WorkRelated,-8.00,Ready for Collection,Shelf A-1,2026-09-13
+F20-2046,Naledi Petersen,naledi.petersen@example.com,0828887766,Personal,BAD,Registered,,2026-09-15
+F20-2047,Dean Mthembu,dean.mthembu@example.com,0681112233,Personal,10.00,In Storage,,2026-09-24
+,,,0714443322,WorkRelated,0.00,Collected,,2026-09-11
+,Precious Dlamini,precious.dlamini@example.com,0837778899,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-18
+F20-2050,,tebogo.mahlangu@example.com,0641110099,Personal,10.00,Registered,,2026-09-16
+F20-2051,Thabo Khumalo,plainaddress,0784445566,WorkRelated,0.00,In Storage,Shelf A-2,2026-09-20
+F20-2052,Lerato Mokoena,lerato.mokoena@example.com,,Personal,10.00,Ready for Collection,Shelf B-2,2026-09-14
+F20-2053,Sipho Patel,sipho.patel@example.com,0610001122,Personal,-10.00,Registered,,2026-09-22
+F20-2054,Zanele Botha,zanele.botha@example.com,0733334455,WorkRelated,INVALID,Collected,,2026-09-10
+F20-2055,Ahmed Zulu,ahmed.zulu@example.com,0846667788,Personal,10.00,In Storage,,2026-09-19
+,,,0719990011,Personal,-20.00,Ready for Collection,Shelf A-3,2026-09-17
+,Jabulani Molefe,jabulani.molefe@example.com,0832223344,WorkRelated,0.00,Registered,,2026-09-25
+F20-2058,,elsie.khan@example.com,0655556677,Personal,10.00,In Storage,Shelf B-1,2026-09-12
+F20-2059,Kagiso Ngcobo,@example.com,0728889900,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-18
+F20-2060,Fatima Adams,fatima.adams@example.com,,WorkRelated,0.00,Registered,,2026-09-15
+F20-2061,Andile Sithole,andile.sithole@example.com,0814445566,Personal,-5.00,Collected,,2026-09-21
+F20-2062,Christine Dube,christine.dube@example.com,0637778899,Personal,NULL,In Storage,Shelf A-1,2026-09-13
+F20-2063,Pieter Petersen,pieter.petersen@example.com,0760001122,WorkRelated,0.00,In Storage,,2026-09-23
+,,,0823334455,Personal,-10.00,Registered,,2026-09-16
+,Dean Nkosi,dean.nkosi@example.com,0686667788,Personal,10.00,In Storage,Shelf C-2,2026-09-19
+F20-2066,,nomvula.dlamini@example.com,0719990011,WorkRelated,0.00,Ready for Collection,Shelf A-2,2026-09-14
+F20-2067,Precious Mahlangu,precious.mahlangu,0832223344,Personal,10.00,Registered,,2026-09-20
+F20-2068,Tebogo Khumalo,tebogo.khumalo@example.com,,Personal,10.00,Collected,,2026-09-11
+F20-2069,Thabo Mokoena,thabo.mokoena@example.com,0788889900,WorkRelated,-15.00,In Storage,Shelf B-1,2026-09-17
+F20-2070,Lerato Patel,lerato.patel@example.com,0821112233,Personal,FALSE,Ready for Collection,Shelf C-1,2026-09-24
+F20-2071,Sipho Botha,sipho.botha@example.com,0614445566,Personal,10.00,In Storage,,2026-09-12
+,,,0737778899,WorkRelated,0.00,In Storage,Shelf A-3,2026-09-18
+,Ahmed Pretorius,ahmed.pretorius@example.com,0840001122,Personal,10.00,Ready for Collection,Shelf B-2,2026-09-15
+F20-2074,,maria.molefe@example.com,0713334455,Personal,10.00,Registered,,2026-09-21
+F20-2075,Jabulani Khan,jabulani.khan#example.com,0836667788,WorkRelated,0.00,Collected,,2026-09-13
+F20-2076,Elsie Ngcobo,elsie.ngcobo@example.com,,Personal,10.00,In Storage,Shelf C-2,2026-09-16
+F20-2077,Kagiso Adams,kagiso.adams@example.com,0722223344,Personal,-30.00,Ready for Collection,Shelf A-1,2026-09-22
+F20-2078,Fatima Sithole,fatima.sithole@example.com,0795556677,WorkRelated,BAD_FEE,Registered,,2026-09-10
+F20-2079,Andile Dube,andile.dube@example.com,0818889900,Personal,10.00,In Storage,,2026-09-19
+,,,0631112233,Personal,-10.00,Ready for Collection,Shelf C-1,2026-09-14
+,Pieter Mthembu,pieter.mthembu@example.com,0764445566,WorkRelated,0.00,Registered,,2026-09-26
+F20-2082,,naledi.nkosi@example.com,0827778899,Personal,10.00,Collected,,2026-09-12
+F20-2083,Dean Dlamini,dean.dlamini.com,0680001122,Personal,10.00,In Storage,Shelf A-2,2026-09-18
+F20-2084,Nomvula Mahlangu,nomvula.mahlangu@example.com,,WorkRelated,0.00,Ready for Collection,Shelf B-2,2026-09-15
+F20-2085,Precious Khumalo,precious.khumalo@example.com,0836667788,Personal,-5.00,Registered,,2026-09-20
+F20-2086,Tebogo Mokoena,tebogo.mokoena@example.com,0649990011,Personal,X,In Storage,Shelf C-2,2026-09-17
+F20-2087,Thabo Patel,thabo.patel@example.com,0782223344,WorkRelated,0.00,In Storage,,2026-09-23
+,,,0825556677,Personal,-10.00,Registered,,2026-09-11
+,Sipho Zulu,sipho.zulu@example.com,0618889900,Personal,10.00,Collected,,2026-09-16
+F20-2090,,zanele.pretorius@example.com,0731112233,WorkRelated,0.00,In Storage,Shelf B-1,2026-09-21
+F20-2091,Ahmed Molefe,ahmed.molefe@domain,0844445566,Personal,10.00,Ready for Collection,Shelf C-1,2026-09-14
+F20-2092,Maria Khan,maria.khan@example.com,,Personal,10.00,Registered,,2026-09-19
+F20-2093,Jabulani Ngcobo,jabulani.ngcobo@example.com,0830001122,WorkRelated,-25.00,In Storage,Shelf A-1,2026-09-13
+F20-2094,Elsie Adams,elsie.adams@example.com,0653334455,Personal,NONE,Ready for Collection,Shelf B-2,2026-09-25
+F20-2095,Andile Ngcobo,andile.ngcobo@example.com,0814441122,Personal,10.00,In Storage,,2026-09-14
+,,,0632223344,WorkRelated,0.00,In Storage,Shelf C-1,2026-09-18
+,Pieter van Wyk,pieter.vanwyk@example.com,0761110099,Personal,10.00,Ready for Collection,Shelf A-3,2026-09-11
+F20-2098,,naledi.mokoena@example.com,0823334411,Personal,10.00,Registered,,2026-09-25
+F20-2099,Dean Petersen,invalid-email,0685554433,WorkRelated,0.00,Collected,,2026-09-08
+F20-2100,Nomvula Sithole,nomvula.sithole@example.com,,Personal,10.00,In Storage,Shelf B-2,2026-09-19

@@ -3,6 +3,9 @@ using System.Data;
 using CourierService.Domain;
 using CourierService.Domain.Entities;
 using CourierService.Domain.Repositories;
+using System.Collections.Generic;
+using System.Text;
+using CourierService.Domain.Models;
 
 namespace CourierService.Data.Repositories
 {
@@ -18,7 +21,8 @@ namespace CourierService.Data.Repositories
             p.CreatedAtUtc, p.CollectedAtUtc, p.CollectedByUserId, p.RowVersion,
             r.RecipientId AS R_RecipientId, r.FullName AS R_FullName, r.IdentifierNo AS R_IdentifierNo,
             r.Email AS R_Email, r.PhoneNumber AS R_PhoneNumber, r.Department AS R_Department,
-            r.CreatedAtUtc AS R_CreatedAtUtc";
+            r.CreatedAtUtc AS R_CreatedAtUtc,
+            sl.Code AS SL_Code";
 
         private readonly IDbConnectionFactory _connectionFactory;
 
@@ -33,6 +37,7 @@ namespace CourierService.Data.Repositories
                 SELECT " + SelectColumns + @"
                 FROM dbo.Packages p
                 INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId
+                LEFT JOIN dbo.StorageLocations sl ON sl.StorageLocationId = p.StorageLocationId
                 WHERE p.F20Identifier = @F20Identifier;";
 
             using (var connection = _connectionFactory.CreateOpenConnection())
@@ -54,6 +59,7 @@ namespace CourierService.Data.Repositories
                 SELECT " + SelectColumns + @"
                 FROM dbo.Packages p
                 INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId
+                LEFT JOIN dbo.StorageLocations sl ON sl.StorageLocationId = p.StorageLocationId
                 WHERE p.PackageId = @PackageId;";
 
             using (var connection = _connectionFactory.CreateOpenConnection())
@@ -116,6 +122,131 @@ namespace CourierService.Data.Repositories
             });
         }
 
+        public PagedResult<Package> Search(PackageSearchCriteria criteria)
+        {
+            if (criteria == null) criteria = new PackageSearchCriteria();
+            var page = criteria.Page < 1 ? 1 : criteria.Page;
+            var pageSize = criteria.PageSize < 1 ? 20 : Math.Min(criteria.PageSize, 100);
+
+            // The SQL text only ever contains fixed fragments. Every value the user supplies
+            // goes in as a parameter, never into the text (SR-03).
+            var where = new StringBuilder(" WHERE 1 = 1");
+            var bindings = new List<Action<IDbCommand>>();
+
+            if (!string.IsNullOrWhiteSpace(criteria.Query))
+            {
+                var text = EscapeLike(criteria.Query.Trim());
+                where.Append(" AND (p.F20Identifier LIKE @QueryStartsWith ESCAPE '\\'" +
+                             " OR r.IdentifierNo LIKE @QueryStartsWith ESCAPE '\\'" +
+                             " OR r.FullName LIKE @QueryContains ESCAPE '\\')");
+                bindings.Add(c => c.AddParameter("@QueryStartsWith", DbType.String, text + "%"));
+                bindings.Add(c => c.AddParameter("@QueryContains", DbType.String, "%" + text + "%"));
+            }
+
+            if (criteria.ReceivedFrom.HasValue)
+            {
+                var value = criteria.ReceivedFrom.Value.Date;
+                where.Append(" AND p.CreatedAtUtc >= @ReceivedFrom");
+                bindings.Add(c => c.AddParameter("@ReceivedFrom", DbType.DateTime2, value));
+            }
+
+            if (criteria.ReceivedTo.HasValue)
+            {
+                // "To" includes the whole day, so compare against the start of the next day.
+                var value = criteria.ReceivedTo.Value.Date.AddDays(1);
+                where.Append(" AND p.CreatedAtUtc < @ReceivedToExclusive");
+                bindings.Add(c => c.AddParameter("@ReceivedToExclusive", DbType.DateTime2, value));
+            }
+
+            if (criteria.Status.HasValue)
+            {
+                var value = criteria.Status.Value.ToString();
+                where.Append(" AND p.Status = @Status");
+                bindings.Add(c => c.AddParameter("@Status", DbType.String, value));
+            }
+
+            const string fromClause = @"
+                FROM dbo.Packages p
+                INNER JOIN dbo.Recipients r ON r.RecipientId = p.RecipientId
+                LEFT JOIN dbo.StorageLocations sl ON sl.StorageLocationId = p.StorageLocationId";
+
+            using (var connection = _connectionFactory.CreateOpenConnection())
+            {
+                int total;
+                using (var countCommand = connection.CreateCommand())
+                {
+                    countCommand.CommandText = "SELECT COUNT(*) " + fromClause + where;
+                    foreach (var bind in bindings) bind(countCommand);
+                    total = Convert.ToInt32(countCommand.ExecuteScalar());
+                }
+
+                var items = new List<Package>();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT " + SelectColumns + fromClause + where +
+                        @" ORDER BY p.CreatedAtUtc DESC, p.PackageId DESC
+                           OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+                    foreach (var bind in bindings) bind(command);
+                    command.AddParameter("@Offset", DbType.Int32, (page - 1) * pageSize);
+                    command.AddParameter("@PageSize", DbType.Int32, pageSize);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read()) items.Add(MapPackage(reader));
+                    }
+                }
+
+                return new PagedResult<Package>
+                {
+                    Items = items,
+                    TotalCount = total,
+                    Page = page,
+                    PageSize = pageSize
+                };
+            }
+        }
+
+        /// <summary>Stops user-typed % _ [ characters acting as LIKE wildcards.</summary>
+        private static string EscapeLike(string value)
+        {
+            return value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
+        }
+        public bool TryUpdateStatus(
+            int packageId,
+            PackageStatus newStatus,
+            int? storageLocationId,
+            int? collectedByUserId,
+            byte[] expectedRowVersion,
+            IUnitOfWork unitOfWork = null)
+        {
+            if (expectedRowVersion == null)
+            {
+                throw new ArgumentNullException(nameof(expectedRowVersion));
+            }
+
+            // The RowVersion in the WHERE clause is the concurrency check: if anyone changed the row since it
+            // was read, its RowVersion has moved on, nothing matches, and zero rows are updated.
+            const string sql = @"
+                UPDATE dbo.Packages
+                SET Status = @Status,
+                    StorageLocationId = COALESCE(@StorageLocationId, StorageLocationId),
+                    CollectedAtUtc = CASE WHEN @Status = 'Collected' THEN SYSUTCDATETIME() ELSE CollectedAtUtc END,
+                    CollectedByUserId = CASE WHEN @Status = 'Collected' THEN @CollectedByUserId ELSE CollectedByUserId END
+                WHERE PackageId = @PackageId AND RowVersion = @RowVersion;";
+
+            var rowsUpdated = RunOwnedOrShared(unitOfWork, sql, command =>
+            {
+                command.AddParameter("@Status", DbType.String, newStatus.ToString());
+                command.AddParameter("@StorageLocationId", DbType.Int32, (object)storageLocationId ?? DBNull.Value);
+                command.AddParameter("@CollectedByUserId", DbType.Int32, (object)collectedByUserId ?? DBNull.Value);
+                command.AddParameter("@PackageId", DbType.Int32, packageId);
+                command.AddParameter("@RowVersion", DbType.Binary, expectedRowVersion);
+                return command.ExecuteNonQuery();
+            });
+
+            return rowsUpdated == 1;
+        }
+
         private static Package MapPackage(IDataRecord record)
         {
             return new Package
@@ -130,6 +261,7 @@ namespace CourierService.Data.Repositories
                 PaymentStatus = record.GetString(record.GetOrdinal("PaymentStatus")),
                 Status = (PackageStatus)Enum.Parse(typeof(PackageStatus), record.GetString(record.GetOrdinal("Status"))),
                 StorageLocationId = GetNullableInt(record, "StorageLocationId"),
+                StorageLocationCode = GetNullableString(record, "SL_Code"),
                 Notes = GetNullableString(record, "Notes"),
                 CreatedByUserId = record.GetInt32(record.GetOrdinal("CreatedByUserId")),
                 CreatedAtUtc = record.GetDateTime(record.GetOrdinal("CreatedAtUtc")),

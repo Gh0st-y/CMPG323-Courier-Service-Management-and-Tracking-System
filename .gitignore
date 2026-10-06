@@ -34,7 +34,7 @@ ScaffoldingReadMe.txt
 # NuGet
 *.nupkg
 *.snupkg
-**/[Pp]ackages/*
+/[Pp]ackages/*
 !**/[Pp]ackages/build/
 *.nuget.props
 *.nuget.targets

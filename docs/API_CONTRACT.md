@@ -71,7 +71,8 @@ Standard status codes: `400` validation, `401` not authenticated, `403` wrong ro
 ## Audit log (SR-04)
 | Method | Path | Roles | Body → Response |
 |---|---|---|---|
-| GET | `/api/audit-log?user=&action=&dateFrom=&dateTo=&page=` | Supervisor, SystemAdmin | → `{items:[...], totalCount}` |
+| GET | `/api/audit-log?user=&action=&dateFrom=&dateTo=&page=&pageSize=` | Supervisor, SystemAdmin | → `{items:[...], totalCount, page, pageSize}` |
+ `user` is a username (exact match). `dateFrom` and `dateTo` are `yyyy-MM-dd` (UTC) and both days are included. Newest first. `pageSize` defaults to 25, max 100. Each item: `{auditId, userId, username, action, entityType, entityId, detail, context, timestampUtc}`.
 
 ## Config (OR-01)
 | Method | Path | Roles | Body → Response |
@@ -86,3 +87,29 @@ Standard status codes: `400` validation, `401` not authenticated, `403` wrong ro
 
 Changes to this contract go through a PR — don't silently change an endpoint shape once
 frontend work has started against it.
+
+---
+
+## Response details: scan, status and collect (T19, T20)
+
+These were only described as "the record" above; this is what the implemented endpoints return.
+
+**`GET /api/packages/scan/{f20Identifier}`** returns, for a logged-in user of any role:
+`{ packageId, f20Identifier, status, classification, packageType, paymentStatus, fee, storageLocationId, storageLocation, recipientName, recipientIdentifierNo, recipientDepartment, recipientPhone, receivedAtUtc, collectedAtUtc }`.
+- `status` is the API name: `Registered`, `InStorage`, `ReadyForCollection` or `Collected`.
+- `storageLocation` is the location's code, e.g. `"Shelf A-3"`.
+- `recipientPhone` is masked to its last three characters, and no email address is returned (DR-004). Only what is needed to check someone's identity.
+- An unknown identifier and a malformed one (anything other than letters, digits, `-` and `_`, up to 30 characters) both give the same `404` with code `NotFound` (IR-006). Leading/trailing whitespace from a scanner is ignored; matching is not case sensitive.
+
+**`POST /api/packages/{f20Identifier}/status`** body `{ "newStatus": "InStorage", "storageLocationId": 3 }` (`storageLocationId` optional; leaving it out keeps the current location). `newStatus` accepts the API name or the staff-facing name (`"In Storage"`), in any letter case.
+- `200` returns the updated record (same shape as scan).
+- `400 ValidationError`: missing or unknown `newStatus`, a storage location that doesn't exist or is retired, a body that isn't valid JSON, or `newStatus` of `Collected` (collecting is only done through `/collect`, so the `CollectionStaff` role split can't be bypassed).
+- `404 NotFound`; `409 InvalidTransition` (message e.g. `Package cannot move to Collected from Registered.`); `409 ConcurrentUpdate` if someone changed the package between it being read and saved (nothing is written; reload and retry).
+- The allowed moves are Registered, In Storage, Ready for Collection, Collected, in that order only (DECISIONS.md #7). Status change, history row and audit entry are saved as one transaction.
+
+**`POST /api/packages/{f20Identifier}/collect`** body `{ "verifiedByUserId": 5 }`. The whole body is optional; `verifiedByUserId` defaults to the logged-in user, and if given must be an active user (otherwise `400 ValidationError`).
+- `200` returns `{ "status": "Collected", "collectedAtUtc": "..." }`.
+- Only works from `ReadyForCollection`; otherwise `409 InvalidTransition`.
+- The package records who verified the collector and when; the history row and audit entry record the logged-in user who processed it.
+
+**`GET /api/storage-locations`** (any logged-in user) returns the active locations as `[{ storageLocationId, code, description }]`. Adding a location (`POST`, SystemAdmin) is not built yet (T24).

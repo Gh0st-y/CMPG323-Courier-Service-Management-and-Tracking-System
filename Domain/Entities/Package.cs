@@ -16,6 +16,9 @@ namespace CourierService.Domain.Entities
         public string PaymentStatus { get; set; }
         public PackageStatus Status { get; set; }
         public int? StorageLocationId { get; set; }
+
+        /// <summary>The location's code (e.g. "Shelf A-3"). Filled in by the query methods; not written by Insert.</summary>
+        public string StorageLocationCode { get; set; }
         public string Notes { get; set; }
         public int CreatedByUserId { get; set; }
         public DateTime CreatedAtUtc { get; set; }

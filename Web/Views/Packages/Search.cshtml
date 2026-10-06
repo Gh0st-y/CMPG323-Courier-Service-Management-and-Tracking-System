@@ -1,0 +1,273 @@
+﻿@{
+    ViewBag.Title = "Search Packages";
+}
+
+<h1 class="app-page-title">Search Packages</h1>
+
+<div class="card">
+    <!-- ============================== -->
+    <!-- Filter form                     -->
+    <!-- ============================== -->
+    <form id="search-form" class="search-form">
+        <div class="search-form__grid">
+            <div class="form-row">
+                <label for="filter-qr">QR / F20 ID</label>
+                <input type="text" id="filter-qr" placeholder="e.g. F20-0001" autocomplete="off" />
+            </div>
+            <div class="form-row">
+                <label for="filter-recipient">Recipient Name</label>
+                <input type="text" id="filter-recipient" placeholder="e.g. Thabo" autocomplete="off" />
+            </div>
+            <div class="form-row">
+                <label for="filter-status">Status</label>
+                <select id="filter-status">
+                    <option value="">All statuses</option>
+                    <option value="Registered">Registered</option>
+                    <option value="InStorage">In Storage</option>
+                    <option value="ReadyForCollection">Ready for Collection</option>
+                    <option value="Collected">Collected</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="filter-dateFrom">Date From</label>
+                <input type="date" id="filter-dateFrom" />
+            </div>
+            <div class="form-row">
+                <label for="filter-dateTo">Date To</label>
+                <input type="date" id="filter-dateTo" />
+            </div>
+        </div>
+
+        <div class="search-form__actions">
+            <button type="button" class="btn btn-secondary" id="filter-clear">Clear</button>
+            <button type="submit" class="btn btn-primary" id="filter-submit">Search</button>
+        </div>
+    </form>
+</div>
+
+<!-- ============================== -->
+<!-- Results                         -->
+<!-- ============================== -->
+<div class="card results-card">
+    <div class="results-header">
+        <h2 class="results-header__title">Results</h2>
+        <span class="results-header__meta" id="results-meta"></span>
+    </div>
+
+    <table class="results-table" id="results-table">
+        <thead>
+            <tr>
+                <th>F20 ID</th>
+                <th>Recipient</th>
+                <th>Status</th>
+                <th>Classification</th>
+                <th>Fee</th>
+                <th>Date Received</th>
+            </tr>
+        </thead>
+        <tbody id="results-body">
+            <tr><td colspan="6" class="results-empty">Loading…</td></tr>
+        </tbody>
+    </table>
+
+    <div class="results-pager" id="results-pager">
+        <button type="button" class="btn btn-secondary" id="pager-prev">Previous</button>
+        <span class="results-pager__info" id="pager-info"></span>
+        <button type="button" class="btn btn-secondary" id="pager-next">Next</button>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            "use strict";
+
+            var PAGE_SIZE = 10;
+
+            var state = {
+                page: 1,
+                allItems: [],       // full dataset (mock mode) or current page (real mode)
+                totalCount: 0,
+                filters: { qr: "", recipient: "", status: "", dateFrom: "", dateTo: "" }
+            };
+
+            var metaEl = document.getElementById("results-meta");
+            var tbodyEl = document.getElementById("results-body");
+            var pagerInfoEl = document.getElementById("pager-info");
+            var prevBtn = document.getElementById("pager-prev");
+            var nextBtn = document.getElementById("pager-next");
+
+            // -----------------------------------------------------------------
+            // Build a single `query` string from the three text inputs.
+            // The backend contract exposes a single `query` param — see T21.
+            // -----------------------------------------------------------------
+            function buildQuery() {
+                var parts = [state.filters.qr, state.filters.recipient]
+                    .map(function (s) { return (s || "").trim(); })
+                    .filter(function (s) { return s.length > 0; });
+                return parts.join(" ");
+            }
+
+            function statusLabel(status) {
+                if (status === "InStorage") return "In Storage";
+                if (status === "ReadyForCollection") return "Ready for Collection";
+                return status;
+            }
+
+            function formatFee(fee) {
+                return "R" + (fee != null ? Number(fee).toFixed(2) : "0.00");
+            }
+
+            // The real API (T21) sends receivedAtUtc; the mock fixtures use createdAtUtc.
+            function receivedAt(p) {
+                return p.receivedAtUtc || p.createdAtUtc;
+            }
+
+            function formatDate(iso) {
+                if (!iso) return "—";
+                var d = new Date(iso);
+                if (isNaN(d)) return "—";
+                return d.toLocaleDateString();
+            }
+
+            // -----------------------------------------------------------------
+            // Client-side filter (used when mock mode is ON — fixtures are static)
+            // -----------------------------------------------------------------
+            function applyClientSideFilters(items) {
+                var f = state.filters;
+
+                return items.filter(function (p) {
+                    if (f.qr && p.f20Identifier.toLowerCase().indexOf(f.qr.toLowerCase()) === -1) return false;
+                    if (f.recipient && p.recipientName.toLowerCase().indexOf(f.recipient.toLowerCase()) === -1) return false;
+                    // Reference number isn't part of the mock items — skip if provided but nothing to compare
+                    if (f.status && p.status !== f.status) return false;
+                    if (f.dateFrom) {
+                        var from = new Date(f.dateFrom);
+                        if (new Date(receivedAt(p)) < from) return false;
+                    }
+                    if (f.dateTo) {
+                        var to = new Date(f.dateTo);
+                        to.setHours(23, 59, 59, 999);
+                        if (new Date(receivedAt(p)) > to) return false;
+                    }
+                    return true;
+                });
+            }
+
+            // -----------------------------------------------------------------
+            // Data fetch — pulls from /api/packages (mock or real)
+            // -----------------------------------------------------------------
+            function fetchPage() {
+                var params = [];
+                var q = buildQuery();
+                if (q) params.push("query=" + encodeURIComponent(q));
+                if (state.filters.status) params.push("status=" + encodeURIComponent(state.filters.status));
+                if (state.filters.dateFrom) params.push("dateFrom=" + encodeURIComponent(state.filters.dateFrom));
+                if (state.filters.dateTo) params.push("dateTo=" + encodeURIComponent(state.filters.dateTo));
+                params.push("page=" + state.page);
+                params.push("pageSize=" + PAGE_SIZE);
+
+                var path = "/packages" + (params.length ? "?" + params.join("&") : "");
+
+                CourierApp.api.get(path).then(function (data) {
+                    if (CourierApp.config.mockMode) {
+                        // Apply filters + paging client-side (fixtures are static)
+                        var filtered = applyClientSideFilters(data.items || []);
+                        state.totalCount = filtered.length;
+                        var start = (state.page - 1) * PAGE_SIZE;
+                        state.allItems = filtered.slice(start, start + PAGE_SIZE);
+                    } else {
+                        state.allItems = data.items || [];
+                        state.totalCount = data.totalCount || 0;
+                    }
+                    renderResults();
+                }).catch(function () {
+                    tbodyEl.innerHTML = '<tr><td colspan="6" class="results-empty">Could not load packages. Please try again.</td></tr>';
+                });
+            }
+
+            // -----------------------------------------------------------------
+            // Rendering
+            // -----------------------------------------------------------------
+            function renderResults() {
+                var items = state.allItems;
+
+                if (!items.length) {
+                    tbodyEl.innerHTML = '<tr><td colspan="6" class="results-empty">No packages match your filters.</td></tr>';
+                } else {
+                    tbodyEl.innerHTML = "";
+                    items.forEach(function (p) {
+                        var tr = document.createElement("tr");
+                        tr.className = "results-table__row";
+                        tr.style.cursor = "pointer";
+                        // T34 will create /Packages/Detail/{id}; until then this 404s.
+                        tr.title = "Open package detail (available after T34)";
+                        tr.addEventListener("click", function () {
+                            window.location.href = "@Url.Action("Detail", "Packages")/" + encodeURIComponent(p.f20Identifier);
+                        });
+
+                        function cell(text, className) {
+                            var td = document.createElement("td");
+                            td.textContent = text;
+                            if (className) td.className = className;
+                            tr.appendChild(td);
+                        }
+
+                        cell(p.f20Identifier, "results-table__id");
+                        cell(p.recipientName);
+                        cell(statusLabel(p.status), "results-table__status results-table__status--" + p.status);
+                        cell(p.classification === "WorkRelated" ? "Work" : "Personal");
+                        cell(formatFee(p.fee));
+                        cell(formatDate(receivedAt(p)));
+                        tbodyEl.appendChild(tr);
+                    });
+                }
+
+                var totalPages = Math.max(1, Math.ceil(state.totalCount / PAGE_SIZE));
+                metaEl.textContent = state.totalCount + " package" + (state.totalCount === 1 ? "" : "s");
+                pagerInfoEl.textContent = "Page " + state.page + " of " + totalPages;
+                prevBtn.disabled = state.page <= 1;
+                nextBtn.disabled = state.page >= totalPages;
+            }
+
+            // -----------------------------------------------------------------
+            // Events
+            // -----------------------------------------------------------------
+            document.getElementById("search-form").addEventListener("submit", function (e) {
+                e.preventDefault();
+                state.filters.qr = document.getElementById("filter-qr").value;
+                state.filters.recipient = document.getElementById("filter-recipient").value;
+                state.filters.status = document.getElementById("filter-status").value;
+                state.filters.dateFrom = document.getElementById("filter-dateFrom").value;
+                state.filters.dateTo = document.getElementById("filter-dateTo").value;
+                state.page = 1;
+                fetchPage();
+            });
+
+            document.getElementById("filter-clear").addEventListener("click", function () {
+                document.getElementById("filter-qr").value = "";
+                document.getElementById("filter-recipient").value = "";
+                document.getElementById("filter-status").value = "";
+                document.getElementById("filter-dateFrom").value = "";
+                document.getElementById("filter-dateTo").value = "";
+                state.filters = { qr: "", recipient: "", status: "", dateFrom: "", dateTo: "" };
+                state.page = 1;
+                fetchPage();
+            });
+
+            prevBtn.addEventListener("click", function () {
+                if (state.page > 1) { state.page -= 1; fetchPage(); }
+            });
+
+            nextBtn.addEventListener("click", function () {
+                var totalPages = Math.max(1, Math.ceil(state.totalCount / PAGE_SIZE));
+                if (state.page < totalPages) { state.page += 1; fetchPage(); }
+            });
+
+            // -----------------------------------------------------------------
+            // Initial load
+            // -----------------------------------------------------------------
+            fetchPage();
+        })();
+    </script>
+}
