@@ -173,6 +173,12 @@ namespace CourierService.Web.Controllers
 
         protected override void OnException(ExceptionContext filterContext)
         {
+            // Already answered by DatabaseUnavailableFilter (a 503 for a database outage), which runs first
+            if (filterContext.ExceptionHandled)
+            {
+                return;
+            }
+
             // Anything unexpected becomes the standard error shape, with no stack trace, SQL or paths in it (SR-03, OR-04)
             Trace.TraceError(filterContext.Exception.ToString());
 

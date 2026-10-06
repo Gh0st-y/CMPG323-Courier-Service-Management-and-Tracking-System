@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
-
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
     <Compile Include="Controllers\CollectionController.cs" />
@@ -70,6 +69,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\CourierServices.cs" />
+    <Compile Include="Infrastructure\DatabaseUnavailableFilter.cs" />
     <Compile Include="Infrastructure\RequestBody.cs" />
     <Compile Include="Infrastructure\RoleAuthorizeAttribute.cs" />
     <Compile Include="Models\Api\Auth\LoginRequest.cs" />
@@ -152,6 +152,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\templetes\Sample-package-importV2.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

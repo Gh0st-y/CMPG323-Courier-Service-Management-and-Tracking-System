@@ -1,3 +1,4 @@
+using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -25,8 +26,24 @@ namespace CourierService.Data
         public IDbConnection CreateOpenConnection()
         {
             var connection = new SqlConnection(_connectionString);
-            connection.Open();
-            return connection;
+
+            try
+            {
+                connection.Open();
+                return connection;
+            }
+            catch (SqlException ex)
+            {
+                // Couldn't connect at all: server down, database offline or missing, network gone (T52)
+                connection.Dispose();
+                throw new DatabaseUnavailableException(ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Thrown when no pooled connection frees up in time, which also means the database isn't keeping up
+                connection.Dispose();
+                throw new DatabaseUnavailableException(ex);
+            }
         }
     }
 }
