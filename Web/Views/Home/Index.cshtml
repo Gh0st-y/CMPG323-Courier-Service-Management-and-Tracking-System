@@ -1,65 +1,204 @@
 @{
-    ViewBag.Title = "Courier Service";
+    ViewBag.Title = "Dashboard";
 }
 
-<h1 class="app-page-title">Courier Service Management and Tracking System</h1>
+<h1 class="app-page-title">F20 Courier Service Dashboard</h1>
 
-<div class="card">
-    <p>Solution skeleton (T02) and frontend scaffold (T07). Real pages replace this as each feature lands.</p>
+<!-- TODO This is the Mock toggle remove later (dev tool)-->
+<div class="dashboard-mock" id="dashboard-mock">
+    Mock mode: <strong id="mock-mode-label"></strong>
+    <button type="button" class="btn btn-secondary" id="toggle-mock-mode">Toggle</button>
+</div>
 
-    <p>
-        Mock mode: <strong id="mock-mode-label"></strong>
-        <button type="button" class="btn btn-secondary" id="toggle-mock-mode">Toggle</button>
+<section class="dashboard-alert" id="dashboard-error" role="alert" aria-live="assertive" hidden>
+    <p class="dashboard-alert__title">Package counts could not be loaded.</p>
+    <p class="dashboard-alert__text">
+        Refresh the page, or contact the system administrator if this continues.
     </p>
+    <div class="dashboard-alert__actions">
+        <button type="button" class="btn btn-primary" id="dashboard-retry">Try again</button>
+    </div>
+</section>
 
-    <p>
-        <button type="button" class="btn btn-primary" id="demo-toast-success">Show success toast</button>
-        <button type="button" class="btn btn-primary" id="demo-toast-error">Show error toast</button>
-        <button type="button" class="btn btn-secondary" id="demo-confirm">Show confirm dialog</button>
-        <button type="button" class="btn btn-secondary" id="demo-fetch-stats">Load dashboard stats</button>
-    </p>
+<div class="dashboard-page">
+    <section class="dashboard-section" aria-labelledby="dashboard-summary-title">
+        <div class="dashboard-section__header">
+            <div class="dashboard-section__heading">
+                <div class="dashboard-section__title-row">
+                    <h2 class="dashboard-section__title" id="dashboard-summary-title">Package summary</h2>
+                    <p class="dashboard-section__meta" id="dashboard-updated-at" hidden>Loading current counts...</p>
+                </div>
+                <span class="dashboard-section__divider" aria-hidden="true"></span>
+                <p class="dashboard-section__text">Counts are loaded from the backend API.</p>
+            </div>
 
-    <pre id="demo-output" class="card" style="margin-top: 12px; background: var(--color-bg);"></pre>
+            <button type="button" class="btn btn-secondary" id="dashboard-refresh">Refresh summary</button>
+        </div>
+
+        <div class="dashboard-stats" id="dashboard-stats" aria-live="polite" aria-busy="true">
+            <article class="card dashboard-stat dashboard-stat--received">
+                <span class="dashboard-stat__label">Received Today</span>
+                <strong class="dashboard-stat__value" id="stat-received">—</strong>
+                <span class="dashboard-stat__note">Packages received today</span>
+            </article>
+
+            <article class="card dashboard-stat dashboard-stat--ready">
+                <span class="dashboard-stat__label">Ready for Collection</span>
+                <strong class="dashboard-stat__value" id="stat-ready">—</strong>
+                <span class="dashboard-stat__note">Current packages waiting for pickup</span>
+            </article>
+
+            <article class="card dashboard-stat dashboard-stat--collected">
+                <span class="dashboard-stat__label">Collected Today</span>
+                <strong class="dashboard-stat__value" id="stat-collected">—</strong>
+                <span class="dashboard-stat__note">Packages collected today</span>
+            </article>
+
+            <article class="card dashboard-stat dashboard-stat--outstanding">
+                <span class="dashboard-stat__label">Outstanding</span>
+                <strong class="dashboard-stat__value" id="stat-outstanding">—</strong>
+                <span class="dashboard-stat__note">Current packages not yet collected</span>
+            </article>
+        </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="dashboard-actions-title">
+        <div class="dashboard-section__header">
+            <div>
+                <h2 class="dashboard-section__title" id="dashboard-actions-title">Quick actions</h2>
+                <p class="dashboard-section__text">Only actions available to the current role are shown.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <a class="dashboard-action dashboard-action--register" data-dashboard-action="register" href="@Url.Action("Register", "Packages")">
+                <span class="dashboard-action__title">Register package</span>
+                <span class="dashboard-action__description">Capture a new package record and generate the F20 identifier.</span>
+                <span class="dashboard-action__footnote">Intake and reception staff</span>
+            </a>
+
+            <a class="dashboard-action dashboard-action--search" data-dashboard-action="search" href="@Url.Action("Search", "Packages")">
+                <span class="dashboard-action__title">Search / Scan</span>
+                <span class="dashboard-action__description">Look up a package or jump into the scan workflow.</span>
+                <span class="dashboard-action__footnote">Search, tracking and QR scanning</span>
+            </a>
+
+            <a class="dashboard-action dashboard-action--collect" data-dashboard-action="collect" href="@Url.Action("Index", "Scan")">
+                <span class="dashboard-action__title">Collect package</span>
+                <span class="dashboard-action__description">Verify a package and move it through the collection flow.</span>
+                <span class="dashboard-action__footnote">Collection verification staff</span>
+            </a>
+        </div>
+    </section>
 </div>
 
 @section scripts {
     <script>
         (function () {
-            var outputEl = document.getElementById("demo-output");
+            "use strict";
+
+            var statReceivedEl = document.getElementById("stat-received");
+            var statReadyEl = document.getElementById("stat-ready");
+            var statCollectedEl = document.getElementById("stat-collected");
+            var statOutstandingEl = document.getElementById("stat-outstanding");
+            var dashboardStatsEl = document.getElementById("dashboard-stats");
+            var updatedAtEl = document.getElementById("dashboard-updated-at");
+            var dashboardErrorEl = document.getElementById("dashboard-error");
+            var refreshButtonEl = document.getElementById("dashboard-refresh");
+            var retryButtonEl = document.getElementById("dashboard-retry");
+
+            var actionPermissions = {
+                register: ["IntakeClerk", "Supervisor", "SystemAdmin"],
+                search: ["IntakeClerk", "StorageStaff", "CollectionStaff", "Supervisor", "SystemAdmin"],
+                collect: ["CollectionStaff", "Supervisor", "SystemAdmin"]
+            };
+
+            var currentRole = (window.CourierApp && CourierApp.currentUserRole)
+                || window.sessionStorage.getItem("courier.userRole")
+                || "Supervisor";
+
+            if (window.CourierApp) {
+                CourierApp.currentUserRole = currentRole;
+            }
+
+            function canUseAction(actionName) {
+                return actionPermissions[actionName].indexOf(currentRole) !== -1;
+            }
+
+            function formatCount(value) {
+                if (value === null || value === undefined) {
+                    return "—";
+                }
+
+                return Number(value).toLocaleString("en-ZA");
+            }
+
+            // Received and Collected are today only; Ready for Collection and Outstanding are current totals.
+            function setStatValues(data) {
+                statReceivedEl.textContent = formatCount(data.receivedToday);
+                statReadyEl.textContent = formatCount(data.readyForCollection);
+                statCollectedEl.textContent = formatCount(data.collectedToday);
+                statOutstandingEl.textContent = formatCount(data.outstanding);
+            }
+
+            function setLoadingState(isLoading) {
+                dashboardStatsEl.setAttribute("aria-busy", isLoading ? "true" : "false");
+                updatedAtEl.hidden = !isLoading;
+                refreshButtonEl.disabled = isLoading;
+                retryButtonEl.disabled = isLoading;
+            }
+
+            function showError() {
+                dashboardErrorEl.hidden = false;
+            }
+
+            function hideError() {
+                dashboardErrorEl.hidden = true;
+            }
+
+            function applyActionVisibility() {
+                Object.keys(actionPermissions).forEach(function (actionName) {
+                    var actionEl = document.querySelector('[data-dashboard-action="' + actionName + '"]');
+                    if (actionEl) {
+                        actionEl.hidden = !canUseAction(actionName);
+                    }
+                });
+            }
+
+            function loadDashboardStats() {
+                setLoadingState(true);
+                hideError();
+
+                return CourierApp.api.get("/dashboard/stats", { silent: true }).then(function (data) {
+                    setStatValues(data || {});
+                }).catch(function () {
+                    setStatValues({});
+                    showError();
+                }).then(function () {
+                    setLoadingState(false);
+                });
+            }
+
+            refreshButtonEl.addEventListener("click", loadDashboardStats);
+            retryButtonEl.addEventListener("click", loadDashboardStats);
+
+            //TODO Remove the functioning of the mockmode
             var mockLabelEl = document.getElementById("mock-mode-label");
+            var mockToggleEl = document.getElementById("toggle-mock-mode");
 
             function refreshMockLabel() {
                 mockLabelEl.textContent = CourierApp.config.mockMode ? "ON" : "OFF";
             }
-            refreshMockLabel();
 
-            document.getElementById("toggle-mock-mode").addEventListener("click", function () {
+            mockToggleEl.addEventListener("click", function () {
                 CourierApp.config.setMockMode(!CourierApp.config.mockMode);
                 refreshMockLabel();
-            });
+                loadDashboardStats();
+            });//END of mockmode
 
-            document.getElementById("demo-toast-success").addEventListener("click", function () {
-                CourierApp.toast.success("Package registered successfully.");
-            });
-
-            document.getElementById("demo-toast-error").addEventListener("click", function () {
-                CourierApp.toast.error("Package cannot move to Collected from Registered.");
-            });
-
-            document.getElementById("demo-confirm").addEventListener("click", function () {
-                CourierApp.confirm("Mark this package as collected?", { confirmLabel: "Mark collected" })
-                    .then(function (confirmed) {
-                        outputEl.textContent = "Confirm result: " + confirmed;
-                    });
-            });
-
-            document.getElementById("demo-fetch-stats").addEventListener("click", function () {
-                CourierApp.api.get("/dashboard/stats").then(function (data) {
-                    outputEl.textContent = JSON.stringify(data, null, 2);
-                }).catch(function () {
-                    outputEl.textContent = "Request failed (see toast).";
-                });
-            });
+            refreshMockLabel();
+            applyActionVisibility();
+            loadDashboardStats();
         })();
     </script>
 }
