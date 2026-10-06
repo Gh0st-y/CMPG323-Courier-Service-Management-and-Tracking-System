@@ -115,6 +115,12 @@ namespace CourierService.Web.Controllers.Api
 
         protected override void OnException(ExceptionContext filterContext)
         {
+            // Already answered by another filter, such as the database outage filter from T52, which runs first
+            if (filterContext.ExceptionHandled)
+            {
+                return;
+            }
+
             // Same as PackageActionsController: no stack traces, SQL or paths in the response (SR-03, OR-04)
             Trace.TraceError(filterContext.Exception.ToString());
 
