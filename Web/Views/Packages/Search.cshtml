@@ -118,6 +118,11 @@
                 return "R" + (fee != null ? Number(fee).toFixed(2) : "0.00");
             }
 
+            // The real API (T21) sends receivedAtUtc; the mock fixtures use createdAtUtc.
+            function receivedAt(p) {
+                return p.receivedAtUtc || p.createdAtUtc;
+            }
+
             function formatDate(iso) {
                 if (!iso) return "—";
                 var d = new Date(iso);
@@ -138,12 +143,12 @@
                     if (f.status && p.status !== f.status) return false;
                     if (f.dateFrom) {
                         var from = new Date(f.dateFrom);
-                        if (new Date(p.createdAtUtc) < from) return false;
+                        if (new Date(receivedAt(p)) < from) return false;
                     }
                     if (f.dateTo) {
                         var to = new Date(f.dateTo);
                         to.setHours(23, 59, 59, 999);
-                        if (new Date(p.createdAtUtc) > to) return false;
+                        if (new Date(receivedAt(p)) > to) return false;
                     }
                     return true;
                 });
@@ -213,7 +218,7 @@
                         cell(statusLabel(p.status), "results-table__status results-table__status--" + p.status);
                         cell(p.classification === "WorkRelated" ? "Work" : "Personal");
                         cell(formatFee(p.fee));
-                        cell(formatDate(p.createdAtUtc));
+                        cell(formatDate(receivedAt(p)));
                         tbodyEl.appendChild(tr);
                     });
                 }

@@ -9,6 +9,10 @@ namespace CourierService.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Lets controllers declare URLs like [Route("api/packages/scan/{packageId}")]. Must come before the
+            // conventional route below.
+            routes.MapMvcAttributeRoutes();
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

@@ -78,9 +78,12 @@ CREATE TABLE dbo.Packages (
     RowVersion                 ROWVERSION  -- optimistic concurrency (PR-02 / concurrent edits)
 );
 GO
-CREATE INDEX IX_Packages_Status ON dbo.Packages(Status);
-CREATE INDEX IX_Packages_RecipientId ON dbo.Packages(RecipientId);
-CREATE INDEX IX_Packages_CreatedAtUtc ON dbo.Packages(CreatedAtUtc);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_Status' AND object_id = OBJECT_ID('dbo.Packages'))
+    CREATE INDEX IX_Packages_Status ON dbo.Packages(Status);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_RecipientId' AND object_id = OBJECT_ID('dbo.Packages'))
+    CREATE INDEX IX_Packages_RecipientId ON dbo.Packages(RecipientId);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_CreatedAtUtc' AND object_id = OBJECT_ID('dbo.Packages'))
+    CREATE INDEX IX_Packages_CreatedAtUtc ON dbo.Packages(CreatedAtUtc);
 GO
 
 -- ===================== Status history (FR-04, DR-009, DR-010) =====================
@@ -95,7 +98,8 @@ CREATE TABLE dbo.PackageStatusHistory (
     Notes                          NVARCHAR(300) NULL
 );
 GO
-CREATE INDEX IX_PackageStatusHistory_PackageId ON dbo.PackageStatusHistory(PackageId);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_PackageStatusHistory_PackageId' AND object_id = OBJECT_ID('dbo.PackageStatusHistory'))
+    CREATE INDEX IX_PackageStatusHistory_PackageId ON dbo.PackageStatusHistory(PackageId);
 GO
 
 -- ===================== Notifications (FR-06, FR-09, FR-10, IR-001..IR-004, DR-012) =====
@@ -124,7 +128,8 @@ CREATE TABLE dbo.NotificationLog (
     SentAtUtc                 DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
-CREATE INDEX IX_NotificationLog_PackageId ON dbo.NotificationLog(PackageId);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_NotificationLog_PackageId' AND object_id = OBJECT_ID('dbo.NotificationLog'))
+    CREATE INDEX IX_NotificationLog_PackageId ON dbo.NotificationLog(PackageId);
 GO
 
 -- ===================== Audit log — append-only (SR-04, NFR-019, DR-010, DR-011) =====
@@ -140,7 +145,8 @@ CREATE TABLE dbo.AuditLog (
 );
 -- No update/delete grants or code paths should ever target this table.
 GO
-CREATE INDEX IX_AuditLog_OccurredAtUtc ON dbo.AuditLog(OccurredAtUtc);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_AuditLog_OccurredAtUtc' AND object_id = OBJECT_ID('dbo.AuditLog'))
+    CREATE INDEX IX_AuditLog_OccurredAtUtc ON dbo.AuditLog(OccurredAtUtc);
 GO
 
 -- ===================== Config (OR-01, NFR-024, IR-004) =====================

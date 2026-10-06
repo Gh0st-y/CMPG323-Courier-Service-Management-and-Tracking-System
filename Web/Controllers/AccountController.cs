@@ -13,7 +13,7 @@ namespace CourierService.Web.Controllers
 
             if (Request.QueryString["expired"] == "1")
             {
-                ViewBag.Message = "Your session has expired. Please sign in again.";
+                ViewBag.Message = "Your session has expired. Please log in again.";
             }
 
             return View(new LoginViewModel());
