@@ -5,9 +5,12 @@
 <h1 class="app-page-title">F20 Courier Service Dashboard</h1>
 
 <!-- TODO This is the Mock toggle remove later (dev tool)-->
-<div class="dashboard-mock" id="dashboard-mock">
-    Mock mode: <strong id="mock-mode-label"></strong>
-    <button type="button" class="btn btn-secondary" id="toggle-mock-mode">Toggle</button>
+<div class="dashboard-mock">
+    <label class="mock-switch" for="toggle-mock-mode">
+        <input type="checkbox" role="switch" id="toggle-mock-mode" class="mock-switch__input" />
+        <span class="mock-switch__track" aria-hidden="true"></span>
+        <span class="mock-switch__text">Mock mode: <strong id="mock-mode-label">OFF</strong></span>
+    </label>
 </div>
 
 <section class="dashboard-alert" id="dashboard-error" role="alert" aria-live="assertive" hidden>
@@ -187,14 +190,17 @@
             var mockToggleEl = document.getElementById("toggle-mock-mode");
 
             function refreshMockLabel() {
-                mockLabelEl.textContent = CourierApp.config.mockMode ? "ON" : "OFF";
+                mockToggleEl.checked = !!CourierApp.config.mockMode;
+                mockLabelEl.textContent = mockToggleEl.checked ? "ON" : "OFF";
             }
 
-            mockToggleEl.addEventListener("click", function () {
-                CourierApp.config.setMockMode(!CourierApp.config.mockMode);
+            mockToggleEl.addEventListener("change", function () {
+                CourierApp.config.setMockMode(mockToggleEl.checked);
                 refreshMockLabel();
                 loadDashboardStats();
-            });//END of mockmode
+            });
+
+            refreshMockLabel();//END of mockmode
 
             refreshMockLabel();
             applyActionVisibility();
