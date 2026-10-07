@@ -12,7 +12,7 @@ using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
-    public class PackagesController : Controller
+    public partial class PackagesController : Controller
     {
         private readonly IPackageRepository _packages;
 
