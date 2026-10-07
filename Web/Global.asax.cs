@@ -4,6 +4,7 @@ using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web
 {
@@ -14,6 +15,9 @@ namespace CourierService.Web
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
 
+            // T52: a database outage becomes 503 Service Unavailable instead of a generic error
+            GlobalFilters.Filters.Add(new DatabaseUnavailableFilter());
+
             // Controllers read JSON request bodies themselves (RequestBody.Read) so they can answer 400 for a bad body.
             // MVC's own JSON value provider would parse the body first and throw on bad JSON, which comes out as a 500.
             var jsonProvider = ValueProviderFactories.Factories.OfType<JsonValueProviderFactory>().FirstOrDefault();
@@ -23,12 +27,12 @@ namespace CourierService.Web
             }
         }
 
-        
+
         /// T12: turns the logged-in session (set by AuthController.Login) into the request's
         /// User/IPrincipal, so standard [Authorize(Roles = "...")] attributes work against it
         /// in T13 onward. Must be PostAcquireRequestState, not PostAuthenticateRequest —
         /// Session isn't loaded yet at the authenticate stage and would read as null there.
-        
+
         protected void Application_PostAcquireRequestState(object sender, EventArgs e)
         {
             var context = HttpContext.Current;
