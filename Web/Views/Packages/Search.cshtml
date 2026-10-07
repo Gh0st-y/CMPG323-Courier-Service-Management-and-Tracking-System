@@ -61,12 +61,13 @@
                 <th>Recipient</th>
                 <th>Status</th>
                 <th>Classification</th>
+                <th>Payment</th>
                 <th>Fee</th>
                 <th>Date Received</th>
             </tr>
         </thead>
         <tbody id="results-body">
-            <tr><td colspan="6" class="results-empty">Loading…</td></tr>
+            <tr><td colspan="7" class="results-empty">Loading…</td></tr>
         </tbody>
     </table>
 
@@ -193,7 +194,7 @@
                 var items = state.allItems;
 
                 if (!items.length) {
-                    tbodyEl.innerHTML = '<tr><td colspan="6" class="results-empty">No packages match your filters.</td></tr>';
+                    tbodyEl.innerHTML = '<tr><td colspan="7" class="results-empty">No packages match your filters.</td></tr>';
                 } else {
                     tbodyEl.innerHTML = "";
                     items.forEach(function (p) {
@@ -217,6 +218,7 @@
                         cell(p.recipientName);
                         cell(statusLabel(p.status), "results-table__status results-table__status--" + p.status);
                         cell(p.classification === "WorkRelated" ? "Work" : "Personal");
+                        cell(p.paymentStatus || "—", "results-table__payment results-table__payment--" + (p.paymentStatus || "unknown"));
                         cell(formatFee(p.fee));
                         cell(formatDate(receivedAt(p)));
                         tbodyEl.appendChild(tr);

@@ -59,7 +59,12 @@ Standard status codes: `400` validation, `401` not authenticated, `403` wrong ro
 ## Dashboard (UI: Dashboard)
 | Method | Path | Roles | Body → Response |
 |---|---|---|---|
-| GET | `/api/dashboard/stats` | any authenticated | → `{receivedToday, readyForCollection, collectedToday, outstanding}` |
+| GET | `/api/dashboard/stats?period=today\|week\|month` | any authenticated | → `{period, receivedToday, readyForCollection, collectedToday, outstanding, recentActivity:[{f20Identifier, fromStatus, toStatus, changedBy, changedAtUtc}]}`; any other `period` → 400 `InvalidPeriod` |
+
+Notes for the Dashboard endpoint:
+- `period` is optional and defaults to `today`. "Today" is the current calendar day in South African time (UTC+2), not the UTC day. `week` is the last 7 days including today, `month` the last 30 days including today.
+- **`receivedToday` and `collectedToday` hold the totals for the whole period.** With `period=week` or `period=month` they are the week's or month's totals, even though the names say "Today". `readyForCollection` and `outstanding` are current counts and ignore `period`.
+- `recentActivity` is the 10 most recent status changes, newest first. `fromStatus` is `null` for a package's first status. `changedAtUtc` is an ISO 8601 UTC timestamp. It includes staff usernames, which is why the endpoint needs a login.
 
 ## Users / admin (FR-02, SR-01)
 | Method | Path | Roles | Body → Response |
@@ -133,3 +138,23 @@ All three endpoints are SystemAdmin only (`401 NotAuthenticated` when not logged
 - `400 ValidationError` for an unknown role or an empty body; `400 OwnAccount` if an admin tries to change their own role or deactivate themselves; `404 NotFound` for an unknown id; `409 LastAdministrator` if the change would leave no active SystemAdmin.
 - A deactivated user can no longer log in. A session that is already open stays valid until it times out (30 minutes, `Session.InactivityTimeoutMinutes`).
 - Each change is written to the audit log as `UserCreated`, `UserRoleChanged` (detail e.g. `Role: IntakeClerk -> Supervisor`), `UserDeactivated` or `UserReactivated`. The entity id is the user's id; no names or email addresses go into the audit detail (SR-03).
+
+## Response details: registration and QR label
+
+**`POST /api/packages`** (IntakeClerk, Supervisor, SystemAdmin) body, as sent by the registration form:
+`{ "recipient": { "fullName", "identifierNo", "email", "phone", "department" }, "senderName", "packageType", "classification", "storageLocationId", "notes" }`.
+- `201` returns `{ packageId, f20Identifier, fee, paymentStatus, status: "Registered" }`.
+- Required: `recipient.fullName`, `recipient.identifierNo`, `recipient.email`, `recipient.phone`, `senderName`, `packageType`, `classification`, `storageLocationId`. Optional: `recipient.department`, `notes`. Text is trimmed and limited to the column sizes in `db/schema.sql`.
+- `packageType` is one of `Envelope`, `Box`, `Parcel`, `Other`. `classification` is `Personal` or `WorkRelated` (also accepted: `Work-related`, `work related`, any letter case).
+- `phone` may contain spaces, dashes, dots or brackets; it is stored as digits (with an optional leading `+`) and must be 9 to 15 digits.
+- `storageLocationId` must be an active location from `GET /api/storage-locations`.
+- `f20Identifier` is `F20-` plus the next free number, at least four digits (`F20-0201`, or `F20-60001` with the 50,000-package seed). It is assigned inside the registration's transaction, so two clerks registering at the same moment never get the same one.
+- `fee` comes from `dbo.AppConfig` (`Fee.Personal`, `Fee.WorkRelated`), so changing the fee needs no redeploy (FR-15). A fee of 0 gives `paymentStatus` `Exempt`, anything else `Unpaid` (FR-17).
+- The recipient's details are saved with this package as a new recipient row (the details as given at registration).
+- The package, recipient, first status history row (`Registered`) and the `PackageCreated` audit entry are saved in one transaction. The audit detail holds only the classification and fee, no names or contact details (SR-03).
+- `400 ValidationError` with a message the form can show, for a missing or invalid field or a body that isn't valid JSON.
+
+**`GET /api/packages/{f20Identifier}/qr`** (any logged-in user) returns the label's QR code as `image/png`.
+- The QR code holds the F20 identifier only (CON-008), so a lost label shows no personal details and the scan screens can look the package up from it.
+- Only drawn for packages that exist: an unknown or malformed identifier gives the same `404 NotFound` as the scan endpoint.
+- Sent with `Cache-Control: private`, so only the user's own browser keeps a copy.

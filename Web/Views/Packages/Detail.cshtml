@@ -59,7 +59,20 @@
                 <dd id="d-fee">—</dd>
 
                 <dt>Payment Status</dt>
-                <dd id="d-payment">—</dd>
+                <dd>
+                    <div class="payment-control">
+                        <span class="payment-control__current" id="d-payment">—</span>
+                        <div class="payment-control__actions">
+                            <select id="d-payment-select" aria-label="Payment status">
+                                <option value="Unpaid">Unpaid</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Exempt">Exempt</option>
+                            </select>
+                            <button type="button" class="btn btn-primary btn-sm" id="d-payment-save">Save</button>
+                        </div>
+                        <span class="payment-control__meta" id="d-payment-meta" hidden></span>
+                    </div>
+                </dd>
 
                 <dt>Storage Location</dt>
                 <dd id="d-location">—</dd>
@@ -158,7 +171,23 @@
                     setText("d-recipient", pkg.recipientName);
                     setText("d-classification", pkg.classification === "WorkRelated" ? "Work" : (pkg.classification || "—"));
                     setText("d-fee", formatFee(pkg.fee));
-                    setText("d-payment", pkg.paymentStatus || "—");
+                    // Payment status display + control
+                    var paymentStatus = pkg.paymentStatus || "Unpaid";
+                    setText("d-payment", paymentStatus);
+                    var paymentSelect = document.getElementById("d-payment-select");
+                    if (paymentSelect) paymentSelect.value = paymentStatus;
+
+                    var metaEl = document.getElementById("d-payment-meta");
+                    if (metaEl) {
+                        if (pkg.paymentStatusUpdatedAtUtc) {
+                            metaEl.textContent = "Last updated " + formatDateTime(pkg.paymentStatusUpdatedAtUtc) +
+                                (pkg.paymentStatusUpdatedBy ? " by " + pkg.paymentStatusUpdatedBy : "");
+                            metaEl.hidden = false;
+                        } else {
+                            metaEl.textContent = "Not yet updated.";
+                            metaEl.hidden = false;
+                        }
+                    }
                     setText("d-location", pkg.storageLocation);
                     setText("d-created", formatDate(pkg.createdAtUtc));
 
@@ -219,6 +248,32 @@
                             notifEl.appendChild(li);
                         });
                     }
+                    // Payment save handler
+                    document.getElementById("d-payment-save").addEventListener("click", function () {
+                        var newStatus = document.getElementById("d-payment-select").value;
+                        var saveBtn = document.getElementById("d-payment-save");
+
+                        saveBtn.disabled = true;
+
+                        CourierApp.api.patch("/packages/" + encodeURIComponent(f20Identifier) + "/payment", { paymentStatus: newStatus })
+                            .then(function (response) {
+                                CourierApp.toast.success("Payment status updated to " + response.paymentStatus + ".");
+                                // Update the display
+                                setText("d-payment", response.paymentStatus);
+                                var metaEl = document.getElementById("d-payment-meta");
+                                if (metaEl) {
+                                    metaEl.textContent = "Last updated " + formatDateTime(response.paymentStatusUpdatedAtUtc) +
+                                        (response.paymentStatusUpdatedBy ? " by " + response.paymentStatusUpdatedBy : "");
+                                    metaEl.hidden = false;
+                                }
+                            })
+                            .catch(function () {
+                                // Error toast already shown by CourierApp
+                            })
+                            .finally(function () {
+                                saveBtn.disabled = false;
+                            });
+                    });
                     document.getElementById("detail-header").style.display = "flex";
                     contentEl.style.display = "grid";
                 })

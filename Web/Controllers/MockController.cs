@@ -14,7 +14,7 @@ namespace CourierService.Web.Controllers
     public class MockController : Controller
     {
         // GET: /Mock/Fixtures
-        [RoleAuthorize]
+        [AllowAnonymous]
         public ActionResult Fixtures()
         {
             var repoRoot = Path.GetFullPath(Path.Combine(HttpRuntime.AppDomainAppPath, ".."));

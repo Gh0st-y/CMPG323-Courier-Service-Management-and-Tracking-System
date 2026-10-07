@@ -8,11 +8,12 @@ using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
 using CourierService.Domain.Models;
 using CourierService.Domain.Repositories;
+using CourierService.Services.Packages;
 using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
-    public class PackagesController : Controller
+    public partial class PackagesController : Controller
     {
         private readonly IPackageRepository _packages;
         private readonly IPackageDetailRepository _packageDetail;
@@ -29,19 +30,11 @@ namespace CourierService.Web.Controllers
             _packageDetail = packageDetail;
         }
 
-        /// <summary>
-        /// Renders the package registration form (FR-03, UR-01).
-        /// All API calls are made client-side via CourierApp.api, so this action just returns the view.
-        /// </summary>
         public ActionResult Register()
         {
             return View();
         }
 
-        /// <summary>
-        /// Renders the print-friendly label view for a package (FR-03, CON-008).
-        /// The f20Identifier is passed through to the view, which fetches details via CourierApp.api.
-        /// </summary>
         public ActionResult Label(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -52,19 +45,11 @@ namespace CourierService.Web.Controllers
             return View(model: id);
         }
 
-        /// <summary>
-        /// Renders the search and results page (FR-05, UR-01).
-        /// Filtering and paging happen client-side via CourierApp.api against Get/api/packages.
-        /// </summary>
         public ActionResult Search()
         {
             return View();
         }
 
-        /// <summary>
-        /// Renders the package detail page with status, location, fee, timeline, and notifications (FR-05, DR-012).
-        /// The f20Identifier is passed to the view, which fetches details via CourierApp.api.
-        /// </summary>
         public ActionResult Detail(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -158,71 +143,63 @@ namespace CourierService.Web.Controllers
         [Route("api/packages/{f20Identifier}/detail")]
         public ActionResult DetailJson(string f20Identifier)
         {
-            if (string.IsNullOrWhiteSpace(f20Identifier))
+            string identifier;
+            if (!PackageIdentifier.TryNormalize(f20Identifier, out identifier))
                 return ErrorJson(400, "ValidationError", "f20Identifier is required.");
 
-            try
-            {
-                var package = _packages.GetByF20Identifier(f20Identifier.Trim());
-                if (package == null)
-                    return ErrorJson(404, "NotFound", "No package found for that identifier.");
+            var package = _packages.GetByF20Identifier(identifier);
+            if (package == null)
+                return ErrorJson(404, "NotFound", "No package found for that identifier.");
 
-                var statusHistory = _packageDetail.GetStatusHistory(package.PackageId)
-                    .Select(h => new
-                    {
-                        fromStatus = h.FromStatus,
-                        toStatus = h.ToStatus,
-                        changedBy = h.ChangedByUsername,
-                        changedAtUtc = IsoUtc(h.ChangedAtUtc),
-                        notes = h.Notes
-                    }).ToList();
-
-                var notifications = _packageDetail.GetNotificationLog(package.PackageId)
-                    .Select(n => new
-                    {
-                        channel = n.Channel,
-                        recipientAddress = n.RecipientAddress,
-                        subject = n.Subject,
-                        status = n.Status,
-                        sentAtUtc = IsoUtc(n.SentAtUtc)
-                    }).ToList();
-
-                var packageJson = new
+            var statusHistory = _packageDetail.GetStatusHistory(package.PackageId)
+                .Select(h => new
                 {
-                    packageId = package.PackageId,
-                    f20Identifier = package.F20Identifier,
-                    status = package.Status.ToString(),
-                    classification = package.Classification,
-                    packageType = package.PackageType,
-                    paymentStatus = package.PaymentStatus,
-                    fee = package.Fee,
-                    storageLocationId = package.StorageLocationId,
-                    notes = package.Notes,
-                    receivedAtUtc = IsoUtc(package.CreatedAtUtc),
-                    collectedAtUtc = IsoUtc(package.CollectedAtUtc),
-                    recipient = new
-                    {
-                        recipientId = package.Recipient.RecipientId,
-                        fullName = package.Recipient.FullName,
-                        identifierNo = package.Recipient.IdentifierNo,
-                        email = package.Recipient.Email,
-                        phoneNumber = package.Recipient.PhoneNumber,
-                        department = package.Recipient.Department
-                    }
-                };
+                    fromStatus = h.FromStatus,
+                    toStatus = h.ToStatus,
+                    changedBy = h.ChangedByUsername,
+                    changedAtUtc = IsoUtc(h.ChangedAtUtc),
+                    notes = h.Notes
+                }).ToList();
 
-                return Json(new
+            var notifications = _packageDetail.GetNotificationLog(package.PackageId)
+                .Select(n => new
                 {
-                    package = packageJson,
-                    statusHistory,
-                    notifications
-                }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
+                    channel = n.Channel,
+                    recipientAddress = PersonalData.MaskPhone(n.RecipientAddress),
+                    subject = n.Subject,
+                    status = n.Status,
+                    sentAtUtc = IsoUtc(n.SentAtUtc)
+                }).ToList();
+
+            var packageJson = new
             {
-                Trace.TraceError(ex.ToString());
-                return ErrorJson(500, "ServerError", "Something went wrong while loading the package. Please try again.");
-            }
+                packageId = package.PackageId,
+                f20Identifier = package.F20Identifier,
+                status = package.Status.ToString(),
+                classification = package.Classification,
+                packageType = package.PackageType,
+                paymentStatus = package.PaymentStatus,
+                fee = package.Fee,
+                storageLocationId = package.StorageLocationId,
+                notes = package.Notes,
+                receivedAtUtc = IsoUtc(package.CreatedAtUtc),
+                collectedAtUtc = IsoUtc(package.CollectedAtUtc),
+                recipient = new
+                {
+                    recipientId = package.Recipient.RecipientId,
+                    fullName = package.Recipient.FullName,
+                    identifierNo = package.Recipient.IdentifierNo,
+                    phoneNumber = PersonalData.MaskPhone(package.Recipient.PhoneNumber),
+                    department = package.Recipient.Department
+                }
+            };
+
+            return Json(new
+            {
+                package = packageJson,
+                statusHistory,
+                notifications
+            }, JsonRequestBehavior.AllowGet);
         }
 
         private ActionResult ErrorJson(int statusCode, string code, string message)
