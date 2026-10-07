@@ -1,18 +1,20 @@
 using System.IO;
 using System.Web;
 using System.Web.Mvc;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
     /// <summary>
-    /// Dev-only convenience: serves frontend-mocks/mock-fixtures.json (single source of truth,
-    /// shared with T09/other FE work) to the browser. IIS/IIS Express won't otherwise serve it,
-    /// since that folder lives outside the Web project's own directory. Not part of the real
-    /// API contract (docs/API_CONTRACT.md) — the shared JS fetch wrapper only calls this when
-    /// mock mode is switched on (T07).
+    /// Dev-only convenience: serves frontend-mocks/mock-fixtures.json (single source of truth, shared with other FE work)
+    /// to the browser. IIS/IIS Express won't otherwise serve it, since that folder lives outside the Web project's own
+    /// directory. Not part of the real API contract (docs/API_CONTRACT.md): the shared JS fetch wrapper only calls this
+    /// when mock mode is switched on (T07). It only ever reads the file.
     /// </summary>
     public class MockController : Controller
     {
+        // GET: /Mock/Fixtures
+        [AllowAnonymous]
         public ActionResult Fixtures()
         {
             var repoRoot = Path.GetFullPath(Path.Combine(HttpRuntime.AppDomainAppPath, ".."));

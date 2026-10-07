@@ -1,0 +1,9 @@
+﻿TrackingNumber,RecipientName,RecipientEmail,RecipientPhone,StorageLocation,Fee
+PKG10001,John Doe,john.doe@example.com,0821234567,A1-01,15.00
+PKG10002,Jane Smith,jane.smith@example.com,0839876543,B2-04,20.00
+,Thabo Nkosi,thabo.nkosi@example.com,0841112222,C3-09,10.00
+PKG10004,,sipho.m@example.com,0853334444,A2-02,0.00
+PKG10005,Michael Scott,invalid-email-format,0865556666,B1-05,12.50
+PKG10006,Sarah Connor,sarah.c@example.com,0877778888,D4-12,abc
+PKG10007,David Miller,david.m@example.com,1234,E1-02,10.00
+PKG10008,Alice Williams,alice.w@example.com,0890001111,F3-01,-5.00
