@@ -59,6 +59,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
+    <Compile Include="Controllers\Api\UsersApiController.cs" />
     <Compile Include="Controllers\CollectionController.cs" />
     <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -78,6 +79,8 @@
     <Compile Include="Models\Api\Packages\CollectRequest.cs" />
     <Compile Include="Models\Api\Packages\StatusChangeRequest.cs" />
     <Compile Include="Infrastructure\HttpsRedirectModule.cs" />
+    <Compile Include="Models\Api\Users\CreateUserRequest.cs" />
+    <Compile Include="Models\Api\Users\UpdateUserRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
