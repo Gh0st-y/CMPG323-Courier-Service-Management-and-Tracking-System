@@ -25,6 +25,9 @@ namespace CourierService.Web
             {
                 ValueProviderFactories.Factories.Remove(jsonProvider);
             }
+
+            // T25: sends queued notifications in the background, so staff actions never wait for the mail server
+            NotificationWorker.Start();
         }
 
 
