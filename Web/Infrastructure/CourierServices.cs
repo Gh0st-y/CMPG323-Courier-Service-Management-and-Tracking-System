@@ -57,12 +57,16 @@ namespace CourierService.Web.Infrastructure
         }
 
         /// <summary>
-        /// One sender per channel. Until the SMTP sender (T26) and SMS adapter (T29) are in, the stand-in writes a line
-        /// to the Output window instead of sending. T26/T29: replace the TraceNotificationSender here.
+        /// One sender per channel. Email goes through SMTP (T26) using the Smtp.* settings in Web.config. With Smtp.Host
+        /// left empty, the stand-in writes a line to the Output window instead, for machines without a mail server.
+        /// T29: replace the SMS stand-in here.
         /// </summary>
         private static IEnumerable<INotificationSender> NotificationSenders()
         {
-            yield return new TraceNotificationSender(NotificationChannels.Email);
+            var smtp = SmtpSettings.FromAppSettings(ConfigurationManager.AppSettings);
+            yield return string.IsNullOrWhiteSpace(smtp.Host)
+                ? (INotificationSender)new TraceNotificationSender(NotificationChannels.Email)
+                : new SmtpNotificationSender(smtp);
 
             if (SmsEnabled())
             {
