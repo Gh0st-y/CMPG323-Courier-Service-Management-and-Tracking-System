@@ -2,13 +2,12 @@
     ViewBag.Title = "Scan";
 }
 
-<h1 class="app-page-title">Scan (T10 spike)</h1>
+<h1 class="app-page-title">Scan</h1>
 <p>
-    Demonstrates two ways to feed a package identifier into the same lookup call
-    (<code>GET /api/packages/scan/{f20Identifier}</code>). See
-    <code>docs/SCANNING_SPIKE.md</code> in the repo for findings. Mock mode must be on
-    for this page to return data &#8208; toggle it from the
-    <a href="@Url.Action("Index", "Home")">home page</a> first.
+    Scan a package with a USB scanner or a phone camera. Both look the package up the same way
+    (<code>GET /api/packages/scan/{f20Identifier}</code>), then you can move it to its next status.
+    You need to be logged in as storage staff, a supervisor or an admin to change a status.
+    Notes on scanners and HTTPS: <code>docs/SCANNING_SPIKE.md</code>.
 </p>
 
 <div class="card" style="margin-bottom: 16px;">
@@ -57,10 +56,14 @@
         </div>
 
         <div class="form-row">
-            <label for="location-input">Storage Location <span class="optional">(e.g. Shelf A-3)</span></label>
-            <input type="text" id="location-input" placeholder="e.g. Shelf A-3" />
-            <span class="field-error" id="location-input-error"></span>
+            <label for="location-select">Storage Location <span class="optional">(optional)</span></label>
+            <select id="location-select">
+                <option value="">(keep current location)</option>
+            </select>
+            <span class="field-error" id="location-select-error"></span>
         </div>
+
+        <p id="status-update-note" style="color: var(--color-text-muted);"></p>
 
         <div class="form-actions">
             <button type="button" id="confirm-status-update" class="btn btn-primary">Confirm Update</button>
