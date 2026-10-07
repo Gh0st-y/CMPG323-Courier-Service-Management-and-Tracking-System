@@ -82,9 +82,13 @@
                 var currentController = (string)ViewContext.RouteData.Values["controller"];
                 var currentAction = (string)ViewContext.RouteData.Values["action"];
                 var isScanActive = currentController == "Scan" || currentController == "Collection";
+                var userName = Session["UserName"] as string;
+                var isSignedIn = !string.IsNullOrWhiteSpace(userName);
+
             }
             <a class="app-nav__link @(currentController == "Home" ? "is-active" : "")" href="@Url.Action("Index", "Home")">Dashboard</a>
             <!-- The links below are placeholders until their controllers land in later tasks. -->
+            <!-- TODO - Role based and login/logout nav bar-->
             <a class="app-nav__link @(currentController == "Packages" && ViewContext.RouteData.Values["action"].ToString() == "Register" ? "is-active" : "")" href="@Url.Action("Register", "Packages")">Register</a>
             <a class="app-nav__link @(currentController == "Packages" && ViewContext.RouteData.Values["action"].ToString() == "Search" ? "is-active" : "")" href="@Url.Action("Search", "Packages")">Search</a>
             <!-- Scan Dropdown using native site.css classes -->
@@ -97,6 +101,9 @@
                 </div>
             </div>
             <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
+            <a class="app-nav__link @(currentController == "Scan" ? "is-active" : "")" href="@Url.Action("Index", "Scan")">Scan</a>
+            <a class="app-nav__link @(currentController == "Account" ? "is-active" : "")" href="@Url.Action("Login", "Account")">Login</a>
+            <a class="app-nav__link" href="#">Import</a>
             <a class="app-nav__link" href="#">Audit Log</a>
             <a class="app-nav__link" href="#">Users</a>
             <a class="app-nav__link" href="#">Config</a>

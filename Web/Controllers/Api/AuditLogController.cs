@@ -6,6 +6,8 @@ using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
 using CourierService.Services.Audit;
+using CourierService.Services.Security;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers.Api
 {
@@ -19,23 +21,11 @@ namespace CourierService.Web.Controllers.Api
             var connectionFactory = new SqlConnectionFactory();
             _queryService = new AuditLogQueryService(new AuditLogQueryRepository(connectionFactory));
         }
-
+        [RoleAuthorize(RoleNames.Supervisor, RoleNames.SystemAdmin)]
         [HttpGet]
         [Route("api/audit-log")]
         public ActionResult Search()
         {
-            // T13 will move this role check into a shared filter
-            var roleName = Session["RoleName"] as string;
-            if (string.IsNullOrEmpty(roleName))
-            {
-                return ApiError(401, "NotAuthenticated", "Please log in to continue.");
-            }
-
-            if (roleName != "Supervisor" && roleName != "SystemAdmin")
-            {
-                return ApiError(403, "Forbidden", "You do not have permission to view the audit log.");
-            }
-
             // Read from the query string directly. A method parameter called "action" would be
             // filled from the route value (the controller's action name) and not from the URL.
             var query = Request.QueryString;

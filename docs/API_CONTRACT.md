@@ -118,3 +118,23 @@ These were only described as "the record" above; this is what the implemented en
 - The package records who verified the collector and when; the history row and audit entry record the logged-in user who processed it.
 
 **`GET /api/storage-locations`** (any logged-in user) returns the active locations as `[{ storageLocationId, code, description }]`. Adding a location (`POST`, SystemAdmin) is not built yet (T24).
+
+## Response details: users (T43)
+
+All three endpoints are SystemAdmin only (`401 NotAuthenticated` when not logged in, `403 Forbidden` for other roles).
+
+**`GET /api/users`** returns every user, active or not, ordered by username:
+`[{ userId, username, email, role, isActive, lastLoginUtc }]`. `lastLoginUtc` is `null` for someone who has never logged in. The password hash is never returned.
+
+**`POST /api/users`** body `{ "username": "new.clerk", "email": "new.clerk@courier.test", "password": "Welcome123", "role": "IntakeClerk" }`.
+- `201` returns the new user (same shape as one item from `GET`). New users are active.
+- `role` is one of the five role names, in any letter case.
+- `username`: 3 to 100 characters, letters, numbers, `.`, `-` and `_` only. `email`: up to 200 characters and must look like an address.
+- `password`: at least 8 characters with at least one letter and one number (NRF-014), at most 72 bytes because BCrypt ignores anything longer. Stored as a BCrypt hash (work factor 11), never as plain text.
+- `400 ValidationError` for a missing or invalid field or a body that isn't valid JSON; `409 UsernameTaken` or `409 EmailTaken` if either is already used by another account (not case sensitive).
+
+**`PATCH /api/users/{id}`** body `{ "role": "Supervisor", "isActive": false }`. Both fields are optional, but at least one must be sent; a field left out keeps its value.
+- `200` returns the updated user. Sending values the user already has is fine and changes nothing.
+- `400 ValidationError` for an unknown role or an empty body; `400 OwnAccount` if an admin tries to change their own role or deactivate themselves; `404 NotFound` for an unknown id; `409 LastAdministrator` if the change would leave no active SystemAdmin.
+- A deactivated user can no longer log in. A session that is already open stays valid until it times out (30 minutes, `Session.InactivityTimeoutMinutes`).
+- Each change is written to the audit log as `UserCreated`, `UserRoleChanged` (detail e.g. `Role: IntakeClerk -> Supervisor`), `UserDeactivated` or `UserReactivated`. The entity id is the user's id; no names or email addresses go into the audit detail (SR-03).

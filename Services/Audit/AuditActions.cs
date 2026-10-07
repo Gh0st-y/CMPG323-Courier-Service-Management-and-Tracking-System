@@ -11,6 +11,10 @@
         public const string PackageCollected = "PackageCollected";
         public const string CsvImported = "CsvImported";
         public const string ConfigChanged = "ConfigChanged";
+        public const string UserCreated = "UserCreated";
+        public const string UserRoleChanged = "UserRoleChanged";
+        public const string UserDeactivated = "UserDeactivated";
+        public const string UserReactivated = "UserReactivated";
     }
 
     // Values for the EntityType column.

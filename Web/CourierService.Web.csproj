@@ -13,7 +13,7 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>44301</IISExpressSSLPort>
+    <IISExpressSSLPort>44324</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -38,6 +38,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -60,8 +61,10 @@
 
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
+    <Compile Include="Controllers\Api\UsersApiController.cs" />
     <Compile Include="Controllers\CollectionController.cs" />
     <Compile Include="Controllers\CsvImportController.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MockController.cs" />
     <Compile Include="Controllers\PackageActionsController.cs" />
@@ -70,13 +73,17 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Infrastructure\CourierServices.cs" />
+    <Compile Include="Infrastructure\DatabaseUnavailableFilter.cs" />
     <Compile Include="Infrastructure\RequestBody.cs" />
     <Compile Include="Infrastructure\RoleAuthorizeAttribute.cs" />
     <Compile Include="Models\Api\Auth\LoginRequest.cs" />
     <Compile Include="Models\Api\Packages\CollectRequest.cs" />
     <Compile Include="Models\Api\Packages\StatusChangeRequest.cs" />
     <Compile Include="Infrastructure\HttpsRedirectModule.cs" />
+    <Compile Include="Models\Api\Users\CreateUserRequest.cs" />
+    <Compile Include="Models\Api\Users\UpdateUserRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -114,20 +121,20 @@
       <Version>5.2.9</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client">
-      <Version>5.2.9</Version>
+      <Version>6.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNet.WebApi.Core">
-      <Version>5.2.9</Version>
+      <Version>5.3.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNet.WebApi.WebHost">
-      <Version>5.2.9</Version>
+      <Version>5.3.0</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNet.WebPages" Version="3.2.9" />
+    <PackageReference Include="Microsoft.AspNet.WebPages" Version="3.3.0" />
     <PackageReference Include="Microsoft.Web.Infrastructure" Version="2.0.1" />
     <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="4.14.0-preview1" />
     <PackageReference Include="Antlr" Version="3.5.0.2" />
     <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.3</Version>
+      <Version>13.0.4</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +149,10 @@
   <ItemGroup>
     <Content Include="Views\Packages\Detail.cshtml" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Views\Account\Login.cshtml" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Views\CsvImport\Index.cshtml" />
   </ItemGroup>
@@ -153,6 +164,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\templetes\Sample-package-importV2.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
