@@ -1,19 +1,17 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
 using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Domain.Repositories;
+using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
 {
     /// <summary>
-    /// T23: dashboard counts, per the API contract, plus a recent-activity list. The list's
-    /// shape is a placeholder — not yet defined in docs/API_CONTRACT.md (see PR notes).
+    /// T23: dashboard counts plus a recent-activity list, as described in docs/API_CONTRACT.md.
     /// </summary>
-    // TODO: add [Authorize] once login (FR-01) lands.
     public class DashboardController : Controller
     {
         private readonly IDashboardRepository _dashboard;
@@ -28,6 +26,7 @@ namespace CourierService.Web.Controllers
             _dashboard = dashboard;
         }
 
+        [RoleAuthorize]
         [HttpGet]
         [Route("api/dashboard/stats")]
         public ActionResult Stats(string period)
@@ -43,38 +42,35 @@ namespace CourierService.Web.Controllers
                     JsonRequestBehavior.AllowGet);
             }
 
-            try
-            {
-                var stats = _dashboard.GetStats(normalizedPeriod);
-                var activity = _dashboard.GetRecentActivity(10)
-                    .Select(a => new
-                    {
-                        f20Identifier = a.F20Identifier,
-                        fromStatus = a.FromStatus,
-                        toStatus = a.ToStatus,
-                        changedBy = a.ChangedByUsername,
-                        changedAtUtc = a.ChangedAtUtc.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)
-                    })
-                    .ToList();
-
-                return Json(new
+            var stats = _dashboard.GetStats(normalizedPeriod);
+            var activity = _dashboard.GetRecentActivity(10)
+                .Select(a => new
                 {
-                    period = normalizedPeriod,
-                    receivedToday = stats.ReceivedToday,
-                    readyForCollection = stats.ReadyForCollection,
-                    collectedToday = stats.CollectedToday,
-                    outstanding = stats.Outstanding,
-                    recentActivity = activity
-                }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
+                    f20Identifier = a.F20Identifier,
+                    fromStatus = a.FromStatus,
+                    toStatus = a.ToStatus,
+                    changedBy = a.ChangedByUsername,
+                    changedAtUtc = a.ChangedAtUtc.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)
+                })
+                .ToList();
+
+            return Json(new
             {
-                Trace.TraceError(ex.ToString());
-                Response.StatusCode = 500;
-                Response.TrySkipIisCustomErrors = true;
-                return Json(new { error = new { code = "ServerError", message = "Something went wrong while loading the dashboard. Please try again." } },
-                    JsonRequestBehavior.AllowGet);
-            }
+                period = normalizedPeriod,
+                receivedToday = stats.ReceivedToday,
+                readyForCollection = stats.ReadyForCollection,
+                collectedToday = stats.CollectedToday,
+                outstanding = stats.Outstanding,
+                recentActivity = activity
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        // Logs anything unexpected, then leaves it unhandled so the global filter (T52) picks the status code:
+        // 503 for a database outage, 500 for anything else.
+        protected override void OnException(ExceptionContext filterContext)
+        {
+            Trace.TraceError(filterContext.Exception.ToString());
+            base.OnException(filterContext);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using CourierService.Domain;
 using CourierService.Domain.Models;
@@ -15,26 +16,41 @@ namespace CourierService.Data.Repositories
             _connectionFactory = connectionFactory;
         }
 
+        // "Today" is the current calendar day in South Africa (SAST, UTC+2, no daylight saving), not the UTC day,
+        // so packages received just after local midnight count towards the right day. If the machine has no such
+        // Windows time zone, fall back to the server's own local zone.
+        private const string LocalTimeZoneId = "South Africa Standard Time";
+        private static readonly TimeZoneInfo LocalTimeZone = ResolveLocalTimeZone();
+
+        private static TimeZoneInfo ResolveLocalTimeZone()
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(LocalTimeZoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return TimeZoneInfo.Local;
+            }
+            catch (InvalidTimeZoneException)
+            {
+                return TimeZoneInfo.Local;
+            }
+        }
+
         public DashboardStats GetStats(string period = "today")
         {
-            // "today" = calendar day (UTC). "week" = last 7 days including today. "month" = last 30 days.
-            int days;
-            switch ((period ?? "today").ToLowerInvariant())
-            {
-                case "week": days = 7; break;
-                case "month": days = 30; break;
-                default: days = 1; break;
-            }
+            // today = current local day. week = last 7 days including today. month = last 30 days.
+            // ReceivedToday and CollectedToday hold the totals for the whole period, whichever one was asked for.
+            var window = DashboardPeriodWindow.For(period, DateTime.UtcNow, LocalTimeZone);
 
             const string sql = @"
                 SELECT
                     (SELECT COUNT(*) FROM dbo.Packages
-                        WHERE CreatedAtUtc >= DATEADD(DAY, @NegDays, CAST(SYSUTCDATETIME() AS DATE))
-                          AND CreatedAtUtc < DATEADD(DAY, 1, CAST(SYSUTCDATETIME() AS DATE))) AS ReceivedInPeriod,
+                        WHERE CreatedAtUtc >= @FromUtc AND CreatedAtUtc < @ToUtc) AS ReceivedInPeriod,
                     (SELECT COUNT(*) FROM dbo.Packages WHERE Status = 'ReadyForCollection') AS ReadyForCollection,
                     (SELECT COUNT(*) FROM dbo.Packages
-                        WHERE CollectedAtUtc >= DATEADD(DAY, @NegDays, CAST(SYSUTCDATETIME() AS DATE))
-                          AND CollectedAtUtc < DATEADD(DAY, 1, CAST(SYSUTCDATETIME() AS DATE))) AS CollectedInPeriod,
+                        WHERE CollectedAtUtc >= @FromUtc AND CollectedAtUtc < @ToUtc) AS CollectedInPeriod,
                     (SELECT COUNT(*) FROM dbo.Packages
                         WHERE Status IN ('Registered', 'InStorage', 'ReadyForCollection')) AS Outstanding;";
 
@@ -42,7 +58,8 @@ namespace CourierService.Data.Repositories
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = sql;
-                command.AddParameter("@NegDays", DbType.Int32, -(days - 1));
+                command.AddParameter("@FromUtc", DbType.DateTime2, window.StartUtc);
+                command.AddParameter("@ToUtc", DbType.DateTime2, window.EndUtc);
 
                 using (var reader = command.ExecuteReader())
                 {

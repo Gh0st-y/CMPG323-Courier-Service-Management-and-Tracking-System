@@ -59,7 +59,12 @@ Standard status codes: `400` validation, `401` not authenticated, `403` wrong ro
 ## Dashboard (UI: Dashboard)
 | Method | Path | Roles | Body → Response |
 |---|---|---|---|
-| GET | `/api/dashboard/stats` | any authenticated | → `{receivedToday, readyForCollection, collectedToday, outstanding}` |
+| GET | `/api/dashboard/stats?period=today\|week\|month` | any authenticated | → `{period, receivedToday, readyForCollection, collectedToday, outstanding, recentActivity:[{f20Identifier, fromStatus, toStatus, changedBy, changedAtUtc}]}`; any other `period` → 400 `InvalidPeriod` |
+
+Notes for the Dashboard endpoint:
+- `period` is optional and defaults to `today`. "Today" is the current calendar day in South African time (UTC+2), not the UTC day. `week` is the last 7 days including today, `month` the last 30 days including today.
+- **`receivedToday` and `collectedToday` hold the totals for the whole period.** With `period=week` or `period=month` they are the week's or month's totals, even though the names say "Today". `readyForCollection` and `outstanding` are current counts and ignore `period`.
+- `recentActivity` is the 10 most recent status changes, newest first. `fromStatus` is `null` for a package's first status. `changedAtUtc` is an ISO 8601 UTC timestamp. It includes staff usernames, which is why the endpoint needs a login.
 
 ## Users / admin (FR-02, SR-01)
 | Method | Path | Roles | Body → Response |
