@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Configuration;
 using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Domain;
 using CourierService.Services.Audit;
+using CourierService.Services.Notifications;
 using CourierService.Services.Packages;
 
 namespace CourierService.Web.Infrastructure
@@ -24,7 +28,12 @@ namespace CourierService.Web.Infrastructure
                 new PackageStatusHistoryRepository(connectionFactory),
                 new StorageLocationRepository(connectionFactory),
                 new AuditLogger(new AuditLogRepository(connectionFactory)),
-                new UnitOfWorkFactory(connectionFactory));
+                new UnitOfWorkFactory(connectionFactory),
+                new IPackageStatusChangeListener[]
+                {
+                    // T25: Ready for Collection and Collected queue the recipient's notification in the same transaction
+                    new NotificationEnqueuer(new NotificationRepository(connectionFactory), SmsEnabled())
+                });
         }
 
         public static IPackageCollectionService Collection(IDbConnectionFactory connectionFactory)
@@ -33,6 +42,39 @@ namespace CourierService.Web.Infrastructure
                 Status(connectionFactory),
                 new PackageRepository(connectionFactory),
                 new UserRepository(connectionFactory));
+        }
+
+        /// <summary>The background worker's processor (T25). One is made per run, so each run reads fresh settings.</summary>
+        public static NotificationProcessor NotificationProcessor(IDbConnectionFactory connectionFactory, int maxAttempts, TimeSpan retryDelay)
+        {
+            return new NotificationProcessor(
+                new NotificationRepository(connectionFactory),
+                new PackageRepository(connectionFactory),
+                new PlainTextNotificationComposer(new AppConfigRepository(connectionFactory)),
+                NotificationSenders(),
+                maxAttempts,
+                retryDelay);
+        }
+
+        /// <summary>
+        /// One sender per channel. Until the SMTP sender (T26) and SMS adapter (T29) are in, the stand-in writes a line
+        /// to the Output window instead of sending. T26/T29: replace the TraceNotificationSender here.
+        /// </summary>
+        private static IEnumerable<INotificationSender> NotificationSenders()
+        {
+            yield return new TraceNotificationSender(NotificationChannels.Email);
+
+            if (SmsEnabled())
+            {
+                yield return new TraceNotificationSender(NotificationChannels.Sms);
+            }
+        }
+
+        /// <summary>Web.config Sms.Enabled (off by default, DECISIONS.md #6). No SMS is queued while it is off.</summary>
+        private static bool SmsEnabled()
+        {
+            bool enabled;
+            return bool.TryParse(ConfigurationManager.AppSettings["Sms.Enabled"], out enabled) && enabled;
         }
     }
 }

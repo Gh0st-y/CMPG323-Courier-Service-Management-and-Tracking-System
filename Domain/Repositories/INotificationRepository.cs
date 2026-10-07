@@ -12,5 +12,14 @@ namespace CourierService.Domain.Repositories
         void MarkSent(int notificationQueueId, IUnitOfWork unitOfWork = null);
 
         void MarkFailed(int notificationQueueId, IUnitOfWork unitOfWork = null);
+
+        /// <summary>
+        /// Oldest pending item that is due: never tried, or last tried at or before <paramref name="retryBeforeUtc"/>
+        /// (so a failed attempt waits before the next try). Null if nothing is due (T25).
+        /// </summary>
+        NotificationQueueItem GetNextDue(System.DateTime retryBeforeUtc, IUnitOfWork unitOfWork = null);
+
+        /// <summary>Counts a failed attempt but keeps the item Pending so the worker tries again later (T25).</summary>
+        void RecordFailedAttempt(int notificationQueueId, IUnitOfWork unitOfWork = null);
     }
 }
