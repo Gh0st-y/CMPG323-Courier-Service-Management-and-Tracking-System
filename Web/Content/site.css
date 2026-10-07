@@ -1318,7 +1318,7 @@ html, body {
         height: 24px;
     }
 }
-}
+
 
 /* ============================================================ */
 /* CSV Import UI components (T40)                               */
@@ -1384,4 +1384,62 @@ html, body {
     .csv-stats-grid {
         flex-direction: column;
     }
+}
+/* ============================================================ */
+/* Payment status column (T42, FR-15, FR-17)                    */
+/* ============================================================ */
+.results-table__payment {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.results-table__payment--Paid {
+    color: #155724;
+}
+
+.results-table__payment--Unpaid {
+    color: #856404;
+}
+
+.results-table__payment--Exempt {
+    color: #666;
+}
+
+/* ============================================================ */
+/* Payment update control on detail page (T42, FR-15, FR-17)    */
+/* ============================================================ */
+.payment-control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.payment-control__current {
+    font-weight: 600;
+    font-size: 1.05em;
+    text-transform: capitalize;
+}
+
+.payment-control__actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+    .payment-control__actions select {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.95em;
+    }
+
+.payment-control__meta {
+    font-size: 0.82em;
+    color: #666;
+    font-style: italic;
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.9em;
 }
