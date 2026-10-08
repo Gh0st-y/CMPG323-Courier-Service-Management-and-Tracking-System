@@ -1,6 +1,6 @@
-# Notifications (T25 queue and worker)
+# Notifications (T25 queue and worker, T26 email)
 
-How a status change turns into an email or SMS, and where T26, T27, T28, T29 and T49 plug in.
+How a status change turns into an email or SMS, and where T27, T28, T29 and T49 plug in.
 
 ## Flow
 
@@ -38,16 +38,32 @@ Web.config appSettings, all optional (the defaults are used when a key is missin
 | `Notifications.MaxAttempts` | `3` | Attempts in total before a row is marked Failed |
 | `Notifications.RetryDelaySeconds` | `60` | Wait after a failed attempt |
 | `Sms.Enabled` | `false` | Also queue an SMS (DECISIONS.md #6) |
+| `Smtp.Host` | `localhost` in Web.config | Mail server. Leave it empty to use the Output-window stand-in instead of sending |
+| `Smtp.Port` | `25` | |
+| `Smtp.FromAddress` | `courier-noreply@f20.local` in Web.config | Sender address |
+| `Smtp.FromName` | `F20 Courier Service` | Sender name |
+| `Smtp.UseSsl` | `false` | |
+| `Smtp.UserName`, `Smtp.Password` | none | Only if the server needs a login. Never commit a password: put it in Web.config.Local |
+| `Smtp.TimeoutSeconds` | `10` | How long to wait for the mail server before counting a failed attempt |
 
 Email subjects come from `dbo.AppConfig`: `Notification.ReadyForCollection.Subject` and `Notification.Collected.Subject`.
 
 ## Where the other tasks plug in
 
-- **T26 SMTP sender:** write `SmtpNotificationSender : INotificationSender` with `Channel = NotificationChannels.Email`, reading the `Smtp.*` settings. Return `NotificationSendResult.Failed(error)` for things worth retrying (server down, timeout) and `Failed(error, permanent: true)` for things that won't change (invalid address). Then swap it in for the `TraceNotificationSender` in `CourierServices.NotificationSenders()`. Until then the stand-in writes one line per notification to Visual Studio's Output window.
+- **T26 SMTP sender (done):** `SmtpNotificationSender` sends through `System.Net.Mail.SmtpClient` using the `Smtp.*` settings. An invalid address or a 5xx answer about the recipient is a permanent failure; a server that is down, busy, slow or not set up is retried. With `Smtp.Host` empty, `CourierServices.NotificationSenders()` uses the Output-window stand-in instead.
 - **T27 templates:** replace `PlainTextNotificationComposer` with a template-based `INotificationComposer` and swap it in `CourierServices.NotificationProcessor()`.
 - **T28 notification log:** the queueing part of T28 is done here. What is left is writing a `dbo.NotificationLog` row for each attempt in `NotificationProcessor.ProcessNext` (it has the message, the result and the error) and showing failures to staff.
 - **T29 SMS adapter:** an `INotificationSender` with `Channel = NotificationChannels.Sms`, registered in `CourierServices.NotificationSenders()` when `Sms.Enabled` is true.
 - **T49 resend:** set a `Failed` row back to `Pending` (or enqueue a new row with `INotificationRepository.Enqueue`) and the worker picks it up on its next run.
+
+## Email during development
+
+Nothing is sent to real people in development. Run a local test mail server that catches every email and shows it in a web page. Web.config already points at it (`Smtp.Host` localhost, port 25).
+
+- **smtp4dev** (needs the .NET SDK, which Visual Studio installs): run `dotnet tool install -g Rnwood.Smtp4dev` once, then `smtp4dev` whenever you need it. Emails appear at http://localhost:5000.
+- **Papercut SMTP**: install it from its GitHub releases page and start it. Emails appear in its window.
+
+If no test mail server is running, nothing breaks: each email is tried 3 times, 60 s apart, and then marked Failed in `dbo.NotificationQueue`. Status changes are never affected.
 
 ## Rules
 
