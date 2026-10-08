@@ -75,6 +75,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\NotificationWorker.cs" />
+    <Compile Include="Infrastructure\RequireLoginAttribute.cs" />
+    <Compile Include="Infrastructure\UserSession.cs" />
     <Compile Include="Models\Api\Packages\RegisterPackageRequest.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Infrastructure\CourierServices.cs" />
