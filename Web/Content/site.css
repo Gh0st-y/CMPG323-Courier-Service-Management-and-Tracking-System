@@ -1609,7 +1609,7 @@ html, body {
 /* Login page layout                                            */
 /* ============================================================ */
 .login-wrap {
-    max-width: 440px;
+    max-width: 750px;
     margin: 24px auto 0;
 }
 
