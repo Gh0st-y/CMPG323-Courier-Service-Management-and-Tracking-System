@@ -88,30 +88,51 @@
                 var userName = UserSession.Username(Session);
                 var roleName = UserSession.RoleDisplayName(UserSession.RoleName(Session));
                 var isSystemAdmin = UserSession.RoleName(Session) == "SystemAdmin";
+
+                var role = UserSession.RoleName(Session);
+                var canRegister = role == "IntakeClerk" || role == "Supervisor" || role == "SystemAdmin";
+                var canScan = role == "StorageStaff" || role == "CollectionStaff" || role == "Supervisor" || role == "SystemAdmin";
+                var canImport = role == "Supervisor" || role == "SystemAdmin";
+                var canSeeAudit = role == "Supervisor" || role == "SystemAdmin";
             }
             @if (isSignedIn)
             {
                 <a class="app-nav__link @(currentController == "Home" ? "is-active" : "")" href="@Url.Action("Index", "Home")">Dashboard</a>
-                @* The links below are placeholders until their controllers land in later tasks. *@
-                @* TODO (T50): hide links by role *@
-                <a class="app-nav__link @(currentController == "Packages" && ViewContext.RouteData.Values["action"].ToString() == "Register" ? "is-active" : "")" href="@Url.Action("Register", "Packages")">Register</a>
-                <a class="app-nav__link @(currentController == "Packages" && ViewContext.RouteData.Values["action"].ToString() == "Search" ? "is-active" : "")" href="@Url.Action("Search", "Packages")">Search</a>
-                @* Scan Dropdown using native site.css classes *@
-                <div class="app-nav__dropdown">
-                    <a class="app-nav__link @(isScanActive ? "is-active" : "")" href="@Url.Action("Index", "Scan")">
-                        Scan <span class="app-nav__arrow">&#9662;</span>
-                    </a>
-                    <div class="app-nav__dropdown-menu">
-                        <a class="app-nav__dropdown-item" href="@Url.Action("Index", "Collection")">Package Collection</a>
+
+                if (canRegister)
+                {
+                    <a class="app-nav__link @(currentController == "Packages" && currentAction == "Register" ? "is-active" : "")" href="@Url.Action("Register", "Packages")">Register</a>
+                }
+
+                <a class="app-nav__link @(currentController == "Packages" && currentAction == "Search" ? "is-active" : "")" href="@Url.Action("Search", "Packages")">Search</a>
+
+                if (canScan)
+                {
+                    <div class="app-nav__dropdown">
+                        <a class="app-nav__link @(isScanActive ? "is-active" : "")" href="@Url.Action("Index", "Scan")">
+                            Scan <span class="app-nav__arrow">&#9662;</span>
+                        </a>
+                        <div class="app-nav__dropdown-menu">
+                            <a class="app-nav__dropdown-item" href="@Url.Action("Index", "Collection")">Package Collection</a>
+                        </div>
                     </div>
-                </div>
-                <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
-                <a class="app-nav__link" href="#">Audit Log</a>
+                }
+
+                if (canImport)
+                {
+                    <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
+                }
+
+                if (canSeeAudit)
+                {
+                    <a class="app-nav__link" href="#">Audit Log</a>
+                }
+
                 if (isSystemAdmin)
                 {
                     <a class="app-nav__link @(currentController == "UserManagement" ? "is-active" : "")" href="@Url.Action("Index", "UserManagement")">Users</a>
+                    <a class="app-nav__link" href="#">Config</a>
                 }
-                <a class="app-nav__link" href="#">Config</a>
             }
         </nav>
         @if (isSignedIn)
