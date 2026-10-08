@@ -161,6 +161,24 @@ namespace CourierService.Tests.Notifications
         }
     }
 
+    /// <summary>An in-memory dbo.NotificationLog (T28). Set Throw to make every write fail.</summary>
+    internal sealed class FakeNotificationLog : INotificationLogRepository
+    {
+        public List<NotificationLogEntry> Entries { get; } = new List<NotificationLogEntry>();
+
+        public Exception Throw { get; set; }
+
+        public void Add(NotificationLogEntry entry, IUnitOfWork unitOfWork = null)
+        {
+            if (Throw != null)
+            {
+                throw Throw;
+            }
+
+            Entries.Add(entry);
+        }
+    }
+
     internal sealed class FakeUnitOfWork : IUnitOfWork
     {
         public System.Data.IDbConnection Connection => null;

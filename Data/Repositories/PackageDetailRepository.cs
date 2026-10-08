@@ -61,7 +61,7 @@ namespace CourierService.Data.Repositories
         {
             // Cross-referenced to the package via PackageId, as required by DR-012.
             const string sql = @"
-                SELECT Channel, RecipientAddress, Subject, Status, SentAtUtc
+                SELECT Channel, RecipientAddress, Subject, Status, ErrorDetail, SentAtUtc
                 FROM dbo.NotificationLog
                 WHERE PackageId = @PackageId
                 ORDER BY SentAtUtc DESC;";
@@ -79,12 +79,14 @@ namespace CourierService.Data.Repositories
                     while (reader.Read())
                     {
                         var subjectOrdinal = reader.GetOrdinal("Subject");
+                        var errorOrdinal = reader.GetOrdinal("ErrorDetail");
                         results.Add(new NotificationLogItem
                         {
                             Channel = reader.GetString(reader.GetOrdinal("Channel")),
                             RecipientAddress = reader.GetString(reader.GetOrdinal("RecipientAddress")),
                             Subject = reader.IsDBNull(subjectOrdinal) ? null : reader.GetString(subjectOrdinal),
                             Status = reader.GetString(reader.GetOrdinal("Status")),
+                            ErrorDetail = reader.IsDBNull(errorOrdinal) ? null : reader.GetString(errorOrdinal),
                             SentAtUtc = reader.GetDateTime(reader.GetOrdinal("SentAtUtc"))
                         });
                     }
