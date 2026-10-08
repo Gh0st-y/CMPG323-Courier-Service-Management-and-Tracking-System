@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     const root = document.getElementById('user-mgmt');
     if (!root) return;
 
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tbody = document.getElementById('users-body');
 
     // Small local helper: GET/POST/PATCH to /api/users, same-origin so the session cookie goes with it.
-    // Rejects with { status, error } like CourierApp.api does. ? see footnote 2.
+    // Rejects with { status, error } like CourierApp.api does. ⭐ see footnote 2.
     function api(method, path, body) {
         return fetch(apiBase + path, {
             method: method,
@@ -51,7 +51,11 @@ document.addEventListener('DOMContentLoaded', function () {
             tbody.innerHTML = '';
             users.forEach(function (u) { tbody.appendChild(buildRow(u)); });
             if (users.length === 0) {
-                tbody.appendChild(cell('No users found.'));
+                var tr = document.createElement('tr');
+                var td = cell('No users found.');
+                td.colSpan = 6;
+                tr.appendChild(td);
+                tbody.appendChild(tr);
             }
         }, showFailure);
     }
@@ -129,10 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
         api('POST', '/users', { username: username, email: email, password: password, role: role })
             .then(function () {
                 CourierApp.toast.success('User created.');
-                document.getElementById('new-username').value = '';
-                document.getElementById('new-email').value = '';
-                document.getElementById('new-password').value = '';
-                document.getElementById('new-role').value = '';
+                if (window.closeCreateUserPanel) window.closeCreateUserPanel();
                 loadUsers();
             }, showFailure);
     });
