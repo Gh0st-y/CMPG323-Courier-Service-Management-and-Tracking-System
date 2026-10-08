@@ -1,0 +1,71 @@
+@using CourierService.Services.Security
+@{
+    ViewBag.Title = "User Management";
+    var roles = new[] { RoleNames.IntakeClerk, RoleNames.StorageStaff, RoleNames.CollectionStaff, RoleNames.Supervisor, RoleNames.SystemAdmin };
+}
+
+<div class="detail-page"
+     id="user-mgmt"
+     data-api-base="@Url.Content("~/api")"
+     data-current-user-id="@ViewBag.CurrentUserId">
+
+    <h2 class="app-page-title">User Management</h2>
+
+    <div class="card mb-4">
+        <h3 class="card-title mb-3" style="font-size: 16px; font-weight: 600;">Create User</h3>
+        <div class="search-form__grid">
+            <div class="form-row">
+                <label for="new-username">Username <span class="required">*</span></label>
+                <input type="text" id="new-username" autocomplete="off" />
+            </div>
+            <div class="form-row">
+                <label for="new-email">Email <span class="required">*</span></label>
+                <input type="email" id="new-email" autocomplete="off" />
+            </div>
+            <div class="form-row">
+                <label for="new-password">Password <span class="required">*</span></label>
+                <input type="password" id="new-password" autocomplete="new-password" />
+            </div>
+            <div class="form-row">
+                <label for="new-role">Role <span class="required">*</span></label>
+                <select id="new-role">
+                    <option value="">-- Select role --</option>
+                    @foreach (var r in roles)
+                    {
+                        <option value="@r">@r</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="button" id="btn-create-user" class="btn btn-primary">Create User</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3" style="font-size: 16px; font-weight: 600;">All Users</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <!-- RoleNames comes from the ROleNames constants so it can't drift from dbo.ROles'-->
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 8px;">Username</th>
+                    <th style="padding: 8px;">Email</th>
+                    <th style="padding: 8px;">Role</th>
+                    <th style="padding: 8px;">Status</th>
+                    <th style="padding: 8px;">Last login</th>
+                    <th style="padding: 8px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-body">
+                <tr><td colspan="6" style="padding: 8px;">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.USER_ROLES = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(roles));
+    </script>
+    <script src="~/Scripts/app/users.js"></script>
+}

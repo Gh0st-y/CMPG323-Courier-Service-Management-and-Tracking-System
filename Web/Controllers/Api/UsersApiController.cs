@@ -59,10 +59,11 @@ namespace CourierService.Web.Controllers.Api
         public ActionResult Create()
         {
             int actingUserId;
-            if (!TryGetUserId(out actingUserId))
+            TryGetUserId(out actingUserId); //Remove if roles are in place
+             /*if (!TryGetUserId(out actingUserId))
             {
                 return Error(401, "NotAuthenticated", "You need to log in to do this.");
-            }
+            }*/
 
             bool malformed;
             var request = RequestBody.Read<CreateUserRequest>(Request, out malformed);
@@ -92,11 +93,12 @@ namespace CourierService.Web.Controllers.Api
         public ActionResult Update(int id)
         {
             int actingUserId;
-            if (!TryGetUserId(out actingUserId))
+            TryGetUserId(out actingUserId); //Remove if roles are in place
+            /* if (!TryGetUserId(out actingUserId))
             {
                 return Error(401, "NotAuthenticated", "You need to log in to do this.");
             }
-
+            */
             bool malformed;
             var request = RequestBody.Read<UpdateUserRequest>(Request, out malformed);
             if (malformed)

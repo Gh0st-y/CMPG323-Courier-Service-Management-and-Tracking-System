@@ -85,6 +85,8 @@
                 var isScanActive = currentController == "Scan" || currentController == "Collection";
                 var userName = Session["UserName"] as string;
                 var isSignedIn = !string.IsNullOrWhiteSpace(userName);
+                var roleName = Session["RoleName"] as string;
+var isSystemAdmin = roleName == "SystemAdmin";
 
             }
             <a class="app-nav__link @(currentController == "Home" ? "is-active" : "")" href="@Url.Action("Index", "Home")">Dashboard</a>
@@ -106,7 +108,7 @@
             <a class="app-nav__link @(currentController == "Account" ? "is-active" : "")" href="@Url.Action("Login", "Account")">Login</a>
             <a class="app-nav__link" href="#">Import</a>
             <a class="app-nav__link" href="#">Audit Log</a>
-            <a class="app-nav__link" href="#">Users</a>
+            <a class="app-nav__link @(currentController == "UserManagement" ? "is-active" : "")" href="@Url.Action("Index", "UserManagement")">Users</a>
             <a class="app-nav__link" href="#">Config</a>
         </nav>
         <span class="app-header__user">Signed in as: &#8208; (auth lands in a later task)</span>

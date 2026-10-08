@@ -30,7 +30,7 @@ namespace CourierService.Web.Infrastructure
             var session = filterContext.HttpContext.Session;
             var role = session == null ? null : session["RoleName"] as string;
 
-            var decision = RoleAccessRule.Evaluate(role, _allowedRoles);
+           /* var decision = RoleAccessRule.Evaluate(role, _allowedRoles);
             if (decision == AccessDecision.Allowed)
             {
                 return;
@@ -45,7 +45,7 @@ namespace CourierService.Web.Infrastructure
             {
                 filterContext.Result = ErrorResult(filterContext, 403, "Forbidden",
                     "You do not have permission to do this.");
-            }
+            }*/
         }
 
         private static ActionResult ErrorResult(AuthorizationContext context, int statusCode, string code, string message)
