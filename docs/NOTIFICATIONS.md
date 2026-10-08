@@ -1,6 +1,6 @@
 # Notifications (T25 queue and worker, T26 email, T28 log)
 
-How a status change turns into an email or SMS, and where T27, T29 and T49 plug in.
+How a status change turns into an email or SMS, and where T27 and T29 plug in.
 
 ## Flow
 
@@ -54,7 +54,7 @@ Email subjects come from `dbo.AppConfig`: `Notification.ReadyForCollection.Subje
 - **T27 templates:** replace `PlainTextNotificationComposer` with a template-based `INotificationComposer` and swap it in `CourierServices.NotificationProcessor()`.
 - **T28 notification log (done):** every attempt, sent or failed, adds a `dbo.NotificationLog` row (see "Notification log" below). The package detail page lists them with the reason for any failure.
 - **T29 SMS adapter:** an `INotificationSender` with `Channel = NotificationChannels.Sms`, registered in `CourierServices.NotificationSenders()` when `Sms.Enabled` is true.
-- **T49 resend:** set a `Failed` row back to `Pending` (or enqueue a new row with `INotificationRepository.Enqueue`) and the worker picks it up on its next run.
+- **T49 resend (done):** `POST /api/packages/{f20Identifier}/notifications/resend` (Supervisor, SystemAdmin) puts the package's latest notification on a channel back to `Pending` with no attempts, if it failed, and writes a `NotificationResent` audit entry. The worker sends it on its next run. The Resend button on the detail page is FE2's follow-up; see docs/API_CONTRACT.md for the responses.
 
 ## Notification log (T28, IR-003, DR-012)
 
