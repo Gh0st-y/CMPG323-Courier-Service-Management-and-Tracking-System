@@ -71,6 +71,54 @@ namespace CourierService.Data.Repositories
             }
         }
 
+        public NotificationQueueItem GetNextDue(System.DateTime retryBeforeUtc, IUnitOfWork unitOfWork = null)
+        {
+            const string sql = @"
+                SELECT TOP (1) NotificationQueueId, PackageId, Channel, TemplateKey, Status,
+                       AttemptCount, EnqueuedAtUtc, LastAttemptAtUtc
+                FROM dbo.NotificationQueue
+                WHERE Status = 'Pending'
+                  AND (LastAttemptAtUtc IS NULL OR LastAttemptAtUtc <= @RetryBeforeUtc)
+                ORDER BY EnqueuedAtUtc ASC, NotificationQueueId ASC;";
+
+            IDbConnection ownedConnection = null;
+            try
+            {
+                IDbCommand command;
+                if (unitOfWork != null)
+                {
+                    command = unitOfWork.Connection.CreateCommand();
+                    command.Transaction = unitOfWork.Transaction;
+                }
+                else
+                {
+                    ownedConnection = _connectionFactory.CreateOpenConnection();
+                    command = ownedConnection.CreateCommand();
+                }
+
+                using (command)
+                {
+                    command.CommandText = sql;
+                    command.AddParameter("@RetryBeforeUtc", DbType.DateTime2, retryBeforeUtc);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        return reader.Read() ? MapItem(reader) : null;
+                    }
+                }
+            }
+            finally
+            {
+                ownedConnection?.Dispose();
+            }
+        }
+
+        public void RecordFailedAttempt(int notificationQueueId, IUnitOfWork unitOfWork = null)
+        {
+            // Stays Pending: the attempt is counted and timed, and GetNextDue skips it until the retry delay has passed
+            UpdateStatus(notificationQueueId, "Pending", unitOfWork);
+        }
+
         public void MarkSent(int notificationQueueId, IUnitOfWork unitOfWork = null)
         {
             UpdateStatus(notificationQueueId, "Sent", unitOfWork);
