@@ -74,6 +74,30 @@ namespace CourierService.Tests.Notifications
 
         public NotificationQueueItem Get(int id) => Items.Single(i => i.NotificationQueueId == id);
 
+        public NotificationQueueItem GetLatestForPackage(int packageId, string channel, IUnitOfWork unitOfWork = null)
+        {
+            UnitsOfWorkUsed.Add(unitOfWork);
+            return Items
+                .Where(i => i.PackageId == packageId && i.Channel == channel)
+                .OrderByDescending(i => i.NotificationQueueId)
+                .Select(Copy)
+                .FirstOrDefault();
+        }
+
+        public bool Requeue(int notificationQueueId, IUnitOfWork unitOfWork = null)
+        {
+            var item = Get(notificationQueueId);
+            if (item.Status != "Failed")
+            {
+                return false;
+            }
+
+            item.Status = "Pending";
+            item.AttemptCount = 0;
+            item.LastAttemptAtUtc = null;
+            return true;
+        }
+
         private void Update(int id, string status)
         {
             var item = Get(id);
@@ -122,7 +146,7 @@ namespace CourierService.Tests.Notifications
             return ById.TryGetValue(packageId, out package) ? package : null;
         }
 
-        public Package GetByF20Identifier(string f20Identifier) => throw new NotSupportedException();
+        public Package GetByF20Identifier(string f20Identifier) => ById.Values.FirstOrDefault(p => p.F20Identifier == f20Identifier);
         public int Insert(Package package, IUnitOfWork unitOfWork = null) => throw new NotSupportedException();
         public void UpdateStatus(int packageId, PackageStatus newStatus, int? storageLocationId, IUnitOfWork unitOfWork = null) => throw new NotSupportedException();
         public bool TryUpdateStatus(int packageId, PackageStatus newStatus, int? storageLocationId, int? collectedByUserId, byte[] expectedRowVersion, IUnitOfWork unitOfWork = null) => throw new NotSupportedException();

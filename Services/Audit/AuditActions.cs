@@ -9,6 +9,7 @@
         public const string PackageCreated = "PackageCreated";
         public const string PackageStatusChanged = "PackageStatusChanged";
         public const string PackageCollected = "PackageCollected";
+        public const string NotificationResent = "NotificationResent";
         public const string CsvImported = "CsvImported";
         public const string ConfigChanged = "ConfigChanged";
         public const string UserCreated = "UserCreated";

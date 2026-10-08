@@ -103,6 +103,45 @@ namespace CourierService.Tests.Integration
             }
         }
 
+        [TestMethod]
+        public void GetLatestForPackage_ReturnsTheNewestRowOnThatChannel()
+        {
+            using (var unitOfWork = new UnitOfWork(_connectionFactory))
+            {
+                var packageId = InsertPackage(unitOfWork);
+                InsertQueueRow(unitOfWork, packageId, "2000-01-01", lastAttemptNow: false);
+                var newest = InsertQueueRow(unitOfWork, packageId, "2000-01-02", lastAttemptNow: false);
+                var repository = new NotificationRepository(_connectionFactory);
+
+                var latest = repository.GetLatestForPackage(packageId, "Email", unitOfWork);
+
+                Assert.IsNotNull(latest);
+                Assert.AreEqual(newest, latest.NotificationQueueId);
+                Assert.IsNull(repository.GetLatestForPackage(packageId, "SMS", unitOfWork));
+            }
+        }
+
+        [TestMethod]
+        public void Requeue_OnlyChangesAFailedRow_AndResetsItsAttempts()
+        {
+            using (var unitOfWork = new UnitOfWork(_connectionFactory))
+            {
+                var packageId = InsertPackage(unitOfWork);
+                var id = InsertQueueRow(unitOfWork, packageId, "2000-01-01", lastAttemptNow: true);
+                var repository = new NotificationRepository(_connectionFactory);
+
+                Assert.IsFalse(repository.Requeue(id, unitOfWork), "a Pending row is left alone");
+
+                repository.MarkFailed(id, unitOfWork);
+                Assert.IsTrue(repository.Requeue(id, unitOfWork));
+
+                Assert.AreEqual(1, Scalar(unitOfWork,
+                    @"SELECT COUNT(*) FROM dbo.NotificationQueue
+                      WHERE NotificationQueueId = @Value AND Status = 'Pending' AND AttemptCount = 0 AND LastAttemptAtUtc IS NULL;", id));
+                Assert.IsFalse(repository.Requeue(id, unitOfWork), "a second resend does nothing");
+            }
+        }
+
         private static int InsertQueueRow(IUnitOfWork unitOfWork, int packageId, string enqueuedAtUtc, bool lastAttemptNow)
         {
             using (var command = unitOfWork.Connection.CreateCommand())
