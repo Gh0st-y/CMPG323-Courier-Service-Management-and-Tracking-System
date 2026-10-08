@@ -184,6 +184,7 @@ namespace CourierService.Web.Controllers
                     recipientAddress = PersonalData.MaskPhone(n.RecipientAddress),
                     subject = n.Subject,
                     status = n.Status,
+                    errorDetail = n.ErrorDetail,
                     sentAtUtc = IsoUtc(n.SentAtUtc)
                 }).ToList();
 

@@ -1,6 +1,6 @@
-# Notifications (T25 queue and worker, T26 email)
+# Notifications (T25 queue and worker, T26 email, T28 log)
 
-How a status change turns into an email or SMS, and where T27, T28, T29 and T49 plug in.
+How a status change turns into an email or SMS, and where T27, T29 and T49 plug in.
 
 ## Flow
 
@@ -52,9 +52,30 @@ Email subjects come from `dbo.AppConfig`: `Notification.ReadyForCollection.Subje
 
 - **T26 SMTP sender (done):** `SmtpNotificationSender` sends through `System.Net.Mail.SmtpClient` using the `Smtp.*` settings. An invalid address or a 5xx answer about the recipient is a permanent failure; a server that is down, busy, slow or not set up is retried. With `Smtp.Host` empty, `CourierServices.NotificationSenders()` uses the Output-window stand-in instead.
 - **T27 templates:** replace `PlainTextNotificationComposer` with a template-based `INotificationComposer` and swap it in `CourierServices.NotificationProcessor()`.
-- **T28 notification log:** the queueing part of T28 is done here. What is left is writing a `dbo.NotificationLog` row for each attempt in `NotificationProcessor.ProcessNext` (it has the message, the result and the error) and showing failures to staff.
+- **T28 notification log (done):** every attempt, sent or failed, adds a `dbo.NotificationLog` row (see "Notification log" below). The package detail page lists them with the reason for any failure.
 - **T29 SMS adapter:** an `INotificationSender` with `Channel = NotificationChannels.Sms`, registered in `CourierServices.NotificationSenders()` when `Sms.Enabled` is true.
 - **T49 resend:** set a `Failed` row back to `Pending` (or enqueue a new row with `INotificationRepository.Enqueue`) and the worker picks it up on its next run.
+
+## Notification log (T28, IR-003, DR-012)
+
+Every attempt the worker makes writes one row to `dbo.NotificationLog`, after the queue row is updated:
+
+| Column | Value |
+|---|---|
+| PackageId | The package, so the detail page can list its notifications (DR-012) |
+| Channel | Email or SMS |
+| RecipientAddress | The address it went to, or empty if the recipient had none. Masked on screen |
+| Subject | The subject line |
+| Status | Sent or Failed |
+| ErrorDetail | Why it failed, e.g. "The recipient has no email address." or "The mail server could not be used (GeneralFailure, ConnectionRefused). Will try again (attempt 1 of 3)." Empty when sent |
+| SentAtUtc | When the attempt was made (set by the database) |
+
+So a notification that fails twice and then goes through has three rows: Failed, Failed, Sent. The queue row only keeps the latest state.
+
+- Text longer than its column is cut to fit, so a long error can't make the insert fail.
+- If the log row can't be written, the worker only traces a warning. The attempt is already recorded on the queue row, and failing there would mean sending the email again.
+- A queue row whose package no longer exists isn't logged, because the log row needs a package.
+- `GET /api/packages/{f20Identifier}/detail` returns them newest first as `notifications: [{channel, recipientAddress (masked), subject, status, errorDetail, sentAtUtc}]`.
 
 ## Email during development
 

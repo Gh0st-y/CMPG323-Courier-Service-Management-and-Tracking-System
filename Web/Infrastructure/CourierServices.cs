@@ -44,7 +44,7 @@ namespace CourierService.Web.Infrastructure
                 new UserRepository(connectionFactory));
         }
 
-        /// <summary>The background worker's processor (T25). One is made per run, so each run reads fresh settings.</summary>
+        /// <summary>The background worker's processor (T25). One is made per run, so each run reads fresh settings. Every attempt is logged (T28).</summary>
         public static NotificationProcessor NotificationProcessor(IDbConnectionFactory connectionFactory, int maxAttempts, TimeSpan retryDelay)
         {
             return new NotificationProcessor(
@@ -53,7 +53,8 @@ namespace CourierService.Web.Infrastructure
                 new PlainTextNotificationComposer(new AppConfigRepository(connectionFactory)),
                 NotificationSenders(),
                 maxAttempts,
-                retryDelay);
+                retryDelay,
+                log: new NotificationLogRepository(connectionFactory));
         }
 
         /// <summary>
