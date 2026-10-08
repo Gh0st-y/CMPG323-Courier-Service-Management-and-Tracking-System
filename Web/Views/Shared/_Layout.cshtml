@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewBag.Title - Courier Service</title>
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/Content/images/favicon.ico")" />
     <link rel="stylesheet" href="~/Content/site.css" />
     <style>
         /* Prevent header clipping and remove internal scrollbars */
@@ -86,6 +87,7 @@
                 var isSignedIn = UserSession.IsSignedIn(Session);
                 var userName = UserSession.Username(Session);
                 var roleName = UserSession.RoleDisplayName(UserSession.RoleName(Session));
+                var isSystemAdmin = UserSession.RoleName(Session) == "SystemAdmin";
             }
             @if (isSignedIn)
             {
@@ -105,7 +107,10 @@
                 </div>
                 <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
                 <a class="app-nav__link" href="#">Audit Log</a>
-                <a class="app-nav__link" href="#">Users</a>
+                if (isSystemAdmin)
+                {
+                    <a class="app-nav__link @(currentController == "UserManagement" ? "is-active" : "")" href="@Url.Action("Index", "UserManagement")">Users</a>
+                }
                 <a class="app-nav__link" href="#">Config</a>
             }
         </nav>

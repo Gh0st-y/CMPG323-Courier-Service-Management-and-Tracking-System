@@ -1443,3 +1443,123 @@ html, body {
     padding: 6px 14px;
     font-size: 0.9em;
 }
+
+/* ============================================================ */
+/* User Management page (T-user-mgmt, FR-02, SR-02)             */
+/* ============================================================ */
+
+.um-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.um-search {
+    position: relative;
+    flex: 1 1 260px;
+    min-width: 220px;
+}
+
+    .um-search svg {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: var(--color-text-muted);
+        pointer-events: none;
+    }
+
+    .um-search input,
+    .um-select {
+        height: 40px;
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        background-color: var(--color-surface);
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--color-text);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .um-search input {
+        width: 100%;
+        padding: 0 16px 0 40px;
+    }
+
+        .um-search input::placeholder {
+            color: var(--color-text-muted);
+            opacity: 0.8;
+        }
+
+.um-select {
+    padding: 0 36px 0 16px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%236b6572' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+    .um-search input:focus,
+    .um-select:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(92, 45, 145, 0.15);
+    }
+
+.um-add-btn {
+    height: 40px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+
+    .um-add-btn:hover {
+        background: var(--color-primary-dark);
+    }
+
+    .um-add-btn:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+/* Create panel */
+.um-create {
+    border-left: 4px solid var(--color-accent);
+}
+
+    /* 4 fields on one row (default .search-form__grid is 3 columns) */
+    .um-create .search-form__grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+@media (max-width: 800px) {
+    .um-create .search-form__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .um-select,
+    .um-add-btn {
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    .um-create .search-form__grid {
+        grid-template-columns: 1fr;
+    }
+}

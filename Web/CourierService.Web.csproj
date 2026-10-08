@@ -71,6 +71,7 @@
     <Compile Include="Controllers\PackagesController.cs" />
     <Compile Include="Controllers\PackagesController.Registration.cs" />
     <Compile Include="Controllers\ScanController.cs" />
+    <Compile Include="Controllers\UserManagementController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -92,9 +93,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Images\accessDenied.png" />
+    <Content Include="Content\Images\favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
+    <Content Include="Scripts\app\users.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -154,7 +158,9 @@
   <ItemGroup>
     <Content Include="Views\Packages\Detail.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Views\UserManagement\Index.cshtml" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Account\Login.cshtml" />
   </ItemGroup>
