@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Services.Auth;
+using CourierService.Web.Infrastructure;
 using CourierService.Web.Models.Api.Auth;
 using Newtonsoft.Json;
 
@@ -43,9 +44,7 @@ namespace CourierService.Web.Controllers.Api
                 return ApiError(401, "InvalidCredentials", "Invalid username or password.");
             }
 
-            Session["UserId"] = result.UserId;
-            Session["Username"] = result.Username;
-            Session["RoleName"] = result.RoleName;
+            UserSession.SignIn(Session, result);
 
             return Json(new
             {
@@ -59,8 +58,7 @@ namespace CourierService.Web.Controllers.Api
         [Route("api/auth/logout")]
         public ActionResult Logout()
         {
-            Session.Clear();
-            Session.Abandon();
+            UserSession.SignOut(HttpContext);
             Response.StatusCode = 204;
             return new EmptyResult();
         }

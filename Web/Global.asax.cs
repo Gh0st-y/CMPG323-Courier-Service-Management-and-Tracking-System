@@ -18,6 +18,9 @@ namespace CourierService.Web
             // T52: a database outage becomes 503 Service Unavailable instead of a generic error
             GlobalFilters.Filters.Add(new DatabaseUnavailableFilter());
 
+            // Every page needs a login except the ones marked [AllowAnonymous] (the login page); /api keeps [RoleAuthorize]
+            GlobalFilters.Filters.Add(new RequireLoginAttribute());
+
             // Controllers read JSON request bodies themselves (RequestBody.Read) so they can answer 400 for a bad body.
             // MVC's own JSON value provider would parse the body first and throw on bad JSON, which comes out as a 500.
             var jsonProvider = ValueProviderFactories.Factories.OfType<JsonValueProviderFactory>().FirstOrDefault();
