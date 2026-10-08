@@ -92,6 +92,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Images\accessDenied.png" />
+    <Content Include="Content\Images\favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
