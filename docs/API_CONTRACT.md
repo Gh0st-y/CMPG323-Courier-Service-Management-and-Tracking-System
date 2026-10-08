@@ -51,6 +51,14 @@ Standard status codes: `400` validation, `401` not authenticated, `403` wrong ro
 |---|---|---|---|
 | POST | `/api/packages/{f20Identifier}/notifications/resend` | Supervisor, SystemAdmin | `{channel}` → re-queues the last failed notification |
 
+Notes for resend (T49):
+- `channel` is `Email` or `SMS` (any case); left out, it means `Email`. Anything else is 400 `ValidationError`.
+- It looks at the package's **latest** notification on that channel and re-queues it only if it failed. The worker sends it within about 5 s with a fresh 3 attempts, and each attempt appears in the detail page's `notifications` (T28).
+- 200 → `{channel, status: "Queued", queuedAtUtc, templateKey, notificationQueueId}`
+- 404 `NotFound` → unknown package, or the package has no notification on that channel
+- 409 `NotFailed` → the latest notification on that channel wasn't a failure (it was sent or is still waiting), so nothing was re-queued. This also stops an old "ready for collection" email going out after a newer "collected" one.
+- Each resend writes a `NotificationResent` audit entry (SR-04).
+
 ## CSV import (FR-08, IR-009..IR-013)
 | Method | Path | Roles | Body → Response |
 |---|---|---|---|

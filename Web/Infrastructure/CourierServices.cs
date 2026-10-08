@@ -57,6 +57,16 @@ namespace CourierService.Web.Infrastructure
                 log: new NotificationLogRepository(connectionFactory));
         }
 
+        /// <summary>Staff resend of a failed notification (T49).</summary>
+        public static NotificationResendService NotificationResend(IDbConnectionFactory connectionFactory)
+        {
+            return new NotificationResendService(
+                new PackageRepository(connectionFactory),
+                new NotificationRepository(connectionFactory),
+                new AuditLogger(new AuditLogRepository(connectionFactory)),
+                new UnitOfWorkFactory(connectionFactory));
+        }
+
         /// <summary>
         /// One sender per channel. Email goes through SMTP (T26) using the Smtp.* settings in Web.config. With Smtp.Host
         /// left empty, the stand-in writes a line to the Output window instead, for machines without a mail server.
