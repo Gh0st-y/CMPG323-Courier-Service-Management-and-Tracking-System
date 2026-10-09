@@ -66,7 +66,7 @@
         <nav class="app-nav" id="main-nav" aria-label="Main">
             @if (isSignedIn)
             {
-                <a class="app-nav__link @homeActive" href="@homeUrl"><i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard</a>
+                <a class="app-nav__link @homeActive" href="@homeUrl"> Dashboard</a>
 
                 <div class="app-nav__dropdown">
                     <button type="button" class="app-nav__link app-nav__trigger @packagesActive" aria-haspopup="true">
@@ -124,7 +124,7 @@
             <div class="app-user">
                 <button type="button" class="app-user__button" id="user-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="user-menu">
                     <span class="app-user__text">
-                        <span class="app-user__name">@userName</span>
+                        <span class="app-user__name"><i class="bi bi-person-fill"></i> @userName</span>
                         <span class="app-user__role">@roleName</span>
                     </span>
                     <i class="bi bi-chevron-down app-user__chevron" aria-hidden="true"></i>
