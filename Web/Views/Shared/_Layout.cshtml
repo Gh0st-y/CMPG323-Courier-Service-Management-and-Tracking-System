@@ -1,129 +1,86 @@
 @using CourierService.Web.Infrastructure
+@{
+    var currentController = (string)ViewContext.RouteData.Values["controller"];
+    var currentAction = (string)ViewContext.RouteData.Values["action"];
+    var isScanActive = currentController == "Scan" || currentController == "Collection";
+
+    var isSignedIn = UserSession.IsSignedIn(Session);
+    var userName = UserSession.Username(Session);
+    var role = UserSession.RoleName(Session);
+    var roleName = UserSession.RoleDisplayName(role);
+    var isSystemAdmin = role == "SystemAdmin";
+
+    var canRegister = role == "IntakeClerk" || role == "Supervisor" || role == "SystemAdmin";
+    var canScan = role == "StorageStaff" || role == "CollectionStaff" || role == "Supervisor" || role == "SystemAdmin";
+    var canImport = role == "Supervisor" || role == "SystemAdmin";
+    var canSeeAudit = role == "Supervisor" || role == "SystemAdmin";
+
+    var homeActive = currentController == "Home" ? "is-active" : "";
+    var registerActive = (currentController == "Packages" && currentAction == "Register") ? "is-active" : "";
+    var searchActive = (currentController == "Packages" && currentAction == "Search") ? "is-active" : "";
+    var scanActive = isScanActive ? "is-active" : "";
+    var importActive = currentController == "CsvImport" ? "is-active" : "";
+    var usersActive = currentController == "UserManagement" ? "is-active" : "";
+
+    var homeUrl = Url.Action("Index", "Home");
+    var registerUrl = Url.Action("Register", "Packages");
+    var searchUrl = Url.Action("Search", "Packages");
+    var scanUrl = Url.Action("Index", "Scan");
+    var collectionUrl = Url.Action("Index", "Collection");
+    var importUrl = Url.Action("Index", "CsvImport");
+    var usersUrl = Url.Action("Index", "UserManagement");
+    var logoUrl = Url.Content("~/Content/images/icon_inverted.png");
+    var faviconUrl = Url.Content("~/Content/images/favicon.ico");
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewBag.Title - Courier Service</title>
-    <link rel="icon" type="image/x-icon" href="@Url.Content("~/Content/images/favicon.ico")" />
+    <link rel="icon" type="image/x-icon" href="@faviconUrl" />
     <link href="~/Content/bootstrap-icons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/Content/site.css" />
-    <style>
-        /* Prevent header clipping and remove internal scrollbars */
-        .app-header,
-        .app-nav {
-            overflow: visible !important;
-        }
-
-        /* Container for the nav items */
-        .app-nav {
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-        }
-
-        /* Keep the Scan dropdown tab inline with other links */
-        .app-nav__dropdown {
-            position: relative !important;
-            display: inline-block !important;
-            vertical-align: middle !important;
-        }
-
-        /* Floating Popup Menu: completely isolated from header layout */
-        .app-nav__dropdown-menu {
-            display: none !important;
-            position: absolute !important;
-            top: 100% !important;
-            left: 0 !important;
-            background-color: #ffffff !important;
-            min-width: 180px !important;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25) !important;
-            border-radius: 4px !important;
-            border: 1px solid #cccccc !important;
-            z-index: 999999 !important;
-            padding: 6px 0 !important;
-            margin-top: 8px !important;
-        }
-
-            /* Option Item Styling */
-            .app-nav__dropdown-menu a {
-                color: #111111 !important;
-                background-color: #ffffff !important;
-                padding: 10px 16px !important;
-                display: block !important;
-                text-decoration: none !important;
-                white-space: nowrap !important;
-                font-size: 14px !important;
-                line-height: 1.2 !important;
-                margin: 0 !important;
-                height: auto !important;
-            }
-
-                /* Hover effect for dropdown item */
-                .app-nav__dropdown-menu a:hover {
-                    background-color: #f0f0f0 !important;
-                    color: #000000 !important;
-                }
-
-        /* Hover trigger */
-        .app-nav__dropdown:hover .app-nav__dropdown-menu {
-            display: block !important;
-        }
-
-        .app-nav__arrow {
-            display: inline-block !important;
-            margin-left: 4px !important;
-            font-size: 10px !important;
-        }
-    </style>
 </head>
 <body>
     <header class="app-header">
-        <a class="app-header__brand" href="@Url.Action("Index", "Home")">
-            <img class="app-header__logo" src="@Url.Content("~/Content/images/icon_inverted.png")" alt="" />
+        <a class="app-header__brand" href="@homeUrl">
+            <img class="app-header__logo" src="@logoUrl" alt="" />
             <span>F20 Courier Service</span>
-        </a>        <nav class="app-nav" aria-label="Main">
-            @{
-                var currentController = (string)ViewContext.RouteData.Values["controller"];
-                var currentAction = (string)ViewContext.RouteData.Values["action"];
-                var isScanActive = currentController == "Scan" || currentController == "Collection";
-                var isSignedIn = UserSession.IsSignedIn(Session);
-                var userName = UserSession.Username(Session);
-                var roleName = UserSession.RoleDisplayName(UserSession.RoleName(Session));
-                var isSystemAdmin = UserSession.RoleName(Session) == "SystemAdmin";
+        </a>
 
-                var role = UserSession.RoleName(Session);
-                var canRegister = role == "IntakeClerk" || role == "Supervisor" || role == "SystemAdmin";
-                var canScan = role == "StorageStaff" || role == "CollectionStaff" || role == "Supervisor" || role == "SystemAdmin";
-                var canImport = role == "Supervisor" || role == "SystemAdmin";
-                var canSeeAudit = role == "Supervisor" || role == "SystemAdmin";
-            }
+        @if (isSignedIn)
+        {
+            <button type="button" class="app-nav-toggle" id="nav-toggle" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list" aria-hidden="true"></i>
+            </button>
+        }
+
+        <nav class="app-nav" id="main-nav" aria-label="Main">
             @if (isSignedIn)
             {
-                <a class="app-nav__link @(currentController == "Home" ? "is-active" : "")" href="@Url.Action("Index", "Home")">Dashboard</a>
+                <a class="app-nav__link @homeActive" href="@homeUrl">Dashboard</a>
 
                 if (canRegister)
                 {
-                    <a class="app-nav__link @(currentController == "Packages" && currentAction == "Register" ? "is-active" : "")" href="@Url.Action("Register", "Packages")">Register</a>
+                    <a class="app-nav__link @registerActive" href="@registerUrl">Register</a>
                 }
 
-                <a class="app-nav__link @(currentController == "Packages" && currentAction == "Search" ? "is-active" : "")" href="@Url.Action("Search", "Packages")">Search</a>
+                <a class="app-nav__link @searchActive" href="@searchUrl">Search</a>
 
                 if (canScan)
                 {
                     <div class="app-nav__dropdown">
-                        <a class="app-nav__link @(isScanActive ? "is-active" : "")" href="@Url.Action("Index", "Scan")">
-                            Scan <span class="app-nav__arrow">&#9662;</span>
-                        </a>
+                        <a class="app-nav__link @scanActive" href="@scanUrl">Scan <span class="app-nav__arrow">&#9662;</span></a>
                         <div class="app-nav__dropdown-menu">
-                            <a class="app-nav__dropdown-item" href="@Url.Action("Index", "Collection")">Package Collection</a>
+                            <a class="app-nav__dropdown-item" href="@collectionUrl">Package Collection</a>
                         </div>
                     </div>
                 }
 
                 if (canImport)
                 {
-                    <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
+                    <a class="app-nav__link @importActive" href="@importUrl">Import</a>
                 }
 
                 if (canSeeAudit)
@@ -133,21 +90,32 @@
 
                 if (isSystemAdmin)
                 {
-                    <a class="app-nav__link @(currentController == "UserManagement" ? "is-active" : "")" href="@Url.Action("Index", "UserManagement")">Users</a>
+                    <a class="app-nav__link @usersActive" href="@usersUrl">Users</a>
                     <a class="app-nav__link" href="#">Config</a>
                 }
             }
         </nav>
+
         @if (isSignedIn)
         {
-            <span class="app-header__user">
-                Signed in as: @userName (@roleName)
-                @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { style = "display:inline; margin-left:8px;" }))
-                {
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-secondary">Log out</button>
-                }
-            </span>
+            <div class="app-user">
+                <button type="button" class="app-user__button" id="user-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="user-menu">
+                    <span class="app-user__text">
+                        <span class="app-user__name">@userName</span>
+                        <span class="app-user__role">@roleName</span>
+                    </span>
+                    <i class="bi bi-chevron-down app-user__chevron" aria-hidden="true"></i>
+                </button>
+                <div class="app-user__menu" id="user-menu">
+                    @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { style = "margin:0;" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="app-user__menu-item">
+                            <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Log out
+                        </button>
+                    }
+                </div>
+            </div>
         }
     </header>
 
@@ -157,5 +125,44 @@
 
     <script src="~/Scripts/app/courier-app.js"></script>
     @RenderSection("scripts", required: false)
+    <script>
+        (function () {
+            "use strict";
+            var navToggle = document.getElementById("nav-toggle");
+            var nav = document.getElementById("main-nav");
+            var userToggle = document.getElementById("user-toggle");
+            var userMenu = document.getElementById("user-menu");
+
+            function setNav(open) {
+                if (!navToggle) return;
+                nav.classList.toggle("is-open", open);
+                navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            }
+            function setUser(open) {
+                if (!userToggle) return;
+                userMenu.classList.toggle("is-open", open);
+                userToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            }
+
+            if (navToggle) {
+                navToggle.addEventListener("click", function () {
+                    setNav(!nav.classList.contains("is-open"));
+                });
+            }
+            if (userToggle) {
+                userToggle.addEventListener("click", function () {
+                    setUser(!userMenu.classList.contains("is-open"));
+                });
+            }
+            document.addEventListener("click", function (e) {
+                if (userToggle && !userToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                    setUser(false);
+                }
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") { setUser(false); setNav(false); }
+            });
+        })();
+    </script>
 </body>
 </html>

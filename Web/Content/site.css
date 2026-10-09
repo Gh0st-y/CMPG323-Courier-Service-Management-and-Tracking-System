@@ -1768,3 +1768,268 @@ html, body {
         width: 18px;
         height: 18px;
     }
+
+/* ============================================================ */
+/* Responsive header, Scan dropdown and user menu               */
+/* ============================================================ */
+
+.app-header {
+    position: relative;
+    z-index: 50;
+}
+
+.app-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    overflow: visible; /* the old overflow-x:auto clipped the dropdowns */
+}
+
+/* ---- Shared popup menu look (copied from the old Scan dropdown) ---- */
+.app-nav__dropdown-menu,
+.app-user__menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    min-width: 180px;
+    padding: 6px 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+}
+
+.app-nav__dropdown-menu {
+    left: 0;
+}
+
+.app-user__menu {
+    right: 0;
+}
+
+/* Invisible bridge so the menu doesn't close while the mouse moves down */
+.app-nav__dropdown-menu::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -8px;
+    height: 8px;
+}
+
+.app-nav__dropdown-item,
+.app-user__menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 16px;
+    border: 0;
+    background: #fff;
+    color: #111;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+    .app-nav__dropdown-item:hover,
+    .app-user__menu-item:hover {
+        background: #f0f0f0;
+        color: #000;
+    }
+
+    .app-user__menu-item:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: -2px;
+    }
+
+/* ---- Scan dropdown ---- */
+.app-nav__dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+    .app-nav__dropdown:hover .app-nav__dropdown-menu,
+    .app-nav__dropdown:focus-within .app-nav__dropdown-menu {
+        display: block;
+    }
+
+.app-nav__arrow {
+    margin-left: 4px;
+    font-size: 10px;
+}
+
+/* ---- Profile button (looks like a nav tab) ---- */
+.app-user {
+    position: relative;
+    margin-left: auto;
+}
+
+.app-user__button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+    .app-user__button:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .app-user__button[aria-expanded="true"] {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .app-user__button:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+.app-user__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.app-user__name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.app-user__role {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.app-user__chevron {
+    font-size: 10px;
+    transition: transform 0.15s ease;
+}
+
+.app-user__button[aria-expanded="true"] .app-user__chevron {
+    transform: rotate(180deg);
+}
+
+.app-user__menu.is-open {
+    display: block;
+}
+
+/* ---- Hamburger (hidden on wide screens) ---- */
+.app-nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: var(--radius);
+    background: transparent;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+    .app-nav-toggle:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+@media (prefers-reduced-motion: reduce) {
+    .app-user__chevron {
+        transition: none;
+    }
+}
+
+/* ---- Narrow screens: links collapse behind the hamburger ---- */
+@media (max-width: 1100px) {
+    .app-header__brand {
+        order: 1;
+        margin-right: 0;
+    }
+
+    .app-user {
+        order: 2;
+    }
+
+    .app-nav-toggle {
+        display: inline-flex;
+        order: 3;
+    }
+
+    .app-nav {
+        display: none;
+        order: 4;
+        flex: 1 0 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+        .app-nav.is-open {
+            display: flex;
+        }
+
+    .app-nav__link {
+        padding: 12px;
+    }
+
+    /* Scan submenu is always open inside the mobile menu */
+    .app-nav__dropdown {
+        display: block;
+    }
+
+    .app-nav__dropdown-menu {
+        position: static;
+        display: block;
+        padding: 0 0 0 16px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+        .app-nav__dropdown-menu::before {
+            display: none;
+        }
+
+    .app-nav__dropdown-item {
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+        .app-nav__dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+    .app-nav__arrow {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-user__name {
+        max-width: 110px;
+    }
+}
