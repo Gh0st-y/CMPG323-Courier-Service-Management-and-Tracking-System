@@ -1209,7 +1209,7 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding-left: 72px;
+    padding-left: 32px;
 }
 
 .dashboard-action__title {
