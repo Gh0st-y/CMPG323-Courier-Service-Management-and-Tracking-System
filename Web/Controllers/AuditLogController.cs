@@ -9,7 +9,7 @@ using CourierService.Web.Models;
 
 namespace CourierService.Web.Controllers
 {
-    //[Authorize(Roles = "Supervisor, SystemAdmin")] // Hidden from non-admin/supervisor roles (Acceptance Criteria & SR-04)
+    [Authorize(Roles = "Supervisor, SystemAdmin")] // Hidden from non-admin/supervisor roles (Acceptance Criteria & SR-04)
     public class AuditLogController : Controller
     {
         private readonly IAuditLogRepository _auditLogRepository;

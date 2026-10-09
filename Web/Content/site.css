@@ -874,6 +874,71 @@ a {
 }
 
 /* ============================================================ */
+/* CSV Import UI components (T40)                               */
+/* ============================================================ */
+.csv-stats-grid {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    flex: 1;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-box__label {
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+}
+
+.stat-box__value {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.stat-box--success .stat-box__value {
+    color: var(--color-success);
+}
+
+.stat-box--error .stat-box__value {
+    color: var(--color-error);
+}
+
+.form-section fieldset {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 20px 24px 24px;
+    margin: 0;
+    background-color: var(--color-bg);
+}
+
+.form-section legend {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--color-text);
+    padding: 0 10px;
+    margin-left: -4px;
+}
+
+@media (max-width: 600px) {
+    .csv-stats-grid {
+        flex-direction: column;
+    }
+}
+
+/* ============================================================ */
 /* Audit Log Viewer Page (SR-04, T46)                           */
 /* ============================================================ */
 .audit-log-page {
@@ -1063,31 +1128,7 @@ a {
     color: #721c24;
 }
 
-    .audit-notice-alert__content strong {
-        font-weight: 700;
-        color: var(--color-error, #c0392b);
-    }
-
-/* ============================================================ */
-/* Flatpickr Smooth Calendar Overrides                          */
-/* ============================================================ */
-.flatpickr-input[readonly] {
-    cursor: pointer;
-    background-color: #ffffff !important;
-}
-
-    .flatpickr-input[readonly]:hover {
-        border-color: var(--color-primary, #5c2d91) !important;
-    }
-
-.flatpickr-calendar {
-    border-radius: var(--radius, 6px);
-    box-shadow: var(--shadow, 0 2px 8px rgba(31, 27, 36, 0.12));
-    border: 1px solid var(--color-border, #e0dcea);
-}
-
-.flatpickr-day.selected,
-.flatpickr-day.selected:hover {
-    background: var(--color-primary, #5c2d91) !important;
-    border-color: var(--color-primary, #5c2d91) !important;
+.audit-notice-alert__content strong {
+    font-weight: 700;
+    color: var(--color-error, #c0392b);
 }

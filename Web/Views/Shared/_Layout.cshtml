@@ -96,7 +96,7 @@
                     <a class="app-nav__dropdown-item" href="@Url.Action("Index", "Collection")">Package Collection</a>
                 </div>
             </div>
-            <a class="app-nav__link" href="#">Import</a>
+            <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
             <a class="app-nav__link @(currentController == "AuditLog" ? "is-active" : "")" href="@Url.Action("Index", "AuditLog")">Audit Log</a>
             <a class="app-nav__link" href="#">Users</a>
             <a class="app-nav__link" href="#">Config</a>
