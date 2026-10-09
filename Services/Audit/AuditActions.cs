@@ -16,6 +16,7 @@
         public const string UserRoleChanged = "UserRoleChanged";
         public const string UserDeactivated = "UserDeactivated";
         public const string UserReactivated = "UserReactivated";
+        public const string PaymentStatusChanged = "PaymentStatusChanged";
     }
 
     // Values for the EntityType column.

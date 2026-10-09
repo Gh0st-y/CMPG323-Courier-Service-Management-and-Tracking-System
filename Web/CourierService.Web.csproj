@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Api\NotificationsApiController.cs" />
+    <Compile Include="Controllers\Api\PaymentApiController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Infrastructure\NotificationWorker.cs" />
     <Compile Include="Infrastructure\RequireLoginAttribute.cs" />
     <Compile Include="Infrastructure\UserSession.cs" />
+    <Compile Include="Models\Api\Packages\PaymentStatusRequest.cs" />
     <Compile Include="Models\Api\Packages\RegisterPackageRequest.cs" />
     <Compile Include="Models\Api\Packages\ResendNotificationRequest.cs" />
     <Compile Include="Models\LoginViewModel.cs" />

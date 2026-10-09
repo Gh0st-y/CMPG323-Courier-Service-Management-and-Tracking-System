@@ -138,8 +138,9 @@ namespace CourierService.Services.Packages
             // The fee comes from dbo.AppConfig (Fee.Personal / Fee.WorkRelated), so it can change without a redeploy (FR-15)
             var fee = ReadFee(classification);
 
-            // Nothing to pay means nothing to chase (FR-17): work-related packages are Exempt, the rest start Unpaid
-            var paymentStatus = fee == 0m ? "Exempt" : "Unpaid";
+            // Work-related packages start Exempt and personal ones Unpaid (T41, FR-17). By classification, not by fee,
+            // so a changed fee in AppConfig doesn't change who has to pay
+            var paymentStatus = PaymentStatuses.DefaultFor(classification);
 
             // ---- Save: identifier, recipient, package, history and audit together, or not at all ----
 

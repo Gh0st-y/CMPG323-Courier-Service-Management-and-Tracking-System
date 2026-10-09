@@ -203,6 +203,19 @@ namespace CourierService.Tests.Packages
         }
 
         [TestMethod]
+        public void WorkRelatedPackage_StaysExempt_EvenIfAFeeIsConfigured()
+        {
+            _config.Values["Fee.WorkRelated"] = "5.00";
+            var request = ValidRequest();
+            request.Classification = "WorkRelated";
+
+            var result = _service.Register(request, ClerkId);
+
+            Assert.AreEqual(5.00m, result.Fee);
+            Assert.AreEqual("Exempt", result.PaymentStatus);
+        }
+
+        [TestMethod]
         public void TheFeeComesFromConfig_SoAChangedFeeIsUsedStraightAway()
         {
             _config.Values["Fee.Personal"] = "12.50";
