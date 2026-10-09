@@ -80,7 +80,7 @@
                         <a class="app-nav__dropdown-item @searchActive" href="@searchUrl"><i class="bi bi-search" aria-hidden="true"></i> Search packages</a>
                         @if (canScan)
                         {
-                            <a class="app-nav__dropdown-item @scanActive" href="@scanUrl"><i class="bi bi-qr-code-scan" aria-hidden="true"></i> Scan</a>
+                            <a class="app-nav__dropdown-item @scanActive" href="@scanUrl"><i class="bi bi-upc-scan" aria-hidden="true"></i> Scan</a>
                         }
                         @if (canCollect)
                         {
@@ -102,7 +102,7 @@
                             }
                             @if (canImport)
                             {
-                                <a class="app-nav__dropdown-item @importActive" href="@importUrl"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i> Import</a>
+                                <a class="app-nav__dropdown-item @importActive" href="@importUrl"><i class="bi bi-file-earmark-arrow-down" aria-hidden="true"></i> Import</a>
                             }
                             @if (canSeeAudit)
                             {
@@ -110,7 +110,7 @@
                             }
                             @if (isSystemAdmin)
                             {
-                                <a class="app-nav__dropdown-item @usersActive" href="@usersUrl"><i class="bi bi-person-fill-gear" aria-hidden="true"></i> Users</a>
+                                <a class="app-nav__dropdown-item @usersActive" href="@usersUrl"><i class="bi bi-person-gear" aria-hidden="true"></i> Users</a>
                                 <a class="app-nav__dropdown-item" href="#"><i class="bi bi-gear" aria-hidden="true"></i> Config</a>
                             }
                         </div>
