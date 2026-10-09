@@ -78,8 +78,10 @@
 </head>
 <body>
     <header class="app-header">
-        <a class="app-header__brand" href="@Url.Action("Index", "Home")">F20 Courier Service</a>
-        <nav class="app-nav" aria-label="Main">
+        <a class="app-header__brand" href="@Url.Action("Index", "Home")">
+            <img class="app-header__logo" src="@Url.Content("~/Content/images/icon_inverted.png")" alt="" />
+            <span>F20 Courier Service</span>
+        </a>        <nav class="app-nav" aria-label="Main">
             @{
                 var currentController = (string)ViewContext.RouteData.Values["controller"];
                 var currentAction = (string)ViewContext.RouteData.Values["action"];
