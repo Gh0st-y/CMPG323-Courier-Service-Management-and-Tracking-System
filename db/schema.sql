@@ -85,6 +85,15 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_RecipientId' 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_CreatedAtUtc' AND object_id = OBJECT_ID('dbo.Packages'))
     CREATE INDEX IX_Packages_CreatedAtUtc ON dbo.Packages(CreatedAtUtc);
 GO
+-- T41: when the payment status was last changed and by whom (FR-17). Added with ALTER so running this
+-- script again also updates an existing database; it is safe to run more than once.
+IF COL_LENGTH('dbo.Packages', 'PaymentStatusUpdatedAtUtc') IS NULL
+    ALTER TABLE dbo.Packages ADD PaymentStatusUpdatedAtUtc DATETIME2 NULL;
+GO
+IF COL_LENGTH('dbo.Packages', 'PaymentStatusUpdatedByUserId') IS NULL
+    ALTER TABLE dbo.Packages ADD PaymentStatusUpdatedByUserId INT NULL
+        CONSTRAINT FK_Packages_PaymentStatusUpdatedBy REFERENCES dbo.Users(UserId);
+GO
 
 -- ===================== Status history (FR-04, DR-009, DR-010) =====================
 IF OBJECT_ID('dbo.PackageStatusHistory', 'U') IS NULL

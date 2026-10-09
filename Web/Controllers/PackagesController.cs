@@ -17,17 +17,20 @@ namespace CourierService.Web.Controllers
     {
         private readonly IPackageRepository _packages;
         private readonly IPackageDetailRepository _packageDetail;
+        private readonly IPackagePaymentRepository _payments;
 
         public PackagesController()
             : this(new PackageRepository(new SqlConnectionFactory()),
-                   new PackageDetailRepository(new SqlConnectionFactory()))
+                   new PackageDetailRepository(new SqlConnectionFactory()),
+                   new PackagePaymentRepository(new SqlConnectionFactory()))
         {
         }
 
-        public PackagesController(IPackageRepository packages, IPackageDetailRepository packageDetail)
+        public PackagesController(IPackageRepository packages, IPackageDetailRepository packageDetail, IPackagePaymentRepository payments)
         {
             _packages = packages;
             _packageDetail = packageDetail;
+            _payments = payments;
         }
 
         /// <summary>
@@ -184,9 +187,10 @@ namespace CourierService.Web.Controllers
                     recipientAddress = PersonalData.MaskPhone(n.RecipientAddress),
                     subject = n.Subject,
                     status = n.Status,
-                    errorDetail = n.ErrorDetail,
                     sentAtUtc = IsoUtc(n.SentAtUtc)
                 }).ToList();
+
+            var payment = _payments.GetPaymentInfo(package.PackageId);
 
             var packageJson = new
             {
@@ -196,6 +200,9 @@ namespace CourierService.Web.Controllers
                 classification = package.Classification,
                 packageType = package.PackageType,
                 paymentStatus = package.PaymentStatus,
+                // T41: who last changed the payment status and when; null until staff change it
+                paymentStatusUpdatedAtUtc = payment == null ? null : IsoUtc(payment.UpdatedAtUtc),
+                paymentStatusUpdatedBy = payment == null ? null : payment.UpdatedBy,
                 fee = package.Fee,
                 storageLocationId = package.StorageLocationId,
                 storageLocation = package.StorageLocationCode,
