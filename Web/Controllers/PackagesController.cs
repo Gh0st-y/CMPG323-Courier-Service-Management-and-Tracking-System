@@ -1,15 +1,17 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Web.Mvc;
-using CourierService.Data;
+﻿using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
 using CourierService.Domain.Models;
 using CourierService.Domain.Repositories;
 using CourierService.Services.Packages;
+using CourierService.Services.Security;
 using CourierService.Web.Infrastructure;
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Web.Mvc;
+using CourierService.Services.Security;
 
 namespace CourierService.Web.Controllers
 {
@@ -37,6 +39,7 @@ namespace CourierService.Web.Controllers
         /// Renders the package registration form (FR-03, UR-01).
         /// All API calls are made client-side via CourierApp.api, so this action just returns the view.
         /// </summary>
+        [RoleAuthorize(RoleNames.IntakeClerk, RoleNames.Supervisor, RoleNames.SystemAdmin)]
         public ActionResult Register()
         {
             return View();
@@ -46,6 +49,7 @@ namespace CourierService.Web.Controllers
         /// Renders the print-friendly label view for a package (FR-03, CON-008).
         /// The f20Identifier is passed through to the view, which fetches details via CourierApp.api.
         /// </summary>
+        [RoleAuthorize(RoleNames.IntakeClerk, RoleNames.Supervisor, RoleNames.SystemAdmin)]
         public ActionResult Label(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -60,6 +64,7 @@ namespace CourierService.Web.Controllers
         /// Renders the search and results page (FR-05, UR-01).
         /// Filtering and paging happen client-side via CourierApp.api against Get/api/packages.
         /// </summary>
+        [RoleAuthorize]
         public ActionResult Search()
         {
             return View();
@@ -69,6 +74,7 @@ namespace CourierService.Web.Controllers
         /// Renders the package detail page with status, location, fee, timeline, and notifications (FR-05, DR-012).
         /// The f20Identifier is passed to the view, which fetches details via CourierApp.api.
         /// </summary>
+        [RoleAuthorize]
         public ActionResult Detail(string id)
         {
             if (string.IsNullOrWhiteSpace(id))

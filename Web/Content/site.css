@@ -72,12 +72,21 @@ a {
 }
 
 .app-header__brand {
-  font-weight: 600;
-  font-size: 17px;
-  color: var(--color-text-on-primary);
-  text-decoration: none;
-  white-space: nowrap;
-  margin-right: 32px;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--color-text-on-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    margin-right: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-header__logo {
+    height: 32px;
+    width: auto;
+    display: block;
 }
 
 .app-nav {
@@ -910,6 +919,7 @@ html, body {
     gap: 20px;
 }
 
+
 /* TODO remove mock mode */
 .dashboard-mock {
     display: inline-flex;
@@ -1138,67 +1148,168 @@ html, body {
 }
 
 .dashboard-action {
+    --qr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 21'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='21' y2='0'%3E%3Cstop offset='0' stop-color='black'/%3E%3Cstop offset='1' stop-color='black' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='url(%23g)' fill-rule='evenodd'%3E%3Cpath d='M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zM15 1v5h5V1zM16 2h3v3h-3zM0 14h7v7H0zM1 15v5h5v-5zM2 16h3v3H2zM9 0h2v1H9zM12 2h1v2h-1zM9 3h2v1H9zM8 5h1v2H8zM10 6h2v1h-2zM0 8h2v1H0zM3 8h1v1H3zM5 9h2v1H5zM8 8h2v2H8zM11 9h1v2h-1zM13 8h3v1h-3zM17 9h2v1h-2zM19 8h2v2h-2zM9 12h2v2H9zM12 11h1v1h-1zM14 13h2v1h-2zM17 12h1v3h-1zM19 14h2v1h-2zM8 15h1v3H8zM10 16h2v1h-2zM13 16h1v3h-1zM15 18h3v1h-3zM19 17h2v2h-2zM10 19h2v2h-2zM8 20h1v1H8zM17 20h2v1h-2z'/%3E%3C/g%3E%3C/svg%3E");
+    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-height: 72px;
-    padding: 16px 18px;
+    align-items: center;
+    gap: 14px;
+    min-height: 116px;
+    padding: 20px 18px 20px 24px;
+    overflow: hidden;
     border-radius: var(--radius);
     border: 1px solid transparent;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     box-shadow: var(--shadow);
     color: var(--color-text-on-primary);
     text-decoration: none;
-    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.dashboard-action:hover {
-    transform: translateY(-1px);
-    background: var(--color-primary-dark);
-    text-decoration: none;
-}
+    .dashboard-action:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+        text-decoration: none;
+    }
 
-.dashboard-action:focus-visible {
-    outline: 3px solid rgba(92, 45, 145, 0.25);
-    outline-offset: 2px;
-}
+    .dashboard-action:focus-visible {
+        outline: 3px solid var(--color-primary-dark);
+        outline-offset: 3px;
+    }
 
+/* Search: gold */
 .dashboard-action--search {
-    background: var(--color-accent);
+    background: linear-gradient(135deg, #ffbf2e 0%, var(--color-accent) 100%);
     color: var(--color-primary-dark);
 }
 
-.dashboard-action--search:hover {
-    background: var(--color-accent-dark);
-    color: #fff;
-}
+    .dashboard-action--search:hover {
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+    }
 
+/* Collect: green */
 .dashboard-action--collect {
-    background: var(--color-success);
+    background: linear-gradient(135deg, #2a9d62 0%, var(--color-success) 100%);
 }
 
-.dashboard-action--collect:hover {
-    background: #16643c;
+    .dashboard-action--collect:hover {
+        background: linear-gradient(135deg, var(--color-success) 0%, #16643c 100%);
+    }
+
+/* Fading QR pattern, drawn in the tile's own text colour */
+.dashboard-action__qr {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0.12;
+    pointer-events: none;
+    -webkit-mask: var(--qr) no-repeat left -10px center / auto 120%;
+    mask: var(--qr) no-repeat left -10px center / auto 120%;
+}
+
+.dashboard-action__body {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-left: 30px;
 }
 
 .dashboard-action__title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     line-height: 1.2;
 }
 
 .dashboard-action__description {
-    font-size: 13px;
+    font-size: 13.5px;
     line-height: 1.35;
-    color: inherit;
     opacity: 0.92;
 }
 
 .dashboard-action__footnote {
-    font-size: 12px;
+    font-size: 11.5px;
     line-height: 1.3;
-    color: inherit;
     opacity: 0.8;
+}
+
+/* Chevron in a soft circle */
+.dashboard-action__chevron {
+    position: relative;
+    flex: none;
+    box-sizing: content-box;
+    width: 18px;
+    height: 18px;
+    padding: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.dashboard-action--search .dashboard-action__chevron {
+    background: rgba(62, 31, 99, 0.14);
+}
+
+.dashboard-action:hover .dashboard-action__chevron {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.26);
+}
+
+.dashboard-action--search:hover .dashboard-action__chevron {
+    background: rgba(62, 31, 99, 0.24);
+}
+
+/* Role-locked placeholder: greyed, static, no text, no chevron (keep this AFTER the colour rules) */
+.dashboard-action--locked,
+.dashboard-action--locked:hover {
+    background: #e3e1e8;
+    color: #9a95a3;
+    box-shadow: none;
+    transform: none;
+    cursor: default;
+    pointer-events: none;
+}
+
+    .dashboard-action--locked .dashboard-action__qr {
+        opacity: 0.35;
+    }
+
+.spin {
+    display: inline-block;
+    animation: icon-spin 0.8s linear infinite;
+}
+
+@media (max-width: 900px) {
+    .dashboard-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-action,
+    .dashboard-action__chevron {
+        transition: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-action__body {
+        padding-left: 24px;
+    }
+}
+
+@keyframes icon-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spin {
+        animation: none;
+    }
 }
 
 /* ============================================================ */
@@ -1561,5 +1672,419 @@ html, body {
 @media (max-width: 500px) {
     .um-create .search-form__grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================ */
+/* Access Denied page (T50, SR-02)                              */
+/* ============================================================ */
+.access-denied {
+    text-align: center;
+    padding: 32px 16px;
+}
+
+.access-denied__image {
+    display: block;
+    max-width: 320px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 16px;
+}
+
+.access-denied__title {
+    margin: 0 0 8px;
+    color: var(--color-primary-dark);
+}
+
+.access-denied__lead {
+    margin: 0 0 4px;
+    font-size: 17px;
+}
+
+.access-denied__hint {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.access-denied__actions {
+    margin-top: 28px;
+}
+
+    .access-denied__actions .btn {
+        border-radius: 999px;
+        padding: 10px 28px;
+    }
+
+/* ============================================================ */
+/* Login page layout                                            */
+/* ============================================================ */
+.login-wrap {
+    max-width: 750px;
+    margin: 24px auto 0;
+}
+
+.login-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0 0 6px;
+}
+
+    .login-title::after {
+        content: "";
+        display: block;
+        width: 56px;
+        height: 4px;
+        margin: 10px auto 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--color-accent), var(--color-primary-light));
+    }
+
+.login-subtitle {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    margin: 0 0 20px;
+}
+.login-profile {
+    display: block;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.password-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+}
+
+    .password-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+/* ============================================================ */
+/* Responsive header, Scan dropdown and user menu               */
+/* ============================================================ */
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.app-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+    overflow: visible; /* the old overflow-x:auto clipped the dropdowns */
+}
+
+/* ---- Shared popup menu look (copied from the old Scan dropdown) ---- */
+.app-nav__dropdown-menu,
+.app-user__menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    min-width: 180px;
+    padding: 6px 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+}
+
+.app-nav__dropdown-menu {
+    left: 0;
+}
+
+.app-user__menu {
+    right: 0;
+}
+
+/* Invisible bridge so the menu doesn't close while the mouse moves down */
+.app-nav__dropdown-menu::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -8px;
+    height: 8px;
+}
+
+.app-nav__dropdown-item,
+.app-user__menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 16px;
+    border: 0;
+    background: #fff;
+    color: #111;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+    .app-nav__dropdown-item:hover,
+    .app-user__menu-item:hover {
+        background: #f0f0f0;
+        color: #000;
+    }
+
+    .app-user__menu-item:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: -2px;
+    }
+
+/* ---- Scan dropdown ---- */
+.app-nav__dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+    .app-nav__dropdown:hover .app-nav__dropdown-menu,
+    .app-nav__dropdown:focus-within .app-nav__dropdown-menu {
+        display: block;
+    }
+
+.app-nav__arrow {
+    margin-left: 4px;
+    font-size: 10px;
+}
+
+/* ---- Profile button (looks like a nav tab) ---- */
+.app-user {
+    position: relative;
+    margin-left: auto;
+}
+
+.app-user__button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+    .app-user__button:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .app-user__button[aria-expanded="true"] {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .app-user__button:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+.app-user__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.app-user__name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.app-user__role {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    display: inline-block; 
+    padding-left: 18px; 
+}
+
+
+.app-user__chevron {
+    font-size: 10px;
+    transition: transform 0.15s ease;
+}
+
+.app-user__button[aria-expanded="true"] .app-user__chevron {
+    transform: rotate(180deg);
+}
+
+.app-user__menu.is-open {
+    display: block;
+}
+
+/* ---- Hamburger (hidden on wide screens) ---- */
+.app-nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: var(--radius);
+    background: transparent;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+    .app-nav-toggle:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+@media (prefers-reduced-motion: reduce) {
+    .app-user__chevron {
+        transition: none;
+    }
+}
+
+/* ---- Narrow screens: links collapse behind the hamburger ---- */
+@media (max-width: 1100px) {
+    .app-header__brand {
+        order: 1;
+        margin-right: 0;
+    }
+
+    .app-user {
+        order: 2;
+    }
+
+    .app-nav-toggle {
+        display: inline-flex;
+        order: 3;
+    }
+
+    .app-nav {
+        display: none;
+        order: 4;
+        flex: 1 0 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+        .app-nav.is-open {
+            display: flex;
+        }
+
+    .app-nav__link {
+        padding: 12px;
+    }
+
+    /* Scan submenu is always open inside the mobile menu */
+    .app-nav__dropdown {
+        display: block;
+    }
+
+    .app-nav__dropdown-menu {
+        position: static;
+        display: block;
+        padding: 0 0 0 16px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+        .app-nav__dropdown-menu::before {
+            display: none;
+        }
+
+    .app-nav__dropdown-item {
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+        .app-nav__dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+    .app-nav__arrow {
+        display: none;
+    }
+}
+
+/* Dropdown trigger buttons (Packages, Admin) look like nav links */
+.app-nav__trigger {
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+    .app-nav__trigger:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .app-nav__trigger.is-active {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.2);
+        font-weight: 600;
+    }
+
+    .app-nav__trigger:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+
+/* Icon + text inside nav links and dropdown items */
+.app-nav__link .bi,
+.app-nav__dropdown-item .bi {
+    margin-right: 6px;
+}
+
+.app-nav__dropdown-item.is-active {
+    background: #f0f0f0;
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+    .app-nav__trigger {
+        display: block;
+        width: 100%;
+        text-align: left;
+        cursor: default;
+    }
+
+    .app-nav__dropdown-item.is-active {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-user__name {
+        max-width: 110px;
     }
 }

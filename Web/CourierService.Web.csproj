@@ -97,8 +97,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\bootstrap-icons.min.css" />
     <Content Include="Content\Images\accessDenied.png" />
     <Content Include="Content\Images\favicon.ico" />
+    <Content Include="Content\Images\profile.png" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
@@ -182,6 +184,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\AccessDenied.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\fonts\bootstrap-icons.woff" />
+    <Content Include="Content\fonts\bootstrap-icons.woff2" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
