@@ -33,14 +33,15 @@
             <div class="dashboard-section__heading">
                 <div class="dashboard-section__title-row">
                     <h2 class="dashboard-section__title" id="dashboard-summary-title">Package summary</h2>
-                    <p class="dashboard-section__meta" id="dashboard-updated-at" hidden>Loading current counts...</p>
+                    <p class="dashboard-section__meta" id="dashboard-updated-at" hidden></p>
                 </div>
                 <span class="dashboard-section__divider" aria-hidden="true"></span>
                 <p class="dashboard-section__text">Counts are loaded from the backend API.</p>
             </div>
 
-            <button type="button" class="btn btn-secondary" id="dashboard-refresh">Refresh summary</button>
-        </div>
+            <button type="button" class="btn btn-secondary" id="dashboard-refresh">
+                <i class="bi bi-arrow-clockwise" id="refresh-icon"></i> Refresh summary
+            </button>        </div>
 
         <div class="dashboard-stats" id="dashboard-stats" aria-live="polite" aria-busy="true">
             <article class="card dashboard-stat dashboard-stat--received">
@@ -187,6 +188,7 @@
                 updatedAtEl.hidden = !isLoading;
                 refreshButtonEl.disabled = isLoading;
                 retryButtonEl.disabled = isLoading;
+                refreshIconEl.classList.toggle("spin", isLoading);
             }
 
             function showError() {
@@ -206,7 +208,11 @@
                 });
             }
 
+            var MIN_SPIN_MS = 700;
+
             function loadDashboardStats() {
+                var started = Date.now();
+
                 setLoadingState(true);
                 hideError();
 
@@ -216,12 +222,17 @@
                     setStatValues({});
                     showError();
                 }).then(function () {
+                    var wait = Math.max(0, MIN_SPIN_MS - (Date.now() - started));
+                    return new Promise(function (resolve) { setTimeout(resolve, wait); });
+                }).then(function () {
                     setLoadingState(false);
                 });
             }
 
             refreshButtonEl.addEventListener("click", loadDashboardStats);
             retryButtonEl.addEventListener("click", loadDashboardStats);
+
+            var refreshIconEl = document.getElementById("refresh-icon");
 
             //TODO Remove the functioning of the mockmode
             var mockLabelEl = document.getElementById("mock-mode-label");

@@ -1276,6 +1276,11 @@ html, body {
         opacity: 0.35;
     }
 
+.spin {
+    display: inline-block;
+    animation: icon-spin 0.8s linear infinite;
+}
+
 @media (max-width: 900px) {
     .dashboard-actions {
         grid-template-columns: 1fr;
@@ -1292,6 +1297,18 @@ html, body {
 @media (max-width: 600px) {
     .dashboard-action__body {
         padding-left: 24px;
+    }
+}
+
+@keyframes icon-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spin {
+        animation: none;
     }
 }
 
