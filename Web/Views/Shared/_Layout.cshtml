@@ -2,7 +2,6 @@
 @{
     var currentController = (string)ViewContext.RouteData.Values["controller"];
     var currentAction = (string)ViewContext.RouteData.Values["action"];
-    var isScanActive = currentController == "Scan" || currentController == "Collection";
 
     var isSignedIn = UserSession.IsSignedIn(Session);
     var userName = UserSession.Username(Session);
@@ -11,14 +10,21 @@
     var isSystemAdmin = role == "SystemAdmin";
 
     var canRegister = role == "IntakeClerk" || role == "Supervisor" || role == "SystemAdmin";
-    var canScan = role == "StorageStaff" || role == "CollectionStaff" || role == "Supervisor" || role == "SystemAdmin";
+    var canScan = role == "StorageStaff" || role == "Supervisor" || role == "SystemAdmin";    var canCollect = role == "CollectionStaff" || role == "Supervisor" || role == "SystemAdmin";
     var canImport = role == "Supervisor" || role == "SystemAdmin";
     var canSeeAudit = role == "Supervisor" || role == "SystemAdmin";
+    var canSeeReports = role == "Supervisor" || role == "SystemAdmin";
+    var canSeeAdmin = canImport || canSeeAudit || canSeeReports || isSystemAdmin;
 
     var homeActive = currentController == "Home" ? "is-active" : "";
+    var packagesActive = (currentController == "Packages" || currentController == "Scan" || currentController == "Collection") ? "is-active" : "";
+    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "UserManagement") ? "is-active" : "";
+
     var registerActive = (currentController == "Packages" && currentAction == "Register") ? "is-active" : "";
     var searchActive = (currentController == "Packages" && currentAction == "Search") ? "is-active" : "";
-    var scanActive = isScanActive ? "is-active" : "";
+    var scanActive = currentController == "Scan" ? "is-active" : "";
+    var collectionActive = currentController == "Collection" ? "is-active" : "";
+    var reportsActive = currentController == "Reports" ? "is-active" : "";
     var importActive = currentController == "CsvImport" ? "is-active" : "";
     var usersActive = currentController == "UserManagement" ? "is-active" : "";
 
@@ -27,6 +33,7 @@
     var searchUrl = Url.Action("Search", "Packages");
     var scanUrl = Url.Action("Index", "Scan");
     var collectionUrl = Url.Action("Index", "Collection");
+    var reportsUrl = Url.Action("Index", "Reports");
     var importUrl = Url.Action("Index", "CsvImport");
     var usersUrl = Url.Action("Index", "UserManagement");
     var logoUrl = Url.Content("~/Content/images/icon_inverted.png");
@@ -59,38 +66,55 @@
         <nav class="app-nav" id="main-nav" aria-label="Main">
             @if (isSignedIn)
             {
-                <a class="app-nav__link @homeActive" href="@homeUrl"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a class="app-nav__link @homeActive" href="@homeUrl"><i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard</a>
 
-                if (canRegister)
-                {
-                    <a class="app-nav__link @registerActive" href="@registerUrl">Register</a>
-                }
+                <div class="app-nav__dropdown">
+                    <button type="button" class="app-nav__link app-nav__trigger @packagesActive" aria-haspopup="true">
+                        Packages <span class="app-nav__arrow">&#9662;</span>
+                    </button>
+                    <div class="app-nav__dropdown-menu">
+                        @if (canRegister)
+                        {
+                            <a class="app-nav__dropdown-item @registerActive" href="@registerUrl"><i class="bi bi-plus-circle" aria-hidden="true"></i> Register package</a>
+                        }
+                        <a class="app-nav__dropdown-item @searchActive" href="@searchUrl"><i class="bi bi-search" aria-hidden="true"></i> Search packages</a>
+                        @if (canScan)
+                        {
+                            <a class="app-nav__dropdown-item @scanActive" href="@scanUrl"><i class="bi bi-qr-code-scan" aria-hidden="true"></i> Scan</a>
+                        }
+                        @if (canCollect)
+                        {
+                            <a class="app-nav__dropdown-item @collectionActive" href="@collectionUrl"><i class="bi bi-box-seam" aria-hidden="true"></i> Package collection</a>
+                        }
+                    </div>
+                </div>
 
-                <a class="app-nav__link @searchActive" href="@searchUrl">Search</a>
-
-                if (canScan)
+                if (canSeeAdmin)
                 {
                     <div class="app-nav__dropdown">
-                        <a class="app-nav__link @scanActive" href="@scanUrl">Scan <span class="app-nav__arrow">&#9662;</span></a>
+                        <button type="button" class="app-nav__link app-nav__trigger @adminActive" aria-haspopup="true">
+                            Admin <span class="app-nav__arrow">&#9662;</span>
+                        </button>
                         <div class="app-nav__dropdown-menu">
-                            <a class="app-nav__dropdown-item" href="@collectionUrl">Package Collection</a>
+                            @if (canSeeReports)
+                            {
+                                <a class="app-nav__dropdown-item @reportsActive" href="@reportsUrl"><i class="bi bi-bar-chart" aria-hidden="true"></i> Reports</a>
+                            }
+                            @if (canImport)
+                            {
+                                <a class="app-nav__dropdown-item @importActive" href="@importUrl"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i> Import</a>
+                            }
+                            @if (canSeeAudit)
+                            {
+                                <a class="app-nav__dropdown-item" href="#"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
+                            }
+                            @if (isSystemAdmin)
+                            {
+                                <a class="app-nav__dropdown-item @usersActive" href="@usersUrl"><i class="bi bi-person-fill-gear" aria-hidden="true"></i> Users</a>
+                                <a class="app-nav__dropdown-item" href="#"><i class="bi bi-gear" aria-hidden="true"></i> Config</a>
+                            }
                         </div>
                     </div>
-                }
-
-                if (canImport)
-                {
-                    <a class="app-nav__link @importActive" href="@importUrl">Import</a>
-                }
-
-                if (canSeeAudit)
-                {
-                    <a class="app-nav__link" href="#">Audit Log</a>
-                }
-
-                if (isSystemAdmin)
-                {
-                    <a class="app-nav__link" href="#">Config</a>
                 }
             }
         </nav>
@@ -100,19 +124,12 @@
             <div class="app-user">
                 <button type="button" class="app-user__button" id="user-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="user-menu">
                     <span class="app-user__text">
-                        
-                        <span  class="app-user__name"><i class="bi bi-person-fill"></i> @userName</span>
+                        <span class="app-user__name">@userName</span>
                         <span class="app-user__role">@roleName</span>
                     </span>
                     <i class="bi bi-chevron-down app-user__chevron" aria-hidden="true"></i>
                 </button>
                 <div class="app-user__menu" id="user-menu">
-                    @if (isSystemAdmin)
-                    {
-                        <a class="app-user__menu-item @usersActive" href="@usersUrl">
-                            <i class="bi bi-person-fill-gear" aria-hidden="true"></i> User Management
-                        </a>
-                    }
                     @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { style = "margin:0;" }))
                     {
                         @Html.AntiForgeryToken()
