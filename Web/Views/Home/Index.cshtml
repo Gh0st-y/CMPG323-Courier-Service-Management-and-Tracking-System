@@ -148,24 +148,7 @@
             var dashboardErrorEl = document.getElementById("dashboard-error");
             var refreshButtonEl = document.getElementById("dashboard-refresh");
             var retryButtonEl = document.getElementById("dashboard-retry");
-
-            var actionPermissions = {
-                register: ["IntakeClerk", "Supervisor", "SystemAdmin"],
-                search: ["IntakeClerk", "StorageStaff", "CollectionStaff", "Supervisor", "SystemAdmin"],
-                collect: ["CollectionStaff", "Supervisor", "SystemAdmin"]
-            };
-
-            var currentRole = (window.CourierApp && CourierApp.currentUserRole)
-                || window.sessionStorage.getItem("courier.userRole")
-                || "Supervisor";
-
-            if (window.CourierApp) {
-                CourierApp.currentUserRole = currentRole;
-            }
-
-            function canUseAction(actionName) {
-                return actionPermissions[actionName].indexOf(currentRole) !== -1;
-            }
+            var refreshIconEl = document.getElementById("refresh-icon");
 
             function formatCount(value) {
                 if (value === null || value === undefined) {
@@ -199,15 +182,6 @@
                 dashboardErrorEl.hidden = true;
             }
 
-            function applyActionVisibility() {
-                Object.keys(actionPermissions).forEach(function (actionName) {
-                    var actionEl = document.querySelector('[data-dashboard-action="' + actionName + '"]');
-                    if (actionEl) {
-                        actionEl.hidden = !canUseAction(actionName);
-                    }
-                });
-            }
-
             var MIN_SPIN_MS = 700;
 
             function loadDashboardStats() {
@@ -231,9 +205,6 @@
 
             refreshButtonEl.addEventListener("click", loadDashboardStats);
             retryButtonEl.addEventListener("click", loadDashboardStats);
-
-            var refreshIconEl = document.getElementById("refresh-icon");
-
             //TODO Remove the functioning of the mockmode
             var mockLabelEl = document.getElementById("mock-mode-label");
             var mockToggleEl = document.getElementById("toggle-mock-mode");
@@ -251,8 +222,6 @@
 
             refreshMockLabel();//END of mockmode
 
-            
-            applyActionVisibility();
             loadDashboardStats();
         })();
     </script>
