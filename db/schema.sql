@@ -165,6 +165,9 @@ USING (VALUES
     ('Sms.Enabled', 'false', 'Toggle SMS channel on/off (email always sends)'),
     ('Notification.ReadyForCollection.Subject', 'Your package is ready for collection', ''),
     ('Notification.Collected.Subject', 'Your package has been collected', '')
+-- four notification settings: two subjects and two bodies.
+	('Notification.ReadyForCollection.Body', 'Hello {{RecipientName}}, your package {{PackageId}} is ready for collection at {{StorageLocation}}. Please bring your ID. F20 Courier Service', 'Email body template for ready-for-collection notifications'),
+    ('Notification.Collected.Body', 'Hello {{RecipientName}}, your package {{PackageId}} was collected on {{CollectionTime}}. If you did not collect it, please contact the courier office. F20 Courier Service', 'Email body template for collection confirmation')
 ) AS src (ConfigKey, ConfigValue, Description)
 ON target.ConfigKey = src.ConfigKey
 WHEN NOT MATCHED THEN
