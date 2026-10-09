@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\Api\NotificationsApiController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
@@ -65,16 +66,22 @@
     <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+	<Compile Include="Controllers\ImportController.cs" />
     <Compile Include="Controllers\MockController.cs" />
     <Compile Include="Controllers\PackageActionsController.cs" />
     <Compile Include="Controllers\PackagesController.cs" />
     <Compile Include="Controllers\PackagesController.Registration.cs" />
     <Compile Include="Controllers\ScanController.cs" />
     <Compile Include="Controllers\StorageLocationController.cs" />
+    <Compile Include="Controllers\UserManagementController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\NotificationWorker.cs" />
+    <Compile Include="Infrastructure\RequireLoginAttribute.cs" />
+    <Compile Include="Infrastructure\UserSession.cs" />
     <Compile Include="Models\Api\Packages\RegisterPackageRequest.cs" />
+    <Compile Include="Models\Api\Packages\ResendNotificationRequest.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Infrastructure\CourierServices.cs" />
     <Compile Include="Infrastructure\DatabaseUnavailableFilter.cs" />
@@ -89,9 +96,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Images\accessDenied.png" />
+    <Content Include="Content\Images\favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
+    <Content Include="Scripts\app\users.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -151,7 +161,9 @@
   <ItemGroup>
     <Content Include="Views\Packages\Detail.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Views\UserManagement\Index.cshtml" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Account\Login.cshtml" />
   </ItemGroup>

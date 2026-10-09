@@ -8,6 +8,7 @@ using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
 using CourierService.Domain.Models;
 using CourierService.Domain.Repositories;
+using CourierService.Services.Packages;
 using CourierService.Web.Infrastructure;
 
 namespace CourierService.Web.Controllers
@@ -15,15 +16,18 @@ namespace CourierService.Web.Controllers
     public partial class PackagesController : Controller
     {
         private readonly IPackageRepository _packages;
+        private readonly IPackageDetailRepository _packageDetail;
 
         public PackagesController()
-            : this(new PackageRepository(new SqlConnectionFactory()))
+            : this(new PackageRepository(new SqlConnectionFactory()),
+                   new PackageDetailRepository(new SqlConnectionFactory()))
         {
         }
 
-        public PackagesController(IPackageRepository packages)
+        public PackagesController(IPackageRepository packages, IPackageDetailRepository packageDetail)
         {
             _packages = packages;
+            _packageDetail = packageDetail;
         }
 
         /// <summary>
@@ -147,6 +151,75 @@ namespace CourierService.Web.Controllers
                 Trace.TraceError(ex.ToString());
                 return ErrorJson(500, "ServerError", "Something went wrong while searching. Please try again.");
             }
+        }
+
+        /// <summary>T22: GET /api/packages/{f20Identifier}/detail — JSON data for the Detail page above. Any logged-in user (SR-02).</summary>
+        [RoleAuthorize]
+        [HttpGet]
+        [Route("api/packages/{f20Identifier}/detail")]
+        public ActionResult DetailJson(string f20Identifier)
+        {
+            string identifier;
+            if (!PackageIdentifier.TryNormalize(f20Identifier, out identifier))
+                return ErrorJson(400, "ValidationError", "f20Identifier is required.");
+
+            var package = _packages.GetByF20Identifier(identifier);
+            if (package == null)
+                return ErrorJson(404, "NotFound", "No package found for that identifier.");
+
+            var statusHistory = _packageDetail.GetStatusHistory(package.PackageId)
+                .Select(h => new
+                {
+                    fromStatus = h.FromStatus,
+                    toStatus = h.ToStatus,
+                    changedBy = h.ChangedByUsername,
+                    changedAtUtc = IsoUtc(h.ChangedAtUtc),
+                    notes = h.Notes
+                }).ToList();
+
+            var notifications = _packageDetail.GetNotificationLog(package.PackageId)
+                .Select(n => new
+                {
+                    channel = n.Channel,
+                    recipientAddress = PersonalData.MaskPhone(n.RecipientAddress),
+                    subject = n.Subject,
+                    status = n.Status,
+                    errorDetail = n.ErrorDetail,
+                    sentAtUtc = IsoUtc(n.SentAtUtc)
+                }).ToList();
+
+            var packageJson = new
+            {
+                packageId = package.PackageId,
+                f20Identifier = package.F20Identifier,
+                status = package.Status.ToString(),
+                classification = package.Classification,
+                packageType = package.PackageType,
+                paymentStatus = package.PaymentStatus,
+                fee = package.Fee,
+                storageLocationId = package.StorageLocationId,
+                storageLocation = package.StorageLocationCode,
+                notes = package.Notes,
+                receivedAtUtc = IsoUtc(package.CreatedAtUtc),
+                createdAtUtc = IsoUtc(package.CreatedAtUtc),
+                collectedAtUtc = IsoUtc(package.CollectedAtUtc),
+                recipient = new
+                {
+                    recipientId = package.Recipient.RecipientId,
+                    fullName = package.Recipient.FullName,
+                    identifierNo = package.Recipient.IdentifierNo,
+                    phoneNumber = PersonalData.MaskPhone(package.Recipient.PhoneNumber),
+                    department = package.Recipient.Department
+                },
+                recipientName = package.Recipient.FullName
+            };
+
+            return Json(new
+            {
+                package = packageJson,
+                statusHistory,
+                notifications
+            }, JsonRequestBehavior.AllowGet);
         }
 
         private ActionResult ErrorJson(int statusCode, string code, string message)

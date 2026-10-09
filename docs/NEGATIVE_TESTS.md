@@ -46,9 +46,9 @@ If your database has been used for other testing, check them first with step 3a.
 | 6a, 6b | Supervisor on admin-only endpoints | 403 Forbidden on both | Skipped, needs T43 |
 | 7a to 7d | Database offline | 503 ServiceUnavailable, friendly page and toast | Pass |
 | 7e | Database back online | 200 again | Pass |
-| 8 | Email/SMS failure | Pending T25/T28, see section 8 | Not run |
+| 8a to 8f | Mail server not running | Status change 200, email tried 3 times then marked Failed | Pass |
 
-Tested by: Hannu (Visagi1411)  Date: 2026-10-06
+Tested by: Hannu (Visagi1411)  Date: 2026-10-07
 ---
 
 ## 1. Logged out
@@ -253,6 +253,43 @@ ALTER DATABASE CourierService SET ONLINE;
 
 Log in again as supervisor.demo and repeat 7b. Expected: 200 with the package.
 
-## 8. Email and SMS failures (NFR-023)
+## 8. Email failure (NFR-022, IR-001)
 
-Not testable yet. The notification sender (T25, T28) isn't on main. The design already keeps a failed email or SMS from blocking staff: a status change only **queues** the notification inside its own transaction (`IPackageStatusChangeListener`), and a background worker sends it later and marks failures (`INotificationRepository.MarkFailed`). When T25/T28 land, add a step here that points SMTP at a closed port, changes a status, and checks that the change succeeds and the queue row is marked failed.
+This checks that a mail server that isn't running never stops staff from changing a status. It needs T25 (queue and worker) and T26 (SMTP sender). Unlike the rest of the script, it changes one package: F20-0005 moves from In Storage to Ready for Collection. Use the next In Storage package (F20-0009, F20-0013 and so on) if F20-0005 has already moved on.
+
+8a. Make sure no test mail server is running: close smtp4dev or Papercut if you use one. Leave `Smtp.Host` as `localhost` in Web.config. Press F5 if the app isn't running.
+
+8b. Log out, then log in as storage.demo. Expected: 204, then 200.
+```js
+fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.status));
+```
+```js
+fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: "storage.demo", password: "Demo@2026!" }) }).then(r => r.text().then(t => console.log(r.status, t)));
+```
+
+8c. Check the package. Expected: 200 with status InStorage.
+```js
+fetch("/api/packages/scan/F20-0005").then(r => r.json().then(j => console.log(r.status, j.f20Identifier, j.status)));
+```
+
+8d. Move it to Ready for Collection and time it. Expected: 200 with status ReadyForCollection, well under a second, even though the email can't be sent.
+```js
+window.t0 = performance.now(); fetch("/api/packages/F20-0005/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newStatus: "ReadyForCollection" }) }).then(r => r.json().then(j => console.log(r.status, Math.round(performance.now() - window.t0) + " ms", j.status)));
+```
+
+8e. In SQL Server Object Explorer, right-click the **CourierService** database, choose New Query and run this. Run it again after about 1 minute and after about 2 minutes.
+```sql
+USE CourierService;
+SELECT q.NotificationQueueId, p.F20Identifier, q.TemplateKey, q.Status, q.AttemptCount, q.EnqueuedAtUtc, q.LastAttemptAtUtc
+FROM dbo.NotificationQueue q JOIN dbo.Packages p ON p.PackageId = q.PackageId
+WHERE p.F20Identifier = 'F20-0005'
+ORDER BY q.NotificationQueueId DESC;
+```
+Expected: one ReadyForCollection row. After a few seconds it is Pending with AttemptCount 1, after about a minute Pending with 2, and after about two minutes Failed with 3. Visual Studio's Output window shows "attempt 1 of 3 failed, will retry: The mail server could not be used (GeneralFailure, ConnectionRefused)." and finally "failed after 3 attempt(s), not retrying". The recipient's address appears nowhere in the output.
+
+8f. Log out. Expected: 204.
+```js
+fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.status));
+```
+
+SMS failures are tested with the SMS adapter (T29).

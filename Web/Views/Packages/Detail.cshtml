@@ -244,6 +244,17 @@
 
                             li.appendChild(channel);
                             li.appendChild(badge);
+
+                            // T28: say why an attempt failed, e.g. "The recipient has no email address."
+                            if (n.errorDetail) {
+                                var reason = document.createElement("span");
+                                reason.className = "notification-list__reason";
+                                reason.style.fontSize = "0.82em";
+                                reason.style.color = "#721c24";
+                                reason.textContent = n.errorDetail;
+                                li.appendChild(reason);
+                            }
+
                             li.appendChild(when);
                             notifEl.appendChild(li);
                         });

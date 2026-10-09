@@ -1,0 +1,172 @@
+@using CourierService.Services.Security
+@{
+    ViewBag.Title = "User Management";
+    var roles = new[] { RoleNames.IntakeClerk, RoleNames.StorageStaff, RoleNames.CollectionStaff, RoleNames.Supervisor, RoleNames.SystemAdmin };
+}
+
+
+<div class="detail-page"
+     id="user-mgmt"
+     data-api-base="@Url.Content("~/api")"
+     data-current-user-id="@ViewBag.CurrentUserId">
+
+    <h2 class="app-page-title">User Management</h2>
+
+    <!-- Create User panel (hidden until Add User is clicked) -->
+    <div class="card mb-4 um-create" id="create-user-panel" style="display:none;">
+        <h3 class="card-title mb-3" style="font-size: 16px; font-weight: 600;">Create User</h3>
+        <div class="search-form__grid">
+            <div class="form-row">
+                <label for="new-username">Username <span class="required">*</span></label>
+                <input type="text" id="new-username" autocomplete="off" />
+            </div>
+            <div class="form-row">
+                <label for="new-email">Email <span class="required">*</span></label>
+                <input type="email" id="new-email" autocomplete="off" />
+            </div>
+            <div class="form-row">
+                <label for="new-password">Password <span class="required">*</span></label>
+                <input type="password" id="new-password" autocomplete="new-password" />
+            </div>
+            <div class="form-row">
+                <label for="new-role">Role <span class="required">*</span></label>
+                <select id="new-role">
+                    <option value="">-- Select role --</option>
+                    @foreach (var r in roles)
+                    {
+                        <option value="@r">@r</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="button" id="btn-create-user" class="btn btn-primary">Create User</button>
+            <button type="button" id="btn-cancel-create" class="btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Toolbar: search, filters, Add User -->
+    <div class="card mb-4">
+        <div class="um-toolbar">
+            <div class="um-search">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="9" cy="9" r="6" />
+                    <path d="M14 14l4 4" />
+                </svg>
+                <input type="search" id="user-search" placeholder="Search by username, email or role"
+                       autocomplete="off" aria-label="Search users" />
+            </div>
+
+            <select id="filter-role" class="um-select" aria-label="Filter by role">
+                <option value="">All roles</option>
+                @foreach (var r in roles)
+                {
+                    <option value="@r">@r</option>
+                }
+            </select>
+
+            <select id="filter-status" class="um-select" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+
+            <button type="button" id="btn-toggle-create" class="um-add-btn">+ Add User</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title mb-3" style="font-size: 16px; font-weight: 600;">All Users</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <!-- RoleNames comes from the RoleNames constants so it can't drift from dbo.Roles -->
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 8px;">Username</th>
+                    <th style="padding: 8px;">Email</th>
+                    <th style="padding: 8px;">Role</th>
+                    <th style="padding: 8px;">Status</th>
+                    <th style="padding: 8px;">Last login</th>
+                    <th style="padding: 8px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-body">
+                <tr><td colspan="6" style="padding: 8px;">Loading...</td></tr>
+            </tbody>
+        </table>
+        <p id="users-empty" style="display:none; padding:8px;">No users match your search.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.USER_ROLES = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(roles));
+    </script>
+    <script src="~/Scripts/app/users.js"></script>
+    <script>
+        (function () {
+            var panel = document.getElementById('create-user-panel');
+            var toggleBtn = document.getElementById('btn-toggle-create');
+            var cancelBtn = document.getElementById('btn-cancel-create');
+            var tbody = document.getElementById('users-body');
+            var search = document.getElementById('user-search');
+            var roleSel = document.getElementById('filter-role');
+            var statusSel = document.getElementById('filter-status');
+            var emptyMsg = document.getElementById('users-empty');
+            var fields = ['new-username', 'new-email', 'new-password', 'new-role'];
+
+            // ---------- Add User panel ----------
+            function openPanel() {
+                panel.style.display = '';
+                toggleBtn.style.display = 'none';
+                document.getElementById('new-username').focus();
+            }
+            function closePanel() {
+                fields.forEach(function (id) { document.getElementById(id).value = ''; });
+                panel.style.display = 'none';
+                toggleBtn.style.display = '';
+            }
+            toggleBtn.addEventListener('click', openPanel);
+            cancelBtn.addEventListener('click', closePanel);
+            window.closeCreateUserPanel = closePanel;
+
+            // ---------- Search + filters ----------
+            function cellText(cell) {
+                if (!cell) return '';
+                var sel = cell.querySelector('select');
+                return (sel ? sel.value : cell.textContent).trim().toLowerCase();
+            }
+
+            function applyFilters() {
+                var q = search.value.trim().toLowerCase();
+                var role = roleSel.value.toLowerCase();
+                var status = statusSel.value.toLowerCase();
+                var rows = tbody.querySelectorAll('tr');
+                var shown = 0, dataRows = 0;
+
+                rows.forEach(function (tr) {
+                    var cells = tr.children;
+                    if (cells.length < 4) { return; }
+                    dataRows++;
+
+                    var u = cellText(cells[0]), e = cellText(cells[1]),
+                        r = cellText(cells[2]), s = cellText(cells[3]);
+
+                    var ok = (!q || (u + ' ' + e + ' ' + r).indexOf(q) !== -1)
+                        && (!role || r === role)
+                        && (!status || s === status);
+
+                    tr.style.display = ok ? '' : 'none';
+                    if (ok) shown++;
+                });
+
+                emptyMsg.style.display = (dataRows > 0 && shown === 0) ? '' : 'none';
+            }
+
+            search.addEventListener('input', applyFilters);
+            roleSel.addEventListener('change', applyFilters);
+            statusSel.addEventListener('change', applyFilters);
+
+            new MutationObserver(applyFilters).observe(tbody, { childList: true });
+        })();
+    </script>
+}

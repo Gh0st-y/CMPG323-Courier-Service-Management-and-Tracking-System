@@ -270,6 +270,13 @@
                 return null;
             }).then(function (data) {
                 if (!response.ok) {
+                    // Not logged in any more: the session timed out (30 minutes, NRF-015) or ended in another tab.
+                    // Go to the login page and come back here afterwards. Not for /auth/ calls: a wrong password is also a 401.
+                    if (response.status === 401 && path.indexOf("/auth/") !== 0) {
+                        window.location.href = "/Account/Login?expired=1&returnUrl=" +
+                            encodeURIComponent(window.location.pathname + window.location.search);
+                    }
+
                     var apiError = (data && data.error) || { code: "UnknownError", message: "Something went wrong. Please try again." };
                     return Promise.reject({ status: response.status, error: apiError });
                 }

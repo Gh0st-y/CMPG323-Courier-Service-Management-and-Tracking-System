@@ -71,6 +71,134 @@ namespace CourierService.Data.Repositories
             }
         }
 
+        public NotificationQueueItem GetNextDue(System.DateTime retryBeforeUtc, IUnitOfWork unitOfWork = null)
+        {
+            const string sql = @"
+                SELECT TOP (1) NotificationQueueId, PackageId, Channel, TemplateKey, Status,
+                       AttemptCount, EnqueuedAtUtc, LastAttemptAtUtc
+                FROM dbo.NotificationQueue
+                WHERE Status = 'Pending'
+                  AND (LastAttemptAtUtc IS NULL OR LastAttemptAtUtc <= @RetryBeforeUtc)
+                ORDER BY EnqueuedAtUtc ASC, NotificationQueueId ASC;";
+
+            IDbConnection ownedConnection = null;
+            try
+            {
+                IDbCommand command;
+                if (unitOfWork != null)
+                {
+                    command = unitOfWork.Connection.CreateCommand();
+                    command.Transaction = unitOfWork.Transaction;
+                }
+                else
+                {
+                    ownedConnection = _connectionFactory.CreateOpenConnection();
+                    command = ownedConnection.CreateCommand();
+                }
+
+                using (command)
+                {
+                    command.CommandText = sql;
+                    command.AddParameter("@RetryBeforeUtc", DbType.DateTime2, retryBeforeUtc);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        return reader.Read() ? MapItem(reader) : null;
+                    }
+                }
+            }
+            finally
+            {
+                ownedConnection?.Dispose();
+            }
+        }
+
+        public void RecordFailedAttempt(int notificationQueueId, IUnitOfWork unitOfWork = null)
+        {
+            // Stays Pending: the attempt is counted and timed, and GetNextDue skips it until the retry delay has passed
+            UpdateStatus(notificationQueueId, "Pending", unitOfWork);
+        }
+
+        public NotificationQueueItem GetLatestForPackage(int packageId, string channel, IUnitOfWork unitOfWork = null)
+        {
+            const string sql = @"
+                SELECT TOP (1) NotificationQueueId, PackageId, Channel, TemplateKey, Status,
+                       AttemptCount, EnqueuedAtUtc, LastAttemptAtUtc
+                FROM dbo.NotificationQueue
+                WHERE PackageId = @PackageId AND Channel = @Channel
+                ORDER BY NotificationQueueId DESC;";
+
+            IDbConnection ownedConnection = null;
+            try
+            {
+                IDbCommand command;
+                if (unitOfWork != null)
+                {
+                    command = unitOfWork.Connection.CreateCommand();
+                    command.Transaction = unitOfWork.Transaction;
+                }
+                else
+                {
+                    ownedConnection = _connectionFactory.CreateOpenConnection();
+                    command = ownedConnection.CreateCommand();
+                }
+
+                using (command)
+                {
+                    command.CommandText = sql;
+                    command.AddParameter("@PackageId", DbType.Int32, packageId);
+                    command.AddParameter("@Channel", DbType.String, channel);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        return reader.Read() ? MapItem(reader) : null;
+                    }
+                }
+            }
+            finally
+            {
+                ownedConnection?.Dispose();
+            }
+        }
+
+        public bool Requeue(int notificationQueueId, IUnitOfWork unitOfWork = null)
+        {
+            // Only a Failed item: the WHERE makes a second, simultaneous Resend a no-op instead of a double send
+            const string sql = @"
+                UPDATE dbo.NotificationQueue
+                SET Status = 'Pending',
+                    AttemptCount = 0,
+                    LastAttemptAtUtc = NULL
+                WHERE NotificationQueueId = @NotificationQueueId AND Status = 'Failed';";
+
+            IDbConnection ownedConnection = null;
+            try
+            {
+                IDbCommand command;
+                if (unitOfWork != null)
+                {
+                    command = unitOfWork.Connection.CreateCommand();
+                    command.Transaction = unitOfWork.Transaction;
+                }
+                else
+                {
+                    ownedConnection = _connectionFactory.CreateOpenConnection();
+                    command = ownedConnection.CreateCommand();
+                }
+
+                using (command)
+                {
+                    command.CommandText = sql;
+                    command.AddParameter("@NotificationQueueId", DbType.Int32, notificationQueueId);
+                    return command.ExecuteNonQuery() == 1;
+                }
+            }
+            finally
+            {
+                ownedConnection?.Dispose();
+            }
+        }
+
         public void MarkSent(int notificationQueueId, IUnitOfWork unitOfWork = null)
         {
             UpdateStatus(notificationQueueId, "Sent", unitOfWork);
