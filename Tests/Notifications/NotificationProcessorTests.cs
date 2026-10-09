@@ -184,6 +184,32 @@ namespace CourierService.Tests.Notifications
             Assert.AreEqual("0821234567", sms.Sent[0].To);
         }
 
+
+        [TestMethod]
+        public void SmsFailure_DoesNotPreventEmailFromBeingProcessed()
+        {
+            var sms = new FakeSender(NotificationChannels.Sms);
+            sms.Results.Enqueue(() => NotificationSendResult.Failed("SMS provider unavailable"));
+
+            _packages.Add(7, "F20-0007", email: "thandi@courier.test", phone: "0821234567");
+
+            var emailItem = _queue.Add(7, channel: NotificationChannels.Email);
+            var smsItem = _queue.Add(7, channel: NotificationChannels.Sms);
+
+            var processor = Processor(_email, sms);
+
+            // Process the email notification first.
+            Assert.AreEqual(NotificationOutcome.Sent, processor.ProcessNext());
+
+            // The SMS failure is handled independently.
+            Assert.AreEqual(NotificationOutcome.WillRetry, processor.ProcessNext());
+
+            Assert.AreEqual(1, _email.Sent.Count);
+            Assert.AreEqual("Sent", _queue.Get(emailItem.NotificationQueueId).Status);
+            Assert.AreEqual("Pending", _queue.Get(smsItem.NotificationQueueId).Status);
+            Assert.AreEqual(1, sms.Sent.Count);
+        }
+
         [TestMethod]
         public void MissingPackage_Fails()
         {
