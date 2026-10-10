@@ -69,7 +69,9 @@ namespace CourierService.Web.Controllers
         // 503 for a database outage, 500 for anything else.
         protected override void OnException(ExceptionContext filterContext)
         {
-            Trace.TraceError(filterContext.Exception.ToString());
+            Trace.TraceError(
+                "An unexpected error occurred in the Dashboard controller. Exception type: {0}",
+                filterContext.Exception.GetType().Name);
             base.OnException(filterContext);
         }
     }

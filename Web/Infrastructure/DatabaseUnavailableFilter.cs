@@ -29,8 +29,10 @@ namespace CourierService.Web.Infrastructure
                 return;
             }
 
-            // The full error goes to the log only, never to the user (SR-03)
-            Trace.TraceError("Database unavailable: " + filterContext.Exception);
+            // Avoid logging exception messages or stack traces that may contain sensitive data.
+            Trace.TraceError(
+                "Database unavailable. Exception type: {0}",
+                filterContext.Exception.GetType().Name);
 
             var httpContext = filterContext.HttpContext;
             var response = httpContext.Response;
