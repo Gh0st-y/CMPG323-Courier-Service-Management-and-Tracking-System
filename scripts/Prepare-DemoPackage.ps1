@@ -26,7 +26,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Could not archive the release commit.' }
 $source = Join-Path $output 'source'
 Expand-Archive -LiteralPath $sourceZip -DestinationPath $source
 $web = Join-Path $output 'web'
-& $MSBuildPath (Join-Path $source 'Web\CourierService.Web.csproj') /restore /t:Build /p:Configuration=Release /p:MvcBuildViews=true /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem "/p:publishUrl=$web" /p:DeleteExistingFiles=false /v:minimal /nologo
+& $MSBuildPath (Join-Path $source 'Web\CourierService.Web.csproj') /restore /t:Build /p:Configuration=Release /p:MvcBuildViews=true /p:DeployOnBuild=true /p:PublishProfile=DemoFolder "/p:DemoPublishDirectory=$web" /p:DeleteExistingFiles=false /v:quiet /nologo
 if ($LASTEXITCODE -ne 0) { throw 'Release build or filesystem publish failed.' }
 & dotnet test (Join-Path $source 'Tests\CourierService.Tests.csproj') --filter 'FullyQualifiedName!~CourierService.Tests.Integration' --verbosity minimal
 if ($LASTEXITCODE -ne 0) { throw 'Unit tests failed; package is not ready.' }

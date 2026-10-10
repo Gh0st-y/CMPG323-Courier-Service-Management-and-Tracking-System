@@ -109,6 +109,7 @@
     <Content Include="Scripts\app\users.js" />
     <Content Include="Scripts\chart.umd.min.js" />
     <Content Include="Web.config" />
+    <None Include="Properties\PublishProfiles\DemoFolder.pubxml" />
     <Content Include="Web.Release.config"><DependentUpon>Web.config</DependentUpon></Content>
     <Content Include="Scripts\html5-qrcode.min.js" />
     <Content Include="Content\Images\icon_inverted.png" />
