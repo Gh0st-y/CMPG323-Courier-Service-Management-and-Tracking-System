@@ -1,4 +1,4 @@
-﻿@model string
+@model string
 
 @{
     ViewBag.Title = "Package Detail";
@@ -110,7 +110,7 @@
         (function () {
             "use strict";
 
-            var f20Identifier = "@Html.Raw(f20Identifier)";
+            var f20Identifier = document.getElementById("detail-id").textContent;
 
             var errorEl = document.getElementById("detail-error");
             var contentEl = document.getElementById("detail-content");
