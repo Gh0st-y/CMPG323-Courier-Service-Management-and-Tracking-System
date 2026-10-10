@@ -52,3 +52,9 @@ Keep the previous site folder, package manifest and a verified synthetic databas
 ## Completion
 
 Record actual evidence, resolve demo-breaking defects, then review #57 for closure. This preparation PR deliberately does not close it. Full rehearsal follows under #60; release freeze/tag/backup recording remains #61.
+
+## Preparation verification performed
+
+On 2026-10-10, the candidate package from commit `b1be0d8` was exported, restored, built and published into a new local output directory. All 333 non-integration MSTest tests passed with no skips. Required assets and the Release transform were verified; all manifest hashes matched the published files, and the local scanner asset matched the existing repository copy. Existing NuGet version and assembly-binding warnings were retained.
+
+This candidate deliberately excludes other unmerged branches and is not a final demo release. SQL integration, IIS installation, backup restore, phone/printer checks and rehearsal remain pending.
