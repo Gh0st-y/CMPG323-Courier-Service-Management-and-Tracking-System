@@ -196,6 +196,3 @@ All three endpoints are SystemAdmin only (`401 NotAuthenticated` when not logged
 - The QR code holds the F20 identifier only (CON-008), so a lost label shows no personal details and the scan screens can look the package up from it.
 - Only drawn for packages that exist: an unknown or malformed identifier gives the same `404 NotFound` as the scan endpoint.
 - Sent with `Cache-Control: private`, so only the user's own browser keeps a copy.
-## Reports backend semantics (T47)
-
-`GET /api/reports?from=&to=&status=&classification=&paymentStatus=` is restricted to Supervisor/SystemAdmin. Inclusive SAST dates filter package registration time. Default: 30 days ending today (or the supplied end date). Totals describe current statuses/payment statuses of that receipt cohort, not transactions occurring during the range. The outstanding list excludes Collected and returns its 50 oldest packages. Invalid dates/ranges return 400. See [REPORT_VERIFICATION.md](REPORT_VERIFICATION.md) for executed SQL-backed checks.
