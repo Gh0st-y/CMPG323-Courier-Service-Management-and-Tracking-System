@@ -42,6 +42,8 @@ namespace CourierService.Web.Controllers
         [Route("api/reports")]
         public ActionResult Data(DateTime? from, DateTime? to, string status, string classification, string paymentStatus)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("InvalidDate", "from and to must be valid dates in yyyy-MM-dd format.");
             if (!IsAllowed(status, Statuses))
                 return BadRequest("InvalidStatus", "status must be one of: " + string.Join(", ", Statuses) + ".");
             if (!IsAllowed(classification, Classifications))
@@ -51,14 +53,19 @@ namespace CourierService.Web.Controllers
             if (from.HasValue && to.HasValue && from.Value.Date > to.Value.Date)
                 return BadRequest("InvalidDateRange", "from must not be after to.");
 
-            var report = _reports.GetReport(new ReportFilter
+            ReportData report;
+            try
             {
-                FromDate = from,
-                ToDate = to,
-                Status = status,
-                Classification = classification,
-                PaymentStatus = paymentStatus
-            });
+                report = _reports.GetReport(new ReportFilter
+                {
+                    FromDate = from, ToDate = to, Status = status,
+                    Classification = classification, PaymentStatus = paymentStatus
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest("InvalidDateRange", ex.Message);
+            }
 
             return Json(new
             {
