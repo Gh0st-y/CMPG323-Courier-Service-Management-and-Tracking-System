@@ -3,7 +3,9 @@
 Staff-only intake, storage and collection tracking system for North-West University's
 F20 courier point. See [DECISIONS.md](DECISIONS.md) for the architecture/decisions log,
 [docs/API_CONTRACT.md](docs/API_CONTRACT.md) for the REST contract, and
-[db/schema.sql](db/schema.sql) for the database schema.
+[db/schema.sql](db/schema.sql) for the database schema. Maintainers can use
+[technical documentation](docs/TECHNICAL_DOCUMENTATION.md) for setup, configuration,
+the ERD and the future ingestion extension path.
 
 ## Solution layout
 

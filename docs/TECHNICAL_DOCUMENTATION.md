@@ -1,126 +1,199 @@
-# Technical documentation — T59
+# Technical documentation (T59)
 
-## 1. Overview
+## System and scope
 
-Courier Service Management and Tracking System is a staff-facing ASP.NET MVC 5 application for registering, storing, tracking and collecting parcels at the NWU F20 courier point. The repository targets **.NET Framework 4.8** and **SQL Server Express/LocalDB**. Its API contract is maintained in [`API_CONTRACT.md`](API_CONTRACT.md); authoritative scope decisions are in [`../DECISIONS.md`](../DECISIONS.md).
+This staff-only application handles intake, storage, notifications and collection at NWU F20. It uses C#, .NET Framework 4.8, ASP.NET MVC 5 and SQL Server Express/LocalDB. The package lifecycle is `Registered -> InStorage -> ReadyForCollection -> Collected`. Recipients have no portal. QR payloads contain the internal package identifier only.
 
-## 2. Architecture
+Scope decisions are recorded in [DECISIONS.md](../DECISIONS.md), routes and roles in [API_CONTRACT.md](API_CONTRACT.md), and tables in [schema.sql](../db/schema.sql). The functional specification's 20-user target conflicts with the decisions log's five-user demo target; acceptance must identify which target applies.
 
-```text
-Browser / QR scanner
-        |
-        v
-Web (ASP.NET MVC controllers, Razor views, JS)
-        |
-        v
-Services (validation, workflows, state transitions, notifications)
-        |                               |
-        v                               v
-Domain (entities and interfaces)     Data (ADO.NET repositories)
-                                        |
-                                        v
-                                    SQL Server
+## Architecture and dependencies
+
+```mermaid
+flowchart TD
+    Browser[Staff browser / USB input / phone camera] --> Web[Web: MVC controllers and Razor]
+    Web --> Services[Services: business rules]
+    Web --> Data[Data: ADO.NET repositories]
+    Services --> Domain[Domain: models and interfaces]
+    Data --> Domain
+    Data --> SQL[(SQL Server)]
+    Web --> Worker[Notification timer]
+    Worker --> Processor[NotificationProcessor]
+    Processor --> Sender[SMTP or SMS stub]
 ```
 
-The dependency rules are documented in [`../README.md`](../README.md): Web uses Services and Data; Services and Data use Domain; SQL access is restricted to Data. `Tests` contains MSTest unit and integration coverage. The source-of-truth solution is `CourierService.sln`.
+Services depends on Domain, not Data. Web constructs concrete repositories and passes them through Domain interfaces to services; those repositories execute SQL at runtime. SQL access is confined to Data. The browser talks to MVC endpoints; the included Web API packages do not make these controllers Web API controllers.
 
-## 3. Repository guide
-
-| Location | Purpose |
+| Layer | Responsibilities |
 | --- | --- |
-| `Domain/Entities` | Package, recipient, user, storage and notification models |
-| `Services/Packages` | Registration, scanning, status changes, collection, payments and CSV parsing |
-| `Services/Notifications` | Notification queueing, composition, sending and resend logic |
-| `Services/Auth`, `Services/Users` | Authentication, roles and account administration |
-| `Data/Repositories` | SQL persistence and queries |
-| `Web/Controllers`, `Web/Controllers/Api` | MVC and HTTP endpoints |
-| `Web/Views` | Razor UI |
-| `db/schema.sql` | Database creation and schema |
-| `db/seed.sql` | Demo data (development only) |
-| `db/seed-50k.sql` | Larger performance-test data set |
-| `Tests/` | MSTest suite |
-| `docs/` | API, operations and test documentation |
+| Domain | Entities, report/search models, repository and transaction interfaces |
+| Services | Validation, fees, transitions, collection, payment, authentication, notifications and audit |
+| Data | Parameterized commands, mapping, connection ownership and transactions |
+| Web | HTTP parsing, session/role filters, service composition, Razor, browser scripts |
+| Tests | MSTest unit and SQL integration tests; standalone JavaScript checks in relevant fix branches |
 
-## 4. Setup (Windows)
+`UnitOfWork` owns one connection and transaction, commits explicitly and otherwise rolls back. Registration atomically creates recipient/package/history/audit records. Status changes atomically update a row-version-checked package, append history/audit entries and enqueue notifications. Payment changes save payment metadata and audit entries together; their concurrency behavior needs the separate review fix.
 
-1. Install Visual Studio 2022 with **ASP.NET and web development** and the **.NET Framework 4.8 targeting pack**. Install SQL Server LocalDB or SQL Server Express.
-2. Clone the repository; open `CourierService.sln` and allow NuGet restore.
-3. Connect SSMS or Visual Studio SQL Server Object Explorer to `(localdb)\MSSQLLocalDB`. Run `db/schema.sql`.
-4. Check the `CourierServiceDb` connection string in `Web/Web.config` matches your local instance. Do not commit credentials. Use the ignored local override approach described in the README where applicable.
-5. Set the `Web` project as startup and run with IIS Express (F5). The documented development HTTPS address is `https://localhost:44301/`.
-6. For demo records only, run `db/seed.sql` against your **development** database. Do not load demo users into production.
-7. Open Test Explorer and run the MSTest suite. Database integration tests need an accessible test database; inspect their setup before running them against any shared instance.
+## Installation and build
 
-See the README for phone camera/HTTPS certificate setup. Do not copy development certificate private keys into this repository.
+1. Install Visual Studio with the ASP.NET/web workload and .NET Framework 4.8 targeting pack; install SQL Server Express or LocalDB.
+2. Check out the agreed release commit. Merge [seed fix #110](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/110) before initializing a fresh database.
+3. Run `db/schema.sql`, then `db/seed.sql` on a development database containing synthetic data only. Scripts target `CourierService`; check the connection before execution. The optional `db/seed-50k.sql` adds performance fixtures.
+4. Configure the `CourierServiceDb` connection string in Web/Web.config. LocalDB uses `Server=(localdb)\MSSQLLocalDB;Database=CourierService;Trusted_Connection=True;`. IIS hosting normally uses SQL Express and the app-pool identity; do not assume developer LocalDB is accessible to IIS.
+5. Restore and build with Visual Studio/MSBuild. Use Release for a deployment package and enable `MvcBuildViews=true` to compile Razor views.
+6. Start Web with IIS Express; development URLs are HTTP 44300 and HTTPS 44301. Phone access needs a LAN binding and a trusted certificate; see [README](../README.md).
+7. Run unit tests with `dotnet test Tests/CourierService.Tests.csproj --filter 'FullyQualifiedName!~CourierService.Tests.Integration'`. Integration tests need their documented database; skips are not passes.
 
-## 5. Configuration
+The project is a legacy web application with SDK-style supporting projects. Use Visual Studio MSBuild to build the whole solution; the dotnet SDK alone may lack the web application targets. Existing assembly-binding warnings need to be assessed separately.
 
-`Web/Web.config` provides the local database connection string and application settings. Relevant keys currently include:
+## Configuration
 
-| Key | Purpose |
-| --- | --- |
-| `Smtp.Host`, `Smtp.Port` | SMTP server location |
-| `Smtp.FromAddress`, `Smtp.UseSsl` | Sender identity and TLS setting |
-| `Sms.Enabled`, `Sms.Provider` | SMS integration feature toggle/provider |
-| `Session.InactivityTimeoutMinutes` | Staff session inactivity limit |
-| `Https.RedirectEnabled`, `Https.Port` | HTTPS redirect behavior |
+| Source | Keys | Effect |
+| --- | --- | --- |
+| connectionStrings | `CourierServiceDb` | Host database connection |
+| dbo.AppConfig | `Fee.Personal`, `Fee.WorkRelated` | Future package fees; existing saved fees stay unchanged |
+| dbo.AppConfig | `Notification.ReadyForCollection.Subject`, `.Body`; `Notification.Collected.Subject`, `.Body` | Read when composing a notification |
+| appSettings | `Smtp.Host`, `.Port`, `.FromAddress`, `.FromName`, `.UseSsl`, `.UserName`, `.Password`, `.TimeoutSeconds` | SMTP transport; default timeout 10 seconds |
+| appSettings | `Sms.Enabled` | Queue/use SMS stub as well as email when enabled |
+| appSettings | `Sms.Provider` | Reserved; only Stub is implemented |
+| appSettings | `Notifications.WorkerEnabled`, `.PollSeconds`, `.MaxAttempts`, `.RetryDelaySeconds` | Worker defaults when settings are absent: enabled, 5-second poll, 3 attempts, 60-second delay |
+| appSettings | `Https.RedirectEnabled`, `Https.Port` | Development HTTP redirect |
+| system.web/sessionState | `timeout` | Actual inactivity timeout, currently 30 minutes |
 
-Never commit production SMTP credentials, database passwords, recipient data or local certificate keys. Use local ignored files/environment-specific deployment configuration as appropriate. The `dbo.AppConfig` table provides database-backed operational configuration; review `Data/Repositories/AppConfigRepository.cs` and the relevant service before changing fee values.
+`Session.InactivityTimeoutMinutes` is not consumed by the session runtime. The database `Sms.Enabled` default is not consumed by service composition: use the Web appSetting. Avoid maintaining conflicting values.
 
-## 6. Database / ERD orientation
+[Configuration PR #113](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/113) adds a fee-only endpoint for intake/supervisors/admins and removes the registration page's hard-coded fallback. It also makes the optional, ignored `Web.config.Local` appSettings file load. Until that PR is merged, merely creating this file has no effect. Its XML root must be `<appSettings>`; it does not override connectionStrings.
 
-The schema in `db/schema.sql` is the authoritative source for columns, types, constraints and foreign keys. Principal tables are:
+Notification placeholders: `{{RecipientName}}`, `{{PackageId}}`, `{{StorageLocation}}`, `{{CollectionTime}}`. Database fees/templates are read afresh without rebuilding. Changing Web.config may recycle the app; this is different from recompiling. Keep SMTP credentials and deployed connection strings outside source control.
 
-| Table | Role |
-| --- | --- |
-| `Roles`, `Users` | Staff identity and permissions |
-| `Recipients` | Recipient contact information |
-| `StorageLocations` | Physical storage locations |
-| `Packages` | Parcel identity, status, fees and recipient/storage references |
-| `PackageStatusHistory` | Status transition history |
-| `NotificationQueue`, `NotificationLog` | Pending notification work and delivery results |
-| `AuditLog` | Security and business audit events |
-| `AppConfig` | Runtime operational configuration |
+The full `/api/config` management API and Config navigation page are not implemented. SQL administrators currently maintain database settings; audited staff configuration updates remain separate work.
 
-For a diagram, import `db/schema.sql` into a SQL Server diagramming tool or use the existing project ERD if supplied by the team. **This document is a schema orientation, not a replacement for a validated graphical ERD.**
+## Database / ERD
 
-## 7. API and operational flows
+The following relationships are taken from schema.sql. A label naming several columns represents multiple foreign keys between those entities.
 
-Use [`API_CONTRACT.md`](API_CONTRACT.md) for authoritative routes, request/response shapes and role permissions. Typical flows are:
+```mermaid
+erDiagram
+    Roles ||--o{ Users : RoleId
+    Recipients ||--o{ Packages : RecipientId
+    StorageLocations o|--o{ Packages : StorageLocationId
+    Users ||--o{ Packages : CreatedByUserId
+    Users o|--o{ Packages : CollectedBy_and_PaymentUpdatedBy
+    Packages ||--o{ PackageStatusHistory : PackageId
+    Users ||--o{ PackageStatusHistory : ChangedByUserId
+    Packages ||--o{ NotificationQueue : PackageId
+    Packages ||--o{ NotificationLog : PackageId
+    Users o|--o{ AuditLog : UserId
+    Roles {
+        int RoleId PK
+        nvarchar RoleName UK
+    }
+    Users {
+        int UserId PK
+        nvarchar Username UK
+        nvarchar Email UK
+        nvarchar PasswordHash
+        int RoleId FK
+        bit IsActive
+    }
+    Recipients {
+        int RecipientId PK
+        nvarchar FullName
+        nvarchar IdentifierNo
+        nvarchar Email
+        nvarchar PhoneNumber
+    }
+    StorageLocations {
+        int StorageLocationId PK
+        nvarchar Code UK
+        bit IsActive
+    }
+    Packages {
+        int PackageId PK
+        nvarchar F20Identifier UK
+        int RecipientId FK
+        int StorageLocationId FK
+        int CreatedByUserId FK
+        int CollectedByUserId FK
+        int PaymentStatusUpdatedByUserId FK
+        decimal Fee
+        nvarchar Classification
+        nvarchar PaymentStatus
+        nvarchar Status
+        rowversion RowVersion
+    }
+    PackageStatusHistory {
+        int PackageStatusHistoryId PK
+        int PackageId FK
+        int ChangedByUserId FK
+        nvarchar FromStatus
+        nvarchar ToStatus
+        datetime2 ChangedAtUtc
+    }
+    NotificationQueue {
+        int NotificationQueueId PK
+        int PackageId FK
+        nvarchar Channel
+        nvarchar TemplateKey
+        nvarchar Status
+        int AttemptCount
+    }
+    NotificationLog {
+        int NotificationLogId PK
+        int PackageId FK
+        nvarchar Channel
+        nvarchar RecipientAddress
+        nvarchar Status
+        datetime2 SentAtUtc
+    }
+    AuditLog {
+        bigint AuditLogId PK
+        int UserId FK
+        nvarchar Action
+        nvarchar EntityType
+        nvarchar EntityId
+        datetime2 OccurredAtUtc
+    }
+    AppConfig {
+        nvarchar ConfigKey PK
+        nvarchar ConfigValue
+        nvarchar Description
+    }
+```
 
-- **Registration:** authorized staff submits package and recipient information; the service validates and persists it; the identifier can be encoded as a QR code.
-- **Scan:** a scanned F20 identifier is normalized and looked up; invalid/unknown codes are handled without disclosing unrelated parcel data.
-- **Status lifecycle:** `Registered -> InStorage -> ReadyForCollection -> Collected`. Transitions must follow the service's rules; collection is a distinct authorized workflow.
-- **Notifications:** qualifying status changes enqueue messages; a processor uses configured senders and records delivery outcomes.
-- **Audit:** sensitive state changes are recorded for review.
+AppConfig has no foreign keys. NotificationLog references the package, not a queue entry. Failed login audit entries may have no user. Registration takes a recipient snapshot in a new row; IdentifierNo is not a unique person registry. The diagram shows principal fields; schema.sql remains authoritative for every column, index and length.
 
-## 8. Testing and troubleshooting
+## CSV ingestion and a future API
 
-- **Unit tests:** `Tests/Packages`, `Tests/Auth`, `Tests/Users`, `Tests/Notifications`, `Tests/Security` and other test folders.
-- **Integration tests:** `Tests/Integration` exercises SQL-backed behavior; configure an isolated database before running.
-- **Negative scenarios:** [`NEGATIVE_TESTS.md`](NEGATIVE_TESTS.md) documents unauthorized actions, invalid transitions, bad scans, database outages and SMTP failures.
-- **Release checks:** [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) covers final readiness tasks.
+The backend path is `ImportController.Csv -> CsvPackageImport -> IPackageRegistrationService.Register`. The translator resolves storage codes and maps columns; the shared service applies recipient validation, classification, configured fee, payment defaults, identifier allocation, history and audit. Structural header errors reject the file; invalid data rows are skipped and reported. Each valid row commits separately, so an unexpected failure after some rows have committed requires checking saved records before retrying.
 
-Common problems:
+Required columns are `RecipientFullName, RecipientIdentifierNo, RecipientEmail, RecipientPhone, SenderName, PackageType, Classification, StorageLocation`; `RecipientDepartment` and `Notes` are optional. The server generates identifiers and fees. [CSV fix #111](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/111) connects the browser page to this backend; the old page only simulates imports locally.
 
-| Symptom | Check |
-| --- | --- |
-| SQL connection fails | SQL instance name, LocalDB installation, database existence, connection string |
-| NuGet/compile failure | Restore packages, .NET Framework 4.8 targeting pack, Visual Studio web workload |
-| HTTPS or camera failure | Correct IIS Express SSL binding, trusted local certificate and browser camera permission |
-| No notification email | SMTP host/port, development inbox availability, queue/log entries, feature settings |
-| Unexpected 401/403 | Login/session and role restrictions in API contract |
+To add an approved live ingestion source later:
 
-## 9. Security and deployment notes
+1. Add a translator mapping external records into `PackageRegistrationRequest`.
+2. Authenticate and authorize the ingestion endpoint separately.
+3. Resolve storage references and call the same registration service; do not duplicate its fee/status rules.
+4. Define idempotency, external reference mapping, ownership and failure/retry policy before enabling repeat imports.
+5. Keep CSV available until the replacement passes the same acceptance checks.
 
-Run over HTTPS, limit database privileges, avoid secrets in source control, and verify role restrictions at the server rather than relying on hidden UI controls. Seed data and local SMTP inboxes are for development. Deployment and backup/restore validation must be completed by the project team for the demo environment; this document does not claim production readiness.
+No live NWU integration is authorized by this design. Protocol and data-owner approval remain open scope dependencies.
 
-## 10. Maintainer checklist
+## Notifications and operations
 
-- Confirm the deployed schema matches `db/schema.sql`.
-- Confirm settings and role assignments for the target environment.
-- Run automated and manual negative tests.
-- Verify collection, notification, audit and import workflows.
-- Check the release checklist and rehearse database recovery.
+Status listeners enqueue ReadyForCollection/Collected work in the package transaction. An ASP.NET timer processes batches in the hosting application. It is not a separately installed, durable worker: application startup, idle shutdown and recycle affect processing. Keep the demo app running and confirm the local SMTP inbox is reachable. Missing SMTP Host selects a trace sender, which does not deliver mail.
 
-_Last updated: 2026-10-09. Based on the user-supplied repository snapshot; verify against the latest main before merging._
+The timer prevents overlapping batches in one process. Multi-process claiming, delivery-log durability and staff-visible failure reasons remain review findings. The resend endpoint exists, but the detail-page Resend button is missing. SMS is a development stub and does not send real messages.
+
+## Roles and known limitations
+
+Five roles are defined: IntakeClerk, StorageStaff, CollectionStaff, Supervisor, SystemAdmin. Server-side RoleAuthorize filters reject unauthorized actions. Sessions currently keep roles from login; account changes do not immediately revoke them. API anti-forgery protection is outstanding. [Package-page fix #112](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/112) removes unsafe identifier insertion into scripts.
+
+The audit query endpoint exists; audit viewer UI is missing. Storage-location listing exists; the pending creation PR needs integration corrections. Camera scanning currently loads a library from external CDNs. These limitations must appear in the release acceptance checklist rather than being hidden by documentation.
+
+## Verification and handover
+
+[T47 report verification PR #114](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/114) records SQL-backed totals and date-boundary checks. Reports describe current statuses of a receipt cohort, not payment transactions made during the range.
+
+Use [NEGATIVE_TESTS.md](NEGATIVE_TESTS.md) for rejection/outage scenarios and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for release evidence. Device/browser checks, performance at 50,000 packages and 500,000 audit entries, backup restoration, staff training and sponsor approval need recorded results. Do not use real recipient information before the required governance approval. Retention period and anonymisation scope remain unresolved.
+
+Updated 2026-10-10 against the reviewed main commit b8af68c and the explicitly identified pending PRs. Review those dependencies before using this document for a release.
