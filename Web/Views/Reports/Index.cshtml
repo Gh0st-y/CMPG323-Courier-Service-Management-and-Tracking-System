@@ -1,0 +1,188 @@
+@{
+    ViewBag.Title = "Reports";
+}
+
+<h1 class="app-page-title"><i class="bi bi-bar-chart"></i> Reports</h1>
+
+<div class="card" id="reports-root">
+    <div class="dashboard-page">
+
+        <section class="dashboard-alert" id="rptError" role="alert" aria-live="assertive" hidden>
+            <p class="dashboard-alert__title">The report could not be loaded.</p>
+            <p class="dashboard-alert__text" id="rptErrorText">
+                Refresh the page, or contact the system administrator if this continues.
+            </p>
+            <div class="dashboard-alert__actions">
+                <button type="button" class="btn btn-primary" id="rptRetry">Try again</button>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="dashboard-section" aria-labelledby="rpt-filters-title">
+            <div class="dashboard-section__header">
+                <div class="dashboard-section__heading">
+                    <div class="dashboard-section__title-row">
+                        <h2 class="dashboard-section__title" id="rpt-filters-title">Filters</h2>
+                    </div>
+                    <span class="dashboard-section__divider" aria-hidden="true"></span>
+                    <p class="dashboard-section__text">Choose a date range (by date received) and any filters, then apply.</p>
+                </div>
+            </div>
+
+            <div class="rpt-filters">
+                <div class="form-row">
+                    <label for="fFrom">From</label>
+                    <input type="date" id="fFrom">
+                </div>
+                <div class="form-row">
+                    <label for="fTo">To</label>
+                    <input type="date" id="fTo">
+                </div>
+                <div class="form-row">
+                    <label for="fStatus">Status</label>
+                    <select id="fStatus">
+                        <option value="">All</option>
+                        <option value="Registered">Registered</option>
+                        <option value="InStorage">In storage</option>
+                        <option value="ReadyForCollection">Ready for collection</option>
+                        <option value="Collected">Collected</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="fClass">Type</label>
+                    <select id="fClass">
+                        <option value="">All</option>
+                        <option value="Personal">Personal</option>
+                        <option value="WorkRelated">Work-related</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="fPay">Payment</label>
+                    <select id="fPay">
+                        <option value="">All</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Exempt">Exempt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="search-form__actions">
+                <button type="button" class="btn btn-secondary" id="btnReset">Reset</button>
+                <button type="button" class="btn btn-primary" id="btnApply">Apply filters</button>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="dashboard-section" aria-labelledby="rpt-summary-title">
+            <div class="dashboard-section__header">
+                <div class="dashboard-section__heading">
+                    <div class="dashboard-section__title-row">
+                        <h2 class="dashboard-section__title" id="rpt-summary-title">Summary</h2>
+                        <p class="dashboard-section__meta" id="rptUpdatedAt" hidden></p>
+                    </div>
+                    <span class="dashboard-section__divider" aria-hidden="true"></span>
+                    <p class="dashboard-section__text">Totals for packages received in the selected range.</p>
+                </div>
+
+                <button type="button" class="btn btn-secondary" id="btnRefresh">
+                    <i class="bi bi-arrow-clockwise" id="rptRefreshIcon"></i> Refresh report
+                </button>
+            </div>
+
+            <div class="dashboard-stats rpt-stats" id="rptStats" aria-live="polite" aria-busy="true">
+                <article class="card dashboard-stat dashboard-stat--received">
+                    <span class="dashboard-stat__label">Received</span>
+                    <strong class="dashboard-stat__value" id="kTotal">—</strong>
+                    <span class="dashboard-stat__note">Packages registered in this range</span>
+                </article>
+                <article class="card dashboard-stat dashboard-stat--ready">
+                    <span class="dashboard-stat__label">Ready for Collection</span>
+                    <strong class="dashboard-stat__value" id="kReady">—</strong>
+                    <span class="dashboard-stat__note">Of those, waiting for pickup</span>
+                </article>
+                <article class="card dashboard-stat dashboard-stat--collected">
+                    <span class="dashboard-stat__label">Collected</span>
+                    <strong class="dashboard-stat__value" id="kColl">—</strong>
+                    <span class="dashboard-stat__note">Of those, already collected</span>
+                </article>
+                <article class="card dashboard-stat dashboard-stat--received">
+                    <span class="dashboard-stat__label">Avg Days to Collect</span>
+                    <strong class="dashboard-stat__value" id="kAvg">—</strong>
+                    <span class="dashboard-stat__note">From registration to collection</span>
+                </article>
+                <article class="card dashboard-stat dashboard-stat--collected">
+                    <span class="dashboard-stat__label">Fees Paid</span>
+                    <strong class="dashboard-stat__value" id="kPaid">—</strong>
+                    <span class="dashboard-stat__note">Packages marked Paid</span>
+                </article>
+                <article class="card dashboard-stat dashboard-stat--outstanding">
+                    <span class="dashboard-stat__label">Fees Unpaid</span>
+                    <strong class="dashboard-stat__value" id="kUnpaid">—</strong>
+                    <span class="dashboard-stat__note">Packages marked Unpaid</span>
+                </article>
+            </div>
+        </section>
+
+        <!-- Charts -->
+        <section class="dashboard-section" aria-labelledby="rpt-charts-title">
+            <div class="dashboard-section__header">
+                <div class="dashboard-section__heading">
+                    <div class="dashboard-section__title-row">
+                        <h2 class="dashboard-section__title" id="rpt-charts-title">Trends and breakdowns</h2>
+                    </div>
+                    <span class="dashboard-section__divider" aria-hidden="true"></span>
+                </div>
+            </div>
+
+            <div class="rpt-charts">
+                <article class="card rpt-chart rpt-chart--wide">
+                    <h3 class="rpt-chart__title">Packages received per day</h3>
+                    <div class="rpt-chart__body rpt-chart__body--wide"><canvas id="cDay"></canvas></div>
+                </article>
+                <article class="card rpt-chart">
+                    <h3 class="rpt-chart__title">By status</h3>
+                    <div class="rpt-chart__body"><canvas id="cStatus"></canvas></div>
+                </article>
+                <article class="card rpt-chart">
+                    <h3 class="rpt-chart__title">Personal vs Work-related</h3>
+                    <div class="rpt-chart__body"><canvas id="cClass"></canvas></div>
+                </article>
+                <article class="card rpt-chart">
+                    <h3 class="rpt-chart__title">Fees by payment status (R)</h3>
+                    <div class="rpt-chart__body"><canvas id="cPay"></canvas></div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Outstanding -->
+        <section class="dashboard-section" aria-labelledby="rpt-out-title">
+            <div class="dashboard-section__header">
+                <div class="dashboard-section__heading">
+                    <div class="dashboard-section__title-row">
+                        <h2 class="dashboard-section__title" id="rpt-out-title">Outstanding packages</h2>
+                    </div>
+                    <span class="dashboard-section__divider" aria-hidden="true"></span>
+                    <p class="dashboard-section__text">Not yet collected, oldest first (up to 50).</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="rpt-table-wrap">
+                    <table class="results-table">
+                        <thead>
+                            <tr><th>Package</th><th>Recipient</th><th>Status</th><th>Location</th><th>Age (days)</th></tr>
+                        </thead>
+                        <tbody id="tOut"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/chart.umd.min.js"></script>
+    <script src="~/Scripts/app/reports.js"></script>
+}
