@@ -146,6 +146,11 @@
         @RenderBody()
     </main>
 
+    <script src="~/Scripts/lottie.min.js"></script>
+    <script>
+        window.CourierApp = window.CourierApp || {};
+        window.CourierApp.loaderAnimationUrl = '@Url.Content("~/Content/animations/Loading.json")';
+    </script>
     <script src="~/Scripts/app/courier-app.js"></script>
     @RenderSection("scripts", required: false)
     <script>

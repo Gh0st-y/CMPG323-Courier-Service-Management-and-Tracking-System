@@ -54,12 +54,57 @@
     // loading
     // ---------------------------------------------------------------------
 
+    var loaderOverlayEl = null;
+    var loaderAnim = null;
+    var loaderTimer = null;
+    var LOADER_DELAY_MS = 250; // only show the animation for slow requests
+
+    function ensureLoaderOverlay() {
+        if (loaderOverlayEl) {
+            return;
+        }
+
+        loaderOverlayEl = document.createElement("div");
+        loaderOverlayEl.className = "loader-overlay";
+        loaderOverlayEl.setAttribute("role", "status");
+        loaderOverlayEl.setAttribute("aria-live", "polite");
+        loaderOverlayEl.hidden = true;
+
+        var animEl = document.createElement("div");
+        animEl.className = "loader-anim";
+
+        var textEl = document.createElement("p");
+        textEl.className = "loader-text";
+        textEl.textContent = "Loading…";
+
+        loaderOverlayEl.appendChild(animEl);
+        loaderOverlayEl.appendChild(textEl);
+        document.body.appendChild(loaderOverlayEl);
+
+        if (window.lottie && CourierApp.loaderAnimationUrl) {
+            loaderAnim = window.lottie.loadAnimation({
+                container: animEl,
+                renderer: "svg",
+                loop: true,
+                autoplay: false,
+                path: CourierApp.loaderAnimationUrl
+            });
+        }
+    }
     CourierApp.loading = {
         /** Increments the active-request count and shows the top loading bar. */
         show: function () {
             ensureScaffold();
             loadingCount += 1;
             loadingBarEl.classList.add("is-active");
+
+            if (loadingCount === 1) {
+                loaderTimer = window.setTimeout(function () {
+                    ensureLoaderOverlay();
+                    loaderOverlayEl.hidden = false;
+                    if (loaderAnim) { loaderAnim.play(); }
+                }, LOADER_DELAY_MS);
+            }
         },
 
         /** Decrements the active-request count; hides the bar once nothing is pending. */
@@ -68,6 +113,11 @@
             loadingCount = Math.max(0, loadingCount - 1);
             if (loadingCount === 0) {
                 loadingBarEl.classList.remove("is-active");
+                window.clearTimeout(loaderTimer);
+                if (loaderOverlayEl) {
+                    loaderOverlayEl.hidden = true;
+                    if (loaderAnim) { loaderAnim.stop(); }
+                }
             }
         },
 
@@ -324,6 +374,39 @@
         },
         request: request
     };
+    // ---------------------------------------------------------------------
+    // page navigation: show the loader while the next page is loading
+    // ---------------------------------------------------------------------
 
+    document.addEventListener("click", function (e) {
+        var link = e.target.closest ? e.target.closest("a[href]") : null;
+        if (!link || e.defaultPrevented || e.button !== 0 ||
+            e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return; }
+        if (link.target && link.target !== "_self") { return; }
+        if (link.hasAttribute("download")) { return; }
+
+        var href = link.getAttribute("href");
+        if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0 ||
+            href.indexOf("mailto:") === 0 || href.indexOf("tel:") === 0) { return; }
+        if (link.hostname !== window.location.hostname) { return; }
+
+        CourierApp.loading.show();
+    });
+
+    document.addEventListener("submit", function (e) {
+        // Skip forms that a script handles itself (e.g. via CourierApp.api)
+        if (e.defaultPrevented) { return; }
+        CourierApp.loading.show();
+    });
+
+    // Back/forward button can restore the page from cache with the loader still on
+    window.addEventListener("pageshow", function (e) {
+        if (e.persisted) { CourierApp.loading.hide(); }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadingCount = 1;
+        CourierApp.loading.hide();
+    });
     window.CourierApp = CourierApp;
 })(window, document);
