@@ -2088,3 +2088,76 @@ html, body {
         max-width: 110px;
     }
 }
+
+/* ============================================================ */
+/* Reports Page                                                 */
+/* Reuses dashboard-*, form-row, search-form__actions, results-* */
+/* and card styles. Only the extras live here.                  */
+/* ============================================================ */
+
+.rpt-filters {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px 20px;
+}
+
+/* 6 summary tiles = 2 rows of 3 (the dashboard uses 4 columns) */
+.rpt-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rpt-charts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.rpt-chart--wide {
+    grid-column: 1 / -1;
+}
+
+.rpt-chart__title {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-primary-dark);
+}
+
+.rpt-chart__body {
+    position: relative;
+    height: 260px;
+}
+
+.rpt-chart__body--wide {
+    height: 300px;
+}
+
+.rpt-table-wrap {
+    overflow-x: auto;
+}
+
+@media (max-width: 1100px) {
+    .rpt-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .rpt-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .rpt-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .rpt-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rpt-stats {
+        grid-template-columns: 1fr;
+    }
+}
