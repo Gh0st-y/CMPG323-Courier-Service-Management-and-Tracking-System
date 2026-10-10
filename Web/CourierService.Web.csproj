@@ -74,6 +74,7 @@
     <Compile Include="Controllers\PackagesController.Registration.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\ScanController.cs" />
+    <Compile Include="Controllers\StorageLocationController.cs" />
     <Compile Include="Controllers\UserManagementController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
