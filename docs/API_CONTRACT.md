@@ -196,3 +196,6 @@ All three endpoints are SystemAdmin only (`401 NotAuthenticated` when not logged
 - The QR code holds the F20 identifier only (CON-008), so a lost label shows no personal details and the scan screens can look the package up from it.
 - Only drawn for packages that exist: an unknown or malformed identifier gives the same `404 NotFound` as the scan endpoint.
 - Sent with `Cache-Control: private`, so only the user's own browser keeps a copy.
+## Registration fee lookup (T06)
+
+`GET /api/packages/fees` (IntakeClerk, Supervisor, SystemAdmin) returns `{ "Personal": 10.00, "WorkRelated": 0.00 }` using current `Fee.Personal` and `Fee.WorkRelated` database values. The response is not cached and includes no other configuration. Registration reads those same keys independently when saving.

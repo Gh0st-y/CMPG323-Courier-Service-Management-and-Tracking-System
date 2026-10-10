@@ -1,6 +1,6 @@
 <!--
 T06: Externalised configuration sample.
-Copy the <appSettings> block into your ASP.NET MVC project's Web.config.
+Copy the <appSettings file="Web.config.Local"> block into your ASP.NET MVC project's Web.config.
 Do NOT commit real SMTP credentials — use Web.config.Local (gitignored) or
 environment-specific transforms for anything secret. Fee values below are the
 DEFAULTS; the AppConfig table (schema.sql) is the source of truth at runtime

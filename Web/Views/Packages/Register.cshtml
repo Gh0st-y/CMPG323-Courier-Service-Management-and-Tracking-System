@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Register Package";
 }
 
@@ -123,18 +123,18 @@
             "use strict";
 
             // -----------------------------------------------------------------
-            // Fee config (loaded from /api/config; falls back to fixed values)
+            // Current fees come from the same database keys used to save the package.
             // -----------------------------------------------------------------
-            var fees = { Personal: null, WorkRelated: null };
-            var DEFAULT_FEES = { Personal: 10.00, WorkRelated: 0.00 };
-
-            CourierApp.api.get("/config", { silent: true }).then(function (config) {
-                config.forEach(function (entry) {
-                    if (entry.key === "PersonalPackageFee") fees.Personal = parseFloat(entry.value);
-                    if (entry.key === "WorkPackageFee") fees.WorkRelated = parseFloat(entry.value);
-                });
+            var fees = null;
+            CourierApp.api.get("/packages/fees").then(function (currentFees) {
+                if (!currentFees || typeof currentFees.Personal !== "number" || typeof currentFees.WorkRelated !== "number") {
+                    throw new Error("Invalid fee configuration response.");
+                }
+                fees = currentFees;
+                updateFee();
             }).catch(function () {
-                fees = Object.assign({}, DEFAULT_FEES);
+                feeDisplay.textContent = "Fees could not be loaded. Reload this page before registering.";
+                feeDisplay.className = "fee-display";
             });
 
             // -----------------------------------------------------------------
@@ -169,7 +169,12 @@
                 }
 
                 var cls = selected.value;
-                var amount = fees[cls] != null ? fees[cls] : DEFAULT_FEES[cls];
+                if (!fees) {
+                    feeDisplay.textContent = "Fees unavailable. Reload this page before registering.";
+                    feeDisplay.className = "fee-display";
+                    return;
+                }
+                var amount = fees[cls];
                 var label = cls === "Personal" ? "Personal" : "Work-related";
 
                 feeDisplay.textContent = label + " — R" + amount.toFixed(2);
@@ -237,6 +242,10 @@
             form.addEventListener("submit", function (event) {
                 event.preventDefault();
 
+                if (!fees) {
+                    CourierApp.toast.error("Fees are unavailable. Reload this page before registering.");
+                    return;
+                }
                 if (!validate()) {
                     CourierApp.toast.error("Please fix the errors above.");
                     return;
