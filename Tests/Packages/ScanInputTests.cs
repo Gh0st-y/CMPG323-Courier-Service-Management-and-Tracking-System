@@ -145,5 +145,34 @@ namespace CourierService.Tests.Packages
             Assert.AreEqual(10, masked.Length);
             Assert.AreEqual(3, masked.Replace("*", string.Empty).Length);
         }
+
+        [TestMethod]
+        [DataRow("thandi@courier.test", "t*****@courier.test")]
+        [DataRow("john@example.com", "j***@example.com")]
+        [DataRow("a@example.test", "a@example.test")]
+        [DataRow("  thandi@courier.test  ", "t*****@courier.test")]
+        public void MaskEmail_MasksLocalPartAndPreservesDomain(string email, string expected)
+        {
+            Assert.AreEqual(expected, PersonalData.MaskEmail(email));
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public void MaskEmail_BlankAddress_ReturnsNull(string email)
+        {
+            Assert.IsNull(PersonalData.MaskEmail(email));
+        }
+
+        [TestMethod]
+        [DataRow("invalid-address")]
+        [DataRow("@example.com")]
+        [DataRow("user@@example.com")]
+        [DataRow("user@")]
+        public void MaskEmail_InvalidAddress_IsFullyMasked(string email)
+        {
+            Assert.AreEqual(new string('*', email.Trim().Length), PersonalData.MaskEmail(email));
+        }
     }
 }

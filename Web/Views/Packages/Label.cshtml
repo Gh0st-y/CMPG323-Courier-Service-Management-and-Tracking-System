@@ -1,4 +1,4 @@
-﻿@model string
+@model string
 
 @{
     ViewBag.Title = "Package Label";
@@ -56,7 +56,12 @@
         (function () {
             "use strict";
 
-            var f20Identifier = "@Html.Raw(f20Identifier)";
+            var f20Identifier = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+                f20Identifier,
+                new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.EscapeHtml
+                }));
 
             var qrImg = document.getElementById("qr-image");
             var detailsEl = document.getElementById("label-details");
@@ -86,7 +91,7 @@
                         //{ label: "Classification", value: pkg.classification || "—" },
                         { label: "Fee", value: pkg.fee != null ? "R" + pkg.fee.toFixed(2) : "—" },
                         { label: "Storage Location", value: pkg.storageLocation },
-                        { label: "Date Received", value: pkg.createdAtUtc ? new Date(pkg.createdAtUtc).toLocaleDateString() : "—" }                        
+                        { label: "Date Received", value: pkg.createdAtUtc ? new Date(pkg.createdAtUtc).toLocaleDateString() : "—" }
                     ];
 
                     detailsEl.innerHTML = "";

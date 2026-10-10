@@ -110,7 +110,12 @@
         (function () {
             "use strict";
 
-            var f20Identifier = "@Html.Raw(f20Identifier)";
+            var f20Identifier = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+                f20Identifier,
+                new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.EscapeHtml
+                }));
 
             var errorEl = document.getElementById("detail-error");
             var contentEl = document.getElementById("detail-content");
