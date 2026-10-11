@@ -14,6 +14,9 @@
         .Distinct()
         .ToList();
 }
+   <link href="@Url.Content("~/Content/login-doodles.css")" rel="stylesheet" />
+
+<div class="login-doodles" aria-hidden="true"></div>
 
 <div class="login-wrap">
     <h1 class="login-title">Welcome back</h1>
@@ -64,6 +67,7 @@
 </div>
 
 @section scripts {
+    <script src="@Url.Content("~/Scripts/login-doodles.js")"></script>
     <script>
         (function () {
             "use strict";

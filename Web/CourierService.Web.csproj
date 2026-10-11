@@ -102,12 +102,14 @@
     <Content Include="Content\Images\accessDenied.png" />
     <Content Include="Content\Images\favicon.ico" />
     <Content Include="Content\Images\profile.png" />
+    <Content Include="Content\login-doodles.css" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
     <Content Include="Scripts\app\reports.js" />
     <Content Include="Scripts\app\users.js" />
     <Content Include="Scripts\chart.umd.min.js" />
+    <Content Include="Scripts\login-doodles.js" />
     <Content Include="Scripts\lottie.min.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
