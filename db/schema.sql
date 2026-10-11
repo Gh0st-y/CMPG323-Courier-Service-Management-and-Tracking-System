@@ -85,6 +85,15 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_RecipientId' 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Packages_CreatedAtUtc' AND object_id = OBJECT_ID('dbo.Packages'))
     CREATE INDEX IX_Packages_CreatedAtUtc ON dbo.Packages(CreatedAtUtc);
 GO
+-- T41: when the payment status was last changed and by whom (FR-17). Added with ALTER so running this
+-- script again also updates an existing database; it is safe to run more than once.
+IF COL_LENGTH('dbo.Packages', 'PaymentStatusUpdatedAtUtc') IS NULL
+    ALTER TABLE dbo.Packages ADD PaymentStatusUpdatedAtUtc DATETIME2 NULL;
+GO
+IF COL_LENGTH('dbo.Packages', 'PaymentStatusUpdatedByUserId') IS NULL
+    ALTER TABLE dbo.Packages ADD PaymentStatusUpdatedByUserId INT NULL
+        CONSTRAINT FK_Packages_PaymentStatusUpdatedBy REFERENCES dbo.Users(UserId);
+GO
 
 -- ===================== Status history (FR-04, DR-009, DR-010) =====================
 IF OBJECT_ID('dbo.PackageStatusHistory', 'U') IS NULL
@@ -164,7 +173,10 @@ USING (VALUES
     ('Fee.WorkRelated', '0.00', 'Fee (R) for a Work-related package'),
     ('Sms.Enabled', 'false', 'Toggle SMS channel on/off (email always sends)'),
     ('Notification.ReadyForCollection.Subject', 'Your package is ready for collection', ''),
-    ('Notification.Collected.Subject', 'Your package has been collected', '')
+    ('Notification.Collected.Subject', 'Your package has been collected', ''),
+-- four notification settings: two subjects and two bodies.
+	('Notification.ReadyForCollection.Body', 'Hello {{RecipientName}}, your package {{PackageId}} is ready for collection at {{StorageLocation}}. Please bring your ID. F20 Courier Service', 'Email body template for ready-for-collection notifications'),
+    ('Notification.Collected.Body', 'Hello {{RecipientName}}, your package {{PackageId}} was collected on {{CollectionTime}}. If you did not collect it, please contact the courier office. F20 Courier Service', 'Email body template for collection confirmation')
 ) AS src (ConfigKey, ConfigValue, Description)
 ON target.ConfigKey = src.ConfigKey
 WHEN NOT MATCHED THEN

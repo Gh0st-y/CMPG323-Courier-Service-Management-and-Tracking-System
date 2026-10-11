@@ -1,3 +1,5 @@
+using CourierService.Services.Security;
+using CourierService.Web.Infrastructure;
 using System.Web.Mvc;
 
 namespace CourierService.Web.Controllers
@@ -6,6 +8,8 @@ namespace CourierService.Web.Controllers
     public class CollectionController : Controller
     {
         // GET: /Collection
+        [RoleAuthorize(RoleNames.CollectionStaff, RoleNames.Supervisor, RoleNames.SystemAdmin)]
+
         public ActionResult Index()
         {
             return View();

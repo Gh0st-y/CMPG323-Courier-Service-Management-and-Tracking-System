@@ -1,9 +1,13 @@
 @{
     ViewBag.Title = "Dashboard";
+    var canRegister = (bool)ViewBag.CanRegister;
+    var canSearch = (bool)ViewBag.CanSearch;
+    var canCollect = (bool)ViewBag.CanCollect;
 }
 
 <h1 class="app-page-title">F20 Courier Service Dashboard</h1>
 
+<div class="card dashboard-card">
 <!-- TODO This is the Mock toggle remove later (dev tool)-->
 <div class="dashboard-mock">
     <label class="mock-switch" for="toggle-mock-mode">
@@ -29,14 +33,15 @@
             <div class="dashboard-section__heading">
                 <div class="dashboard-section__title-row">
                     <h2 class="dashboard-section__title" id="dashboard-summary-title">Package summary</h2>
-                    <p class="dashboard-section__meta" id="dashboard-updated-at" hidden>Loading current counts...</p>
+                    <p class="dashboard-section__meta" id="dashboard-updated-at" hidden></p>
                 </div>
                 <span class="dashboard-section__divider" aria-hidden="true"></span>
                 <p class="dashboard-section__text">Counts are loaded from the backend API.</p>
             </div>
 
-            <button type="button" class="btn btn-secondary" id="dashboard-refresh">Refresh summary</button>
-        </div>
+            <button type="button" class="btn btn-secondary" id="dashboard-refresh">
+                <i class="bi bi-arrow-clockwise" id="refresh-icon"></i> Refresh summary
+            </button>        </div>
 
         <div class="dashboard-stats" id="dashboard-stats" aria-live="polite" aria-busy="true">
             <article class="card dashboard-stat dashboard-stat--received">
@@ -74,25 +79,59 @@
         </div>
 
         <div class="dashboard-actions">
-            <a class="dashboard-action dashboard-action--register" data-dashboard-action="register" href="@Url.Action("Register", "Packages")">
-                <span class="dashboard-action__title">Register package</span>
-                <span class="dashboard-action__description">Capture a new package record and generate the F20 identifier.</span>
-                <span class="dashboard-action__footnote">Intake and reception staff</span>
-            </a>
+            @if (canRegister)
+            {
+                <a class="dashboard-action dashboard-action--register" href="@Url.Action("Register", "Packages")">
+                    <span class="dashboard-action__qr" aria-hidden="true"></span>
+                    <span class="dashboard-action__body">
+                        <span class="dashboard-action__title">Register package</span>
+                        <span class="dashboard-action__description">Capture a new package record and generate the F20 identifier.</span>
+                        <span class="dashboard-action__footnote">Intake and reception staff</span>
+                    </span>
+                    <svg class="dashboard-action__chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" /></svg>
+                </a>
+            }
+            else
+            {
+                <div class="dashboard-action dashboard-action--locked" aria-hidden="true"><span class="dashboard-action__qr"></span></div>
+            }
 
-            <a class="dashboard-action dashboard-action--search" data-dashboard-action="search" href="@Url.Action("Search", "Packages")">
-                <span class="dashboard-action__title">Search / Scan</span>
-                <span class="dashboard-action__description">Look up a package or jump into the scan workflow.</span>
-                <span class="dashboard-action__footnote">Search, tracking and QR scanning</span>
-            </a>
+            @if (canSearch)
+            {
+                <a class="dashboard-action dashboard-action--search" href="@Url.Action("Search", "Packages")">
+                    <span class="dashboard-action__qr" aria-hidden="true"></span>
+                    <span class="dashboard-action__body">
+                        <span class="dashboard-action__title">Search / Scan</span>
+                        <span class="dashboard-action__description">Look up a package or jump into the scan workflow.</span>
+                        <span class="dashboard-action__footnote">Search, tracking and QR scanning</span>
+                    </span>
+                    <svg class="dashboard-action__chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" /></svg>
+                </a>
+            }
+            else
+            {
+                <div class="dashboard-action dashboard-action--locked" aria-hidden="true"><span class="dashboard-action__qr"></span></div>
+            }
 
-            <a class="dashboard-action dashboard-action--collect" data-dashboard-action="collect" href="@Url.Action("Index", "Scan")">
-                <span class="dashboard-action__title">Collect package</span>
-                <span class="dashboard-action__description">Verify a package and move it through the collection flow.</span>
-                <span class="dashboard-action__footnote">Collection verification staff</span>
-            </a>
+            @if (canCollect)
+            {
+                <a class="dashboard-action dashboard-action--collect" href="@Url.Action("Index", "Collection")">
+                    <span class="dashboard-action__qr" aria-hidden="true"></span>
+                    <span class="dashboard-action__body">
+                        <span class="dashboard-action__title">Collect package</span>
+                        <span class="dashboard-action__description">Verify a package and move it through the collection flow.</span>
+                        <span class="dashboard-action__footnote">Collection verification staff</span>
+                    </span>
+                    <svg class="dashboard-action__chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" /></svg>
+                </a>
+            }
+            else
+            {
+                <div class="dashboard-action dashboard-action--locked" aria-hidden="true"><span class="dashboard-action__qr"></span></div>
+            }
         </div>
     </section>
+</div>
 </div>
 
 @section scripts {
@@ -109,24 +148,7 @@
             var dashboardErrorEl = document.getElementById("dashboard-error");
             var refreshButtonEl = document.getElementById("dashboard-refresh");
             var retryButtonEl = document.getElementById("dashboard-retry");
-
-            var actionPermissions = {
-                register: ["IntakeClerk", "Supervisor", "SystemAdmin"],
-                search: ["IntakeClerk", "StorageStaff", "CollectionStaff", "Supervisor", "SystemAdmin"],
-                collect: ["CollectionStaff", "Supervisor", "SystemAdmin"]
-            };
-
-            var currentRole = (window.CourierApp && CourierApp.currentUserRole)
-                || window.sessionStorage.getItem("courier.userRole")
-                || "Supervisor";
-
-            if (window.CourierApp) {
-                CourierApp.currentUserRole = currentRole;
-            }
-
-            function canUseAction(actionName) {
-                return actionPermissions[actionName].indexOf(currentRole) !== -1;
-            }
+            var refreshIconEl = document.getElementById("refresh-icon");
 
             function formatCount(value) {
                 if (value === null || value === undefined) {
@@ -149,6 +171,7 @@
                 updatedAtEl.hidden = !isLoading;
                 refreshButtonEl.disabled = isLoading;
                 retryButtonEl.disabled = isLoading;
+                refreshIconEl.classList.toggle("spin", isLoading);
             }
 
             function showError() {
@@ -159,16 +182,11 @@
                 dashboardErrorEl.hidden = true;
             }
 
-            function applyActionVisibility() {
-                Object.keys(actionPermissions).forEach(function (actionName) {
-                    var actionEl = document.querySelector('[data-dashboard-action="' + actionName + '"]');
-                    if (actionEl) {
-                        actionEl.hidden = !canUseAction(actionName);
-                    }
-                });
-            }
+            var MIN_SPIN_MS = 700;
 
             function loadDashboardStats() {
+                var started = Date.now();
+
                 setLoadingState(true);
                 hideError();
 
@@ -178,13 +196,15 @@
                     setStatValues({});
                     showError();
                 }).then(function () {
+                    var wait = Math.max(0, MIN_SPIN_MS - (Date.now() - started));
+                    return new Promise(function (resolve) { setTimeout(resolve, wait); });
+                }).then(function () {
                     setLoadingState(false);
                 });
             }
 
             refreshButtonEl.addEventListener("click", loadDashboardStats);
             retryButtonEl.addEventListener("click", loadDashboardStats);
-
             //TODO Remove the functioning of the mockmode
             var mockLabelEl = document.getElementById("mock-mode-label");
             var mockToggleEl = document.getElementById("toggle-mock-mode");
@@ -202,8 +222,6 @@
 
             refreshMockLabel();//END of mockmode
 
-            refreshMockLabel();
-            applyActionVisibility();
             loadDashboardStats();
         })();
     </script>

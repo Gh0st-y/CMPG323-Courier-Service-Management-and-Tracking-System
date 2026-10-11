@@ -81,7 +81,7 @@ namespace CourierService.Web.Infrastructure
 
             if (SmsEnabled())
             {
-                yield return new TraceNotificationSender(NotificationChannels.Sms);
+                yield return new StubSmsNotificationSender();
             }
         }
 

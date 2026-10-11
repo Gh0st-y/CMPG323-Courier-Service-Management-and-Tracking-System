@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Api\NotificationsApiController.cs" />
+    <Compile Include="Controllers\Api\PaymentApiController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
@@ -66,11 +67,12 @@
     <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-	<Compile Include="Controllers\ImportController.cs" />
+    <Compile Include="Controllers\ImportController.cs" />
     <Compile Include="Controllers\MockController.cs" />
     <Compile Include="Controllers\PackageActionsController.cs" />
     <Compile Include="Controllers\PackagesController.cs" />
     <Compile Include="Controllers\PackagesController.Registration.cs" />
+    <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\ScanController.cs" />
     <Compile Include="Controllers\StorageLocationController.cs" />
     <Compile Include="Controllers\UserManagementController.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="Infrastructure\NotificationWorker.cs" />
     <Compile Include="Infrastructure\RequireLoginAttribute.cs" />
     <Compile Include="Infrastructure\UserSession.cs" />
+    <Compile Include="Models\Api\Packages\PaymentStatusRequest.cs" />
     <Compile Include="Models\Api\Packages\RegisterPackageRequest.cs" />
     <Compile Include="Models\Api\Packages\ResendNotificationRequest.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
@@ -96,12 +99,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\bootstrap-icons.min.css" />
     <Content Include="Content\Images\accessDenied.png" />
     <Content Include="Content\Images\favicon.ico" />
+    <Content Include="Content\Images\profile.png" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
+    <Content Include="Scripts\app\reports.js" />
     <Content Include="Scripts\app\users.js" />
+    <Content Include="Scripts\chart.umd.min.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -181,6 +188,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\AccessDenied.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\fonts\bootstrap-icons.woff" />
+    <Content Include="Content\fonts\bootstrap-icons.woff2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Reports\Index.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
