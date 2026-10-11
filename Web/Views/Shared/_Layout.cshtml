@@ -192,5 +192,25 @@
             });
         })();
     </script>
+
+    <button id="jump-top" type="button" aria-label="Back to top" title="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+</button>
+
+<script>
+    (function () {
+        var btn = document.getElementById('jump-top');
+        var SHOW_AFTER_PX = 250;
+
+        function update() { btn.classList.toggle('show', window.scrollY > SHOW_AFTER_PX); }
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+</script>
 </body>
 </html>
