@@ -2228,3 +2228,73 @@ html, body {
         width: 20px;
         height: 20px;
     }
+
+    /* -------- Foooter --------------- */
+/* ===== Push footer to the bottom on short pages ===== */
+body.has-footer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+    body.has-footer > .app-main,
+    body.has-footer > main {
+        flex: 1 0 auto;
+        width: 100%; /* stops the centred content shrinking inside the flex column */
+    }
+
+/* the element that wraps your page content (main, .container, etc.) */
+main {
+    flex: 1 0 auto;
+}
+
+/* ===== Footer doodles ===== */
+.site-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    padding: 6px 16px 12px;
+    background: linear-gradient(to bottom, transparent, rgba(120, 100, 160, .07));
+}
+
+.footer-doodles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(6px, 1.2vw, 12px);
+    flex-wrap: wrap;
+    color: #9a9a9a;
+}
+
+    .footer-doodles .d {
+        height: clamp(20px, 2.8vw, 30px);
+        width: auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: .85;
+    }
+
+        .footer-doodles .d .fill {
+            fill: currentColor;
+            stroke: none;
+        }
+
+    .footer-doodles .d-dash,
+    .footer-doodles .d-arc {
+        height: clamp(12px, 1.8vw, 18px);
+    }
+
+.footer-text {
+    font-size: clamp(.8rem, 1.5vw, .95rem);
+    letter-spacing: .04em;
+    color: #8a8a8a;
+    white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+    .d-dash, .d-arc {
+        display: none;
+    }
+}
