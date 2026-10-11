@@ -3,71 +3,116 @@
 @{
     ViewBag.Title = "Log in";
     var message = ViewBag.Message as string;
+
+    // Every validation error (missing fields, wrong password), shown as toasts
+    var loginErrors = ViewData.ModelState.Values
+        .SelectMany(v => v.Errors)
+        .Select(e => e.ErrorMessage)
+        .Where(m => !string.IsNullOrWhiteSpace(m))
+        .Distinct()
+        .ToList();
 }
 
-<h1 class="app-page-title">Log in</h1>
+<div class="login-wrap">
+    <h1 class="login-title">Welcome back</h1>
+    <p class="login-subtitle">Enter your username and password to continue.</p>
 
-<div class="card">
-    <p>Enter your username and password to continue.</p>
+    <div class="card">
+        <img class="login-profile"
+             src="@Url.Content("~/Content/images/profile.png")"
+             alt="Profile" />
 
-    @if (!string.IsNullOrWhiteSpace(message))
-    {
-        <div class="toast toast--info">@message</div>
-    }
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "login-form", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("returnUrl", ViewBag.ReturnUrl as string)
 
-    @using (Html.BeginForm("Login", "Account", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        @Html.Hidden("returnUrl", ViewBag.ReturnUrl as string)
+            <fieldset class="form-section">
+                <legend>Account details</legend>
 
-        @Html.ValidationSummary(true, "", new { @class = "field-error" })
-
-        <fieldset class="form-section">
-            <legend>Account details</legend>
-
-            <div class="form-row">
-                @Html.LabelFor(m => m.UsernameOrEmail)
-                @Html.TextBoxFor(m => m.UsernameOrEmail, new { autocomplete = "username" })
-                @Html.ValidationMessageFor(m => m.UsernameOrEmail, "", new { @class = "field-error" })
-            </div>
-
-            <div class="form-row">
-                @Html.LabelFor(m => m.Password)
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    @Html.PasswordFor(m => m.Password, new { autocomplete = "current-password", id = "password-input", style = "flex: 1;" })
-                    <button type="button" class="btn btn-secondary" id="toggle-password">Show password</button>
+                <div class="form-row">
+                    @Html.LabelFor(m => m.UsernameOrEmail)
+                    @Html.TextBoxFor(m => m.UsernameOrEmail, new { autocomplete = "username" })
                 </div>
-                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-error" })
+
+                <div class="form-row">
+                    @Html.LabelFor(m => m.Password)
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        @Html.PasswordFor(m => m.Password, new { autocomplete = "current-password", id = "password-input", style = "flex: 1;" })
+                        <button type="button" class="btn btn-secondary password-toggle" id="toggle-password"
+                                aria-label="Show password" title="Show password">
+                            <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0" />
+                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7" />
+                            </svg>
+                            <svg id="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" style="display: none;">
+                                <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7 7 0 0 0 2.79-.588M5.21 3.088A7 7 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474z" />
+                                <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Log in</button>
             </div>
-        </fieldset>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Log in</button>
-        </div>
-    }
-
-    @section scripts {
-        <script>
-(function () {
-                            "use strict";
-
-                            var foundInput = document.getElementById("password-input");
-                            var foundButton = document.getElementById("toggle-password");
-
-                            // instanceof also tells Visual Studio's script checker that this is an input box, so .type is allowed
-                            if (!(foundInput instanceof HTMLInputElement) || !foundButton) {
-                                return;
-                            }
-
-                            // Copied after the check so the checker knows they can't be null inside the click handler
-                            var passwordInput = foundInput;
-                            var toggleButton = foundButton;
-
-                            toggleButton.addEventListener("click", function () {
-                                var isHidden = passwordInput.type === "password";
-                                passwordInput.type = isHidden ? "text" : "password";
-                                toggleButton.textContent = isHidden ? "Hide password" : "Show password";
-                            });
-                        }());</script>
-    }
+        }
+    </div>
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            "use strict";
+
+            function showError(text) {
+                if (window.CourierApp && CourierApp.toast && CourierApp.toast.error) {
+                    CourierApp.toast.error(text);
+                } else {
+                    console.error("CourierApp.toast is not available:", text);
+                    alert(text);
+                }
+            }
+
+            // Errors sent back by the server (wrong password, or a field left empty)
+            var serverErrors = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(loginErrors, Newtonsoft.Json.Formatting.None, new Newtonsoft.Json.JsonSerializerSettings { StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.EscapeHtml }));
+            serverErrors.forEach(showError);
+
+            var passwordInput = document.getElementById("password-input");
+            var usernameBox = document.getElementById("UsernameOrEmail");
+            var toggleButton = document.getElementById("toggle-password");
+            var eye = document.getElementById("icon-eye");
+            var eyeSlash = document.getElementById("icon-eye-slash");
+            var form = document.getElementById("login-form");
+
+            if (!passwordInput || !usernameBox || !toggleButton || !eye || !eyeSlash || !form) {
+                console.error("Login page: an element id was not found.");
+                return;
+            }
+
+            // Show / hide password
+            toggleButton.addEventListener("click", function () {
+                var isHidden = passwordInput.type === "password";
+                passwordInput.type = isHidden ? "text" : "password";
+                eye.style.display = isHidden ? "none" : "";
+                eyeSlash.style.display = isHidden ? "" : "none";
+                var label = isHidden ? "Hide password" : "Show password";
+                toggleButton.setAttribute("aria-label", label);
+                toggleButton.setAttribute("title", label);
+            });
+
+            // Empty username / password: toast and don't submit
+            form.addEventListener("submit", function (e) {
+                var problems = [];
+                if (!usernameBox.value.trim()) { problems.push("Username is required."); }
+                if (!passwordInput.value) { problems.push("Password is required."); }
+
+                if (problems.length > 0) {
+                    e.preventDefault();
+                    problems.forEach(showError);
+                }
+            });
+        }());
+    </script>
+}

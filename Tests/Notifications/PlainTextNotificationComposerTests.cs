@@ -77,5 +77,53 @@ namespace CourierService.Tests.Notifications
             Assert.AreEqual(string.Empty, composer.Compose(Item(NotificationTemplateKeys.ReadyForCollection), package).To);
             Assert.AreEqual(string.Empty, composer.Compose(Item(NotificationTemplateKeys.ReadyForCollection, NotificationChannels.Sms), package).To);
         }
+
+
+        [TestMethod]
+        public void ReadyEmail_UsesConfiguredBodyAndReplacesPlaceholders()
+        {
+            var config = new FakeAppConfig();
+            config.Values["Notification.ReadyForCollection.Body"] =
+                "Hello {{RecipientName}}. Package {{PackageId}} is ready at {{StorageLocation}}.";
+
+            var package = new FakePackages().Add(
+                7,
+                "F20-0007",
+                email: "thandi@courier.test",
+                fullName: "Thandi Mokoena",
+                storageLocationCode: "Shelf B-04");
+
+            var message = new PlainTextNotificationComposer(config).Compose(
+                Item(NotificationTemplateKeys.ReadyForCollection),
+                package);
+
+            Assert.AreEqual(
+                "Hello Thandi Mokoena. Package F20-0007 is ready at Shelf B-04.",
+                message.Body);
+        }
+
+        [TestMethod]
+        public void CollectedEmail_UsesConfiguredBodyAndReplacesPlaceholders()
+        {
+            var config = new FakeAppConfig();
+            config.Values["Notification.Collected.Body"] =
+                "Hello {{RecipientName}}. Package {{PackageId}} was collected at {{CollectionTime}}.";
+
+            var package = new FakePackages().Add(
+                7,
+                "F20-0007",
+                fullName: "Thandi Mokoena",
+                collectedAtUtc: new DateTime(
+                    2026, 10, 7, 9, 5, 0, DateTimeKind.Utc));
+
+            var message = new PlainTextNotificationComposer(config).Compose(
+                Item(NotificationTemplateKeys.Collected),
+                package);
+
+            Assert.AreEqual(
+                "Hello Thandi Mokoena. Package F20-0007 was collected at 2026-10-07 09:05 (UTC).",
+                message.Body);
+        }
+
     }
 }

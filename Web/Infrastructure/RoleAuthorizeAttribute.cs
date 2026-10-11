@@ -43,8 +43,10 @@ namespace CourierService.Web.Infrastructure
             }
             else
             {
-                filterContext.Result = ErrorResult(filterContext, 403, "Forbidden",
-                    "You do not have permission to do this.");
+                // Pages get the friendly Access Denied view; API calls keep the JSON error
+                filterContext.Result = IsApiRequest(filterContext)
+                    ? ErrorResult(filterContext, 403, "Forbidden", "You do not have permission to do this.")
+                    : AccessDeniedPage(filterContext);
             }
         }
 
@@ -59,6 +61,21 @@ namespace CourierService.Web.Infrastructure
                 Data = new { error = new { code, message } },
                 JsonRequestBehavior = JsonRequestBehavior.AllowGet
             };
+        }
+
+        private static bool IsApiRequest(AuthorizationContext context)
+        {
+            var path = context.HttpContext.Request.AppRelativeCurrentExecutionFilePath ?? string.Empty;
+            return path.StartsWith("~/api/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static ActionResult AccessDeniedPage(AuthorizationContext context)
+        {
+            var response = context.HttpContext.Response;
+            response.StatusCode = 403;
+            response.TrySkipIisCustomErrors = true;
+
+            return new ViewResult { ViewName = "~/Views/Shared/accessDenied.cshtml" };
         }
     }
 }
