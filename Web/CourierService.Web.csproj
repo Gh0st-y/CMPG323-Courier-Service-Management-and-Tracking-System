@@ -101,13 +101,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-icons.min.css" />
+    <Content Include="Content\flatpickr.min.css" />
     <Content Include="Content\Images\accessDenied.png" />
     <Content Include="Content\Images\favicon.ico" />
     <Content Include="Content\Images\profile.png" />
+    <Content Include="Content\site.css" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\app\audit-log-filter.js" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
+    <Content Include="Scripts\app\flatpickr.min.js" />
     <Content Include="Scripts\app\reports.js" />
     <Content Include="Scripts\app\users.js" />
     <Content Include="Scripts\chart.umd.min.js" />
@@ -116,7 +119,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Content\site.css" />
     <Content Include="Scripts\app\courier-app.js" />
     <Content Include="Scripts\app\scan-demo.js" />
     <Content Include="Views\Scan\Index.cshtml" />
@@ -192,7 +194,14 @@
     <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
   </ItemGroup>
   <ItemGroup>
-
+    <Content Include="Views\AuditLog\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\AccessDenied.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\fonts\bootstrap-icons.woff" />
+    <Content Include="Content\fonts\bootstrap-icons.woff2" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

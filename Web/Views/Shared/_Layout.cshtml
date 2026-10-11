@@ -1,5 +1,4 @@
-@using CourierService.Web.Infrastructure
-@{
+@using CourierService.Web.Infrastructure@{
     var currentController = (string)ViewContext.RouteData.Values["controller"];
     var currentAction = (string)ViewContext.RouteData.Values["action"];
 
@@ -18,7 +17,7 @@
 
     var homeActive = currentController == "Home" ? "is-active" : "";
     var packagesActive = (currentController == "Packages" || currentController == "Scan" || currentController == "Collection") ? "is-active" : "";
-    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "UserManagement") ? "is-active" : "";
+    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "AuditLog" || currentController == "UserManagement") ? "is-active" : "";
 
     var registerActive = (currentController == "Packages" && currentAction == "Register") ? "is-active" : "";
     var searchActive = (currentController == "Packages" && currentAction == "Search") ? "is-active" : "";
@@ -26,6 +25,7 @@
     var collectionActive = currentController == "Collection" ? "is-active" : "";
     var reportsActive = currentController == "Reports" ? "is-active" : "";
     var importActive = currentController == "CsvImport" ? "is-active" : "";
+    var auditLogActive = currentController == "AuditLog" ? "is-active" : "";
     var usersActive = currentController == "UserManagement" ? "is-active" : "";
 
     var homeUrl = Url.Action("Index", "Home");
@@ -35,22 +35,31 @@
     var collectionUrl = Url.Action("Index", "Collection");
     var reportsUrl = Url.Action("Index", "Reports");
     var importUrl = Url.Action("Index", "CsvImport");
+    var auditLogUrl = Url.Action("Index", "AuditLog");
     var usersUrl = Url.Action("Index", "UserManagement");
     var logoUrl = Url.Content("~/Content/images/icon_inverted.png");
     var faviconUrl = Url.Content("~/Content/images/favicon.ico");
-}
-<!DOCTYPE html>
-<html lang="en">
-<head>
+}<!DOCTYPE html><html lang="en"><head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewBag.Title - Courier Service</title>
     <link rel="icon" type="image/x-icon" href="@faviconUrl" />
     <link href="~/Content/bootstrap-icons.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/Content/site.css" />
-</head>
-<body>
+    <link rel="stylesheet" href="~/Content/site.css" /></head><body>
     <header class="app-header">
+        <a class="app-header__brand" href="@homeUrl">
+            <img class="app-header__logo" src="@logoUrl" alt="" />
+            <span>F20 Courier Service</span>
+        </a>
+
+        @if (isSignedIn)
+        {
+            <button type="button" class="app-nav-toggle" id="nav-toggle" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list" aria-hidden="true"></i>
+            </button>
+        }
+
+        <nav class="app-nav" id="main-nav" aria-label="Main">
             @if (isSignedIn)
             {
                 <a class="app-nav__link @homeActive" href="@homeUrl"> Dashboard</a>
@@ -76,6 +85,7 @@
                     </div>
                 </div>
 
+                if (canSeeAdmin)
                 {
                     <div class="app-nav__dropdown">
                         <button type="button" class="app-nav__link app-nav__trigger @adminActive" aria-haspopup="true">
@@ -92,7 +102,7 @@
                             }
                             @if (canSeeAudit)
                             {
-                                <a class="app-nav__dropdown-item" href="#"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
+                                <a class="app-nav__dropdown-item @auditLogActive" href="@auditLogUrl"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
                             }
                             @if (isSystemAdmin)
                             {
@@ -172,6 +182,4 @@
                 if (e.key === "Escape") { setUser(false); setNav(false); }
             });
         })();
-    </script>
-</body>
-</html>
+    </script></body></html>
