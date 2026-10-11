@@ -105,6 +105,7 @@
     <Content Include="Content\Images\favicon.ico" />
     <Content Include="Content\Images\profile.png" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\app\audit-log-filter.js" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
     <Content Include="Scripts\app\reports.js" />

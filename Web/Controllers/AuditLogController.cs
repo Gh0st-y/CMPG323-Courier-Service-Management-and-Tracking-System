@@ -81,7 +81,8 @@ namespace CourierService.Web.Controllers
 
             var filter = new AuditLogFilter
             {
-                Username = searchTerm,
+                SearchTerm = searchTerm,
+                Username = null,
                 Action = actionType,
                 FromUtc = startDate,
                 ToUtc = endDate.HasValue ? endDate.Value.AddDays(1) : (DateTime?)null
