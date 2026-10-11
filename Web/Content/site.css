@@ -1602,13 +1602,13 @@ html, body {
     min-width: 220px;
 }
 
-    .um-search svg {
+    .um-search i {
         position: absolute;
         left: 14px;
         top: 50%;
         transform: translateY(-50%);
-        width: 16px;
-        height: 16px;
+        font-size: 16px;
+        line-height: 1;
         color: var(--color-text-muted);
         pointer-events: none;
     }
@@ -2224,9 +2224,9 @@ html, body {
         background: var(--color-primary);
     }
 
-    #jump-top svg {
-        width: 20px;
-        height: 20px;
+    #jump-top i {
+       font-size: 20px;
+       line-height: 1;
     }
 
     /* -------- Foooter --------------- */
