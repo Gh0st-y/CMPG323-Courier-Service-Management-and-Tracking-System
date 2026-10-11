@@ -51,19 +51,6 @@
 </head>
 <body>
     <header class="app-header">
-        <a class="app-header__brand" href="@homeUrl">
-            <img class="app-header__logo" src="@logoUrl" alt="" />
-            <span>F20 Courier Service</span>
-        </a>
-
-        @if (isSignedIn)
-        {
-            <button type="button" class="app-nav-toggle" id="nav-toggle" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list" aria-hidden="true"></i>
-            </button>
-        }
-
-        <nav class="app-nav" id="main-nav" aria-label="Main">
             @if (isSignedIn)
             {
                 <a class="app-nav__link @homeActive" href="@homeUrl"> Dashboard</a>
@@ -89,7 +76,6 @@
                     </div>
                 </div>
 
-                if (canSeeAdmin)
                 {
                     <div class="app-nav__dropdown">
                         <button type="button" class="app-nav__link app-nav__trigger @adminActive" aria-haspopup="true">

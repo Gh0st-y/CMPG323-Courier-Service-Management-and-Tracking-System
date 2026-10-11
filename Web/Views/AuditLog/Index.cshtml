@@ -1,0 +1,258 @@
+﻿@model CourierService.Web.Models.AuditLogViewModel
+@using System.Linq
+@{
+    ViewBag.Title = "Audit Log Viewer";
+}
+
+<link rel="stylesheet" href="~/Content/flatpickr.min.css">
+
+<div class="audit-log-page">
+    <h2 class="app-page-title">Audit Log Viewer</h2>
+    <p class="text-muted">View system activity and security audit trail (Read-Only).</p>
+
+    <!-- Hidden data container with explicit id and name attributes for compliance -->
+    <div id="searchSuggestionsData"
+         name="searchSuggestionsData"
+         data-users='@Html.Raw(Json.Encode(ViewBag.UserIds ?? new List<string>()))'
+         data-types='@Html.Raw(Json.Encode(ViewBag.EntityTypes ?? new List<string>()))'
+         data-ids='@Html.Raw(Json.Encode(ViewBag.EntityIds ?? new List<string>()))'
+         style="display: none;"></div>
+
+    <form method="get" action="@Url.Action("Index", "AuditLog")" id="auditFilterForm" name="auditFilterForm" class="audit-filter-card" style="overflow: visible !important;">
+        <div class="audit-filter-grid" style="overflow: visible !important;">
+            <div class="form-row" style="position: relative !important;">
+                <label for="searchTerm">Search Keywords</label>
+                <input type="text"
+                       id="searchTerm"
+                       name="searchTerm"
+                       value="@Model.SearchTerm"
+                       class="form-control"
+                       placeholder="Type entity, user ID..."
+                       autocomplete="off" />
+
+                <!-- Custom Category-Grouped Suggestion Dropdown Box -->
+                <div id="customSuggestionsDropdown" name="customSuggestionsDropdown" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 2px solid #5c2d91; border-radius: 6px; box-shadow: 0 8px 20px rgba(92, 45, 145, 0.25); z-index: 99999; max-height: 260px; overflow-y: auto;"></div>
+            </div>
+            <div class="form-row">
+                <label for="actionType">Action Type</label>
+                @Html.DropDownListFor(m => m.ActionType, Model.ActionTypes, new { @class = "form-control", id = "actionType", name = "actionType" })
+            </div>
+            <div class="form-row">
+                <label for="startDate">Start Date</label>
+                <input type="text"
+                       id="startDate"
+                       name="startDate"
+                       value="@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("yyyy-MM-dd") : "")"
+                       class="form-control flatpickr-date"
+                       placeholder="Select Start Date"
+                       readonly />
+            </div>
+            <div class="form-row">
+                <label for="endDate">End Date</label>
+                <input type="text"
+                       id="endDate"
+                       name="endDate"
+                       value="@(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("yyyy-MM-dd") : "")"
+                       class="form-control flatpickr-date"
+                       placeholder="Select End Date"
+                       readonly />
+            </div>
+            <div class="audit-filter-actions">
+                <button type="submit" id="filterSubmitBtn" name="filterSubmitBtn" class="btn btn-primary">Filter</button>
+                <a href="@Url.Action("Index", "AuditLog")" id="resetBtn" name="resetBtn" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+
+        <div id="dateRangeError" name="dateRangeError" style="display: none; align-items: center; gap: 6px; margin-top: 12px; color: #c0392b; font-size: 13px; font-weight: 500;"></div>
+    </form>
+
+    <div class="audit-table-container">
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Timestamp (UTC)</th>
+                    <th scope="col">User ID</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Entity Type</th>
+                    <th scope="col">Entity ID</th>
+                    <th scope="col">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Entries != null && Model.Entries.Any())
+                {
+                    foreach (var entry in Model.Entries)
+                    {
+                        <tr>
+                            <td class="audit-table__id">@entry.AuditLogId</td>
+                            <td>@entry.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@(entry.UserId.HasValue ? entry.UserId.Value.ToString() : "System / Anonymous")</td>
+                            <td><span class="audit-badge">@entry.Action</span></td>
+                            <td>@(string.IsNullOrEmpty(entry.EntityType) ? "-" : entry.EntityType)</td>
+                            <td>@(string.IsNullOrEmpty(entry.EntityId) ? "-" : entry.EntityId)</td>
+                            <td class="audit-detail">@(string.IsNullOrEmpty(entry.Detail) ? "-" : entry.Detail)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="results-empty">No audit log records found matching the specified filter.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="~/Scripts/app/flatpickr.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const startInput = document.getElementById("startDate");
+        const endInput = document.getElementById("endDate");
+        const errorDiv = document.getElementById("dateRangeError");
+        const filterForm = document.getElementById("auditFilterForm");
+        const searchInput = document.getElementById("searchTerm");
+        const dropdown = document.getElementById("customSuggestionsDropdown");
+        const dataContainer = document.getElementById("searchSuggestionsData");
+
+        let allUserIds = [];
+        let allEntityTypes = [];
+        let allEntityIds = [];
+
+        if (dataContainer) {
+            try {
+                allUserIds = JSON.parse(dataContainer.getAttribute("data-users") || "[]");
+                allEntityTypes = JSON.parse(dataContainer.getAttribute("data-types") || "[]");
+                allEntityIds = JSON.parse(dataContainer.getAttribute("data-ids") || "[]");
+            } catch (e) {
+                console.error("Failed to parse suggestion attributes", e);
+            }
+        }
+
+        if (searchInput && dropdown) {
+            searchInput.addEventListener("input", function () {
+                const query = this.value.trim().toLowerCase();
+
+                if (query.length === 0) {
+                    dropdown.style.display = "none";
+                    dropdown.innerHTML = "";
+                    return;
+                }
+
+                const matchedUsers = allUserIds.filter(item => item && item.toLowerCase().includes(query));
+                const matchedTypes = allEntityTypes.filter(item => item && item.toLowerCase().includes(query));
+                const matchedIds = allEntityIds.filter(item => item && item.toLowerCase().includes(query));
+
+                if (matchedUsers.length === 0 && matchedTypes.length === 0 && matchedIds.length === 0) {
+                    dropdown.style.display = "none";
+                    dropdown.innerHTML = "";
+                    return;
+                }
+
+                let html = "";
+
+                if (matchedUsers.length > 0) {
+                    html += `<div style="padding: 6px 10px; font-weight: bold; font-size: 11px; background: #f4f0fa; color: #5c2d91; border-bottom: 1px solid #e2d9ed;">USER IDS</div>`;
+                    matchedUsers.forEach(item => {
+                        html += `<div class="suggestion-item" style="padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f9f9f9;" data-value="${item}">${item}</div>`;
+                    });
+                }
+
+                if (matchedTypes.length > 0) {
+                    html += `<div style="padding: 6px 10px; font-weight: bold; font-size: 11px; background: #f4f0fa; color: #5c2d91; border-bottom: 1px solid #e2d9ed;">ENTITY TYPES</div>`;
+                    matchedTypes.forEach(item => {
+                        html += `<div class="suggestion-item" style="padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f9f9f9;" data-value="${item}">${item}</div>`;
+                    });
+                }
+
+                if (matchedIds.length > 0) {
+                    html += `<div style="padding: 6px 10px; font-weight: bold; font-size: 11px; background: #f4f0fa; color: #5c2d91; border-bottom: 1px solid #e2d9ed;">ENTITY IDS</div>`;
+                    matchedIds.forEach(item => {
+                        html += `<div class="suggestion-item" style="padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f9f9f9;" data-value="${item}">${item}</div>`;
+                    });
+                }
+
+                dropdown.innerHTML = html;
+                dropdown.style.display = "block";
+            });
+
+            dropdown.addEventListener("click", function (e) {
+                const target = e.target.closest(".suggestion-item");
+                if (target) {
+                    searchInput.value = target.getAttribute("data-value");
+                    dropdown.style.display = "none";
+                }
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = "none";
+                }
+            });
+        }
+
+        // Clear inputs on fresh hard refresh
+        if (!window.location.search && performance.navigation.type === 1) {
+            if (filterForm) filterForm.reset();
+        }
+
+        function validateDates() {
+            startInput.style.borderColor = "";
+            startInput.style.boxShadow = "";
+            endInput.style.borderColor = "";
+            endInput.style.boxShadow = "";
+            errorDiv.style.display = "none";
+            errorDiv.innerHTML = "";
+
+            if (startInput.value && endInput.value) {
+                const startDate = new Date(startInput.value);
+                const endDate = new Date(endInput.value);
+
+                if (startDate > endDate) {
+                    startInput.style.borderColor = "#c0392b";
+                    endInput.style.borderColor = "#c0392b";
+
+                    errorDiv.style.display = "flex";
+                    errorDiv.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Start date cannot be after the end date.</span>
+                    `;
+                    return false;
+                } else {
+                    startInput.style.borderColor = "#5c2d91";
+                    startInput.style.boxShadow = "0 0 0 3px rgba(92, 45, 145, 0.18)";
+                    endInput.style.borderColor = "#5c2d91";
+                    endInput.style.boxShadow = "0 0 0 3px rgba(92, 45, 145, 0.18)";
+                }
+            }
+            return true;
+        }
+
+        flatpickr(".flatpickr-date", {
+            dateFormat: "Y-m-d",
+            allowInput: false,
+            clickOpens: true,
+            disableMobile: true,
+            onChange: function () {
+                validateDates();
+            }
+        });
+
+        if (startInput) startInput.addEventListener("change", validateDates);
+        if (endInput) endInput.addEventListener("change", validateDates);
+
+        if (filterForm) {
+            filterForm.addEventListener("submit", function (e) {
+                if (!validateDates()) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>

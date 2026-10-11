@@ -14,8 +14,8 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44301</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
     <UseGlobalApplicationHostFile />
@@ -59,6 +59,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Api\NotificationsApiController.cs" />
     <Compile Include="Controllers\Api\PaymentApiController.cs" />
+    <Compile Include="Controllers\AuditLogController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Models\Api\Packages\PaymentStatusRequest.cs" />
     <Compile Include="Models\Api\Packages\RegisterPackageRequest.cs" />
     <Compile Include="Models\Api\Packages\ResendNotificationRequest.cs" />
+    <Compile Include="Models\AuditLogViewModel.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Infrastructure\CourierServices.cs" />
     <Compile Include="Infrastructure\DatabaseUnavailableFilter.cs" />
@@ -189,14 +191,7 @@
     <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Shared\AccessDenied.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\fonts\bootstrap-icons.woff" />
-    <Content Include="Content\fonts\bootstrap-icons.woff2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Reports\Index.cshtml" />
+
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
