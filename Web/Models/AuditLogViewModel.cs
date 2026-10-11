@@ -22,6 +22,8 @@ namespace CourierService.Web.Models
 
         // Dropdowns & Suggestions
         public IEnumerable<SelectListItem> ActionTypes { get; set; }
+
+        public IEnumerable<SelectListItem> KeywordGroups { get; set; }
         public IEnumerable<string> SearchSuggestions { get; set; }
 
         // Authorization Status

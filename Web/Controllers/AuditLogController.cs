@@ -42,16 +42,31 @@ namespace CourierService.Web.Controllers
             const int pageSize = 50;
             if (page < 1) page = 1;
 
-            // Fetch recent entries to populate auto-complete and filter dropdowns
             var rawEntries = _auditLogRepository.GetRecent(500) ?? Enumerable.Empty<AuditLogEntry>();
             var entriesList = rawEntries.ToList();
 
-            var suggestions = entriesList
-                .SelectMany(e => new[] { e.EntityType, e.EntityId, e.UserId?.ToString() })
-                .Where(s => !string.IsNullOrWhiteSpace(s))
+            var userIds = entriesList
+                .Where(e => e.UserId.HasValue)
+                .Select(e => e.UserId.Value.ToString())
                 .Distinct()
                 .OrderBy(s => s)
-                .Take(50)
+                .Take(15)
+                .ToList();
+
+            var entityTypes = entriesList
+                .Where(e => !string.IsNullOrWhiteSpace(e.EntityType))
+                .Select(e => e.EntityType)
+                .Distinct()
+                .OrderBy(s => s)
+                .Take(15)
+                .ToList();
+
+            var entityIds = entriesList
+                .Where(e => !string.IsNullOrWhiteSpace(e.EntityId))
+                .Select(e => e.EntityId)
+                .Distinct()
+                .OrderBy(s => s)
+                .Take(15)
                 .ToList();
 
             var availableActions = entriesList
@@ -64,7 +79,6 @@ namespace CourierService.Web.Controllers
 
             availableActions.Insert(0, new SelectListItem { Text = "-- All Action Types --", Value = "" });
 
-            // Build filter for query service
             var filter = new AuditLogFilter
             {
                 Username = searchTerm,
@@ -73,10 +87,23 @@ namespace CourierService.Web.Controllers
                 ToUtc = endDate.HasValue ? endDate.Value.AddDays(1) : (DateTime?)null
             };
 
-            // Use QueryService for SQL-level filtering and pagination
-            var pagedResult = _queryService.Search(filter, page, pageSize);
+            AuditLogPage pagedResult;
+            try
+            {
+                pagedResult = _queryService.Search(filter, page, pageSize);
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                pagedResult = new AuditLogPage
+                {
+                    Items = new List<AuditLogEntry>(),
+                    TotalCount = 0,
+                    Page = page,
+                    PageSize = pageSize
+                };
+            }
 
-            // Determine authorization status for UI rendering
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated &&
                          (User.IsInRole(RoleNames.Supervisor) || User.IsInRole(RoleNames.SystemAdmin));
 
@@ -91,9 +118,12 @@ namespace CourierService.Web.Controllers
                 StartDate = startDate,
                 EndDate = endDate,
                 ActionTypes = availableActions,
-                SearchSuggestions = suggestions,
                 IsAuthorized = isAuth
             };
+
+            ViewBag.UserIds = userIds;
+            ViewBag.EntityTypes = entityTypes;
+            ViewBag.EntityIds = entityIds;
 
             return View(model);
         }

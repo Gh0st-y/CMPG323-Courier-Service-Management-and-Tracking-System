@@ -30,7 +30,7 @@ namespace CourierService.Services.Audit
 
             filter = filter ?? new AuditLogFilter();
 
-            if (filter.FromUtc.HasValue && filter.ToUtc.HasValue && filter.FromUtc.Value >= filter.ToUtc.Value)
+            if (filter.FromUtc.HasValue && filter.ToUtc.HasValue && filter.FromUtc.Value > filter.ToUtc.Value)
             {
                 throw new ArgumentException("The start date must be on or before the end date.", nameof(filter));
             }

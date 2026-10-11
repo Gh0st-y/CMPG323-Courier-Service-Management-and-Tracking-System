@@ -88,6 +88,7 @@
                 var userName = UserSession.Username(Session);
                 var roleName = UserSession.RoleDisplayName(UserSession.RoleName(Session));
                 var isSystemAdmin = UserSession.RoleName(Session) == "SystemAdmin";
+                var isSupervisorOrAdmin = isSystemAdmin || string.Equals(roleName, "Supervisor", StringComparison.OrdinalIgnoreCase);
             }
             @if (isSignedIn)
             {
@@ -106,7 +107,10 @@
                     </div>
                 </div>
                 <a class="app-nav__link @(currentController == "CsvImport" ? "is-active" : "")" href="@Url.Action("Index", "CsvImport")">Import</a>
-                <a class="app-nav__link" href="#">Audit Log</a>
+                if (isSupervisorOrAdmin)
+                {
+                    <a class="app-nav__link @(currentController == "AuditLog" ? "is-active" : "")" href="@Url.Action("Index", "AuditLog")">Audit Log</a>
+                }
                 if (isSystemAdmin)
                 {
                     <a class="app-nav__link @(currentController == "UserManagement" ? "is-active" : "")" href="@Url.Action("Index", "UserManagement")">Users</a>
