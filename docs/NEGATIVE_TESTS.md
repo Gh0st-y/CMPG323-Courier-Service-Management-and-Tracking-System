@@ -1,14 +1,16 @@
 # Negative and robustness tests (T52)
 
-These checks try to break the system on purpose: wrong roles, moves the status rules don't allow, codes that don't exist, bad input and a database that has gone away. Every request below is meant to be **refused**, so running the script changes no package data. The only things it leaves behind are login entries in the audit log.
+These checks exercise wrong roles, invalid transitions, unknown codes, bad input and a database outage. Sections 1 to 6 must not change packages, but login attempts write audit entries. Sections 8 and 9 deliberately change package status and create notification records; section 9 temporarily clears a synthetic phone number. Run only on a disposable, newly seeded test database and a separate checkout. Never use a production or demo database containing real recipients.
 
 Spec references: NFR-022, NFR-023, NRF-016, NRF-011, IR-006, OR-04.
 
 ## How to run
 
-1. Load `db/schema.sql` and `db/seed.sql` (the demo users all use the password `Demo@2026!`).
+1. Create a new disposable database named `CourierService_TaskVerification_T52`: replace the database name in copies of `db/schema.sql` and `db/seed.sql` before executing them. Configure the separate checkout's `CourierServiceDb` connection string to that database. Verify the actual connection before continuing. Existing databases must not be overwritten. The demo users use `Demo@2026!`.
 2. Press F5 and open the browser console (F12) on `https://localhost:44301/`.
-3. Paste each step on its own, in order, and compare the status code and `code` with the expected result.
+3. Disable mock mode and wait for each request to finish before proceeding. Paste each step on its own and compare the status code and `code` with the expected result. All SQL examples below target `CourierService_TaskVerification_T52`; replace that name consistently if a different disposable database is used.
+
+Record the effective SMTP/SMS and worker settings, including overrides in `Web.config.Local`, before changing them. Restore only the settings changed for the test; do not reset the whole configuration file. Keep the section 9 SQL window open until the saved phone number has been restored. If a test fails, bring the disposable database online, restore the phone/settings and sign out before stopping.
 
 Steps 2d, 6a and 6b use `/api/users` (T43, merged). Section 9 needs T29 (SMS stub, merged) and switches SMS on in Web.config for the duration of the test.
 
@@ -25,7 +27,7 @@ If your database has been used for other testing, check them first with step 3a.
 
 ## Results
 
-Second run, on current `main`, for closing #52. The first run, on 2026-10-07, passed everything except 2d, 6a and 6b, which were skipped until T43 merged; that run is in the Git history of this file.
+The author's second run on 2026-10-12 is retained below. After review, the role/session sequence and cleanup were corrected and rerun on PR #125 updated with main `c270390` (code checkout `3d2300d`). The first run on 2026-10-07 skipped 2d, 6a and 6b until T43 merged. See [T52_VERIFICATION.md](verification/T52_VERIFICATION.md) for the independent rerun, environment, raw summaries and cleanup checks.
 
 | Step | Check | Expected | Result |
 |---|---|---|---|
@@ -51,7 +53,7 @@ Second run, on current `main`, for closing #52. The first run, on 2026-10-07, pa
 | 8a to 8g | Mail server not running | Status change 200, email tried 3 times then Failed, every attempt logged with its reason | Pass |
 | 9a to 9h | SMS failing (SMS on, recipient has no phone) | Status change 200, email Sent, SMS Failed and logged | Pass |
 
-Tested by: Hannu (Visagi1411)  Date: 2026-10-12  Commit: adfef35
+Original second-run tester: Hannu (Visagi1411), 2026-10-12, commit `adfef35`. Corrected-flow rerun: Codex automated Postman/Chrome/SQL checks; 35 requests/59 assertions, six UI/outage checks and 63 notification tests passed. SMTP/SMS status requests completed in 32.50/30.31 ms. The isolated automated worker used a 1-second poll/retry and three attempts; the manual default-delay expectations below were not timed again.
 ---
 
 ## 1. Logged out
@@ -200,7 +202,15 @@ fetch("/api/packages/F20-0001/status", { method: "POST", headers: { "Content-Typ
 fetch("/api/packages/scan/F20-9999").then(r => r.text().then(t => console.log(r.status, t)));
 ```
 
-5b. Open the Scan page, type `F20-9999` into the scan box and press Enter. Expected: a friendly "not found" message on the screen, not an error page.
+5b. Switch to Storage Staff before opening Scan; Collection Staff cannot access that page. Wait for the logout and login responses:
+```js
+fetch("/api/auth/logout", { method: "POST" }).then(async r => {
+    console.log("logout", r.status);
+    const login = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: "storage.demo", password: "Demo@2026!" }) });
+    console.log("login", login.status);
+});
+```
+Expected: 204, then 200. Open Scan, type `F20-9999` and press Enter. Expect a friendly "not found" message without an error page.
 
 ## 6. Admin-only endpoints: Supervisor
 
@@ -223,14 +233,14 @@ fetch("/api/users", { method: "POST", headers: { "Content-Type": "application/js
 
 ## 7. Database unavailable (NFR-022, OR-04)
 
-**Only do this on your own local database, never on the demo machine during a demo.** It takes the database offline and then brings it back.
+**Only use the disposable test database configured above.** Taking it offline cancels its active transactions. Keep the master query window available so it can always be brought online again.
 
-Stay logged in as supervisor.demo. Your session lives in the web server's memory, so it survives the database going offline.
+Stay logged in as supervisor.demo and open the Scan page before taking the database offline. Your session lives in the web server's memory, so it survives the database going offline. Complete the UI checks before logging out: login cannot recreate a session while the database is offline.
 
-7a. In Visual Studio, open View > SQL Server Object Explorer, expand `(localdb)\MSSQLLocalDB` > Databases, right-click **master** (not CourierService) and choose New Query. Run:
+7a. In Visual Studio, open View > SQL Server Object Explorer, expand `(localdb)\MSSQLLocalDB` > Databases, right-click **master** (not the test database) and choose New Query. Run:
 
 ```sql
-ALTER DATABASE CourierService SET OFFLINE WITH ROLLBACK IMMEDIATE;
+ALTER DATABASE CourierService_TaskVerification_T52 SET OFFLINE WITH ROLLBACK IMMEDIATE;
 ```
 
 7b. Scan in the console. Expected: 503 with code ServiceUnavailable and the message "The system can't reach its database right now. Please try again in a few minutes." No SQL, server names or stack trace. If the very first call after going offline gives a different error, run it once more: the first call can hit a connection that was already open.
@@ -238,7 +248,9 @@ ALTER DATABASE CourierService SET OFFLINE WITH ROLLBACK IMMEDIATE;
 fetch("/api/packages/scan/F20-0001").then(r => r.text().then(t => console.log(r.status, t, "Retry-After:", r.headers.get("Retry-After"))));
 ```
 
-7c. Log out and try to log in. Expected: the logout is 204, then the login gives 503 ServiceUnavailable.
+7c. While still signed in, use the Scan page opened before the outage and scan `F20-0001`. Expect the "can't reach its database" toast and a working page. Open `/AuditLog` in another tab with the same session; its database-backed page should return the generic Service Unavailable page with HTTP 503. Visual Studio's Output window should contain "Database unavailable. Exception: CourierService.Domain.DatabaseUnavailableException" and a stack trace, without the SQL exception message or recipient data.
+
+7d. Only after the UI checks, log out and try to log in. Expected: logout is 204, then login gives 503 ServiceUnavailable. Do not attempt authenticated UI checks after this failed login.
 ```js
 fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.status));
 ```
@@ -246,12 +258,10 @@ fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.
 fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: "supervisor.demo", password: "Demo@2026!" }) }).then(r => r.text().then(t => console.log(r.status, t)));
 ```
 
-7d. Open the Scan page and scan `F20-0001`. Expected: a toast with the "can't reach its database" message, and the page keeps working. Visual Studio's Output window shows a line starting with "Database unavailable. Exception: System.Data.SqlClient.SqlException" followed by a stack trace (that is the log, OR-04). Since T54 it shows the exception type and where it happened, but not the SQL error message, which can contain personal data.
-
 7e. Bring the database back in the same query window:
 
 ```sql
-ALTER DATABASE CourierService SET ONLINE;
+ALTER DATABASE CourierService_TaskVerification_T52 SET ONLINE;
 ```
 
 Log in again as supervisor.demo and repeat 7b. Expected: 200 with the package.
@@ -260,7 +270,7 @@ Log in again as supervisor.demo and repeat 7b. Expected: 200 with the package.
 
 This checks that a mail server that isn't running never stops staff from changing a status. It needs T25 (queue and worker) and T26 (SMTP sender). Unlike the rest of the script, it changes one package: F20-0005 moves from In Storage to Ready for Collection. Use the next In Storage package (F20-0009, F20-0013 and so on) if F20-0005 has already moved on.
 
-8a. Make sure no test mail server is running: close smtp4dev or Papercut if you use one. Leave `Smtp.Host` as `localhost` in Web.config. Press F5 if the app isn't running.
+8a. Record the effective settings first, including `Web.config.Local` overrides. SMS must be disabled, and `Smtp.Host`/`Smtp.Port` must point to an unused loopback port, not an external mail server. Stop the local test inbox listening on that port. Verify the worker is enabled; the expectations below use three attempts, a 5-second poll and a 60-second retry delay. Restart if settings changed, then sign in again.
 
 8b. Log out, then log in as storage.demo. Expected: 204, then 200.
 ```js
@@ -280,9 +290,9 @@ fetch("/api/packages/scan/F20-0005").then(r => r.json().then(j => console.log(r.
 window.t0 = performance.now(); fetch("/api/packages/F20-0005/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newStatus: "ReadyForCollection" }) }).then(r => r.json().then(j => console.log(r.status, Math.round(performance.now() - window.t0) + " ms", j.status)));
 ```
 
-8e. In SQL Server Object Explorer, right-click the **CourierService** database, choose New Query and run this. Run it again after about 1 minute and after about 2 minutes.
+8e. In SQL Server Object Explorer, right-click the **CourierService_TaskVerification_T52** database, choose New Query and run this. Run it again after about 1 minute and after about 2 minutes.
 ```sql
-USE CourierService;
+USE CourierService_TaskVerification_T52;
 SELECT q.NotificationQueueId, p.F20Identifier, q.TemplateKey, q.Status, q.AttemptCount, q.EnqueuedAtUtc, q.LastAttemptAtUtc
 FROM dbo.NotificationQueue q JOIN dbo.Packages p ON p.PackageId = q.PackageId
 WHERE p.F20Identifier = 'F20-0005'
@@ -292,13 +302,13 @@ Expected: one ReadyForCollection row. After a few seconds it is Pending with Att
 
 8f. Every attempt is also logged (T28). Run this after the queue row shows Failed. Expected: three Failed rows for F20-0005, newest first: "The mail server could not be used (...)", then "... Will try again (attempt 2 of 3).", then "... Will try again (attempt 1 of 3)."
 ```sql
-USE CourierService;
+USE CourierService_TaskVerification_T52;
 SELECT l.Channel, l.Status, l.ErrorDetail, l.SentAtUtc
 FROM dbo.NotificationLog l JOIN dbo.Packages p ON p.PackageId = l.PackageId
 WHERE p.F20Identifier = 'F20-0005'
 ORDER BY l.NotificationLogId DESC;
 ```
-Then open `https://localhost:44301/Packages/Detail/F20-0005`. Expected: under Notifications, the Email entries show a red Failed badge with the reason underneath (needs #123).
+Then open `https://localhost:44301/Packages/Detail/F20-0005`. Expected: under Notifications, the Email entries show a red Failed badge with the reason underneath (#123 is merged).
 
 8g. Log out. Expected: 204.
 ```js
@@ -309,14 +319,20 @@ fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.
 
 This checks that a failing SMS never stops the staff workflow or the email. It switches SMS on in Web.config for the test and changes one package: F20-0009 moves from In Storage to Ready for Collection (use F20-0013, F20-0017 and so on if it has already moved on). The SMS stub never sends a real message.
 
-9a. Stop debugging. In `Web/Web.config` change `<add key="Sms.Enabled" value="false"/>` to `value="true"` and save. **Do not commit this change.** Start smtp4dev (`smtp4dev`) so the email can go through, then press F5.
+9a. Stop debugging. Record the current `Sms.Enabled` value and set it to `true` in the effective settings file: use `Web.config.Local` if it overrides the key, otherwise Web.config. **Do not commit test configuration.** Start the local SMTP inbox on the configured loopback host/port and confirm SSL/credentials match that inbox. A running web inbox alone is not proof the SMTP settings match. Restart, then sign in again.
 
-9b. In a SQL query window on CourierService, remove the recipient's phone number so the SMS must fail:
+9b. In one SQL window on the disposable database, save the original phone before clearing it. Keep this window open through 9h; the temporary backup belongs to this SQL session. Do not overwrite an existing backup from an unfinished run:
 ```sql
-USE CourierService;
-UPDATE r SET r.PhoneNumber = NULL
+USE CourierService_TaskVerification_T52;
+IF OBJECT_ID('tempdb..#T52PhoneBackup') IS NOT NULL
+    THROW 51000, 'Restore the previous T52 phone backup before running again.', 1;
+SELECT r.RecipientId, r.PhoneNumber INTO #T52PhoneBackup
 FROM dbo.Recipients r JOIN dbo.Packages p ON p.RecipientId = r.RecipientId
 WHERE p.F20Identifier = 'F20-0009';
+IF (SELECT COUNT(*) FROM #T52PhoneBackup) <> 1
+    THROW 51000, 'Expected exactly one synthetic recipient.', 1;
+UPDATE r SET PhoneNumber = NULL
+FROM dbo.Recipients r JOIN #T52PhoneBackup b ON b.RecipientId = r.RecipientId;
 ```
 
 9c. Log in as storage.demo. Expected: 200.
@@ -334,9 +350,9 @@ fetch("/api/packages/scan/F20-0009").then(r => r.json().then(j => console.log(r.
 fetch("/api/packages/F20-0009/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newStatus: "ReadyForCollection" }) }).then(r => r.json().then(j => console.log(r.status, j.status)));
 ```
 
-9f. Wait 5 seconds, then check the log. Expected: an Email row with Sent (and the email visible in smtp4dev at http://localhost:5000), and an SMS row with Failed and "The recipient has no phone number." The SMS is not retried, because a missing number won't fix itself.
+9f. Poll until both queue items have reached a terminal state rather than assuming a fixed 5-second wait. Expect Email Sent with its message visible in the local inbox, and SMS Failed with "The recipient has no phone number." Missing phone is permanent and is not retried. Verify the failure in NotificationLog as well as NotificationQueue.
 ```sql
-USE CourierService;
+USE CourierService_TaskVerification_T52;
 SELECT l.Channel, l.Status, l.ErrorDetail, l.SentAtUtc
 FROM dbo.NotificationLog l JOIN dbo.Packages p ON p.PackageId = l.PackageId
 WHERE p.F20Identifier = 'F20-0009'
@@ -348,9 +364,18 @@ ORDER BY l.NotificationLogId;
 fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.status));
 ```
 
-9h. Stop debugging and put Web.config back, so SMS is off again:
+9h. Even if a test failed, restore the phone using the same SQL window as 9b:
+```sql
+USE CourierService_TaskVerification_T52;
+IF OBJECT_ID('tempdb..#T52PhoneBackup') IS NULL
+    THROW 51000, 'Phone backup is unavailable; discard/reseed this disposable test database.', 1;
+UPDATE r SET PhoneNumber = b.PhoneNumber
+FROM dbo.Recipients r JOIN #T52PhoneBackup b ON b.RecipientId = r.RecipientId;
+SELECT r.RecipientId, r.PhoneNumber
+FROM dbo.Recipients r JOIN #T52PhoneBackup b ON b.RecipientId = r.RecipientId;
+DROP TABLE #T52PhoneBackup;
 ```
-git checkout -- Web/Web.config
-```
+
+Stop debugging and restore the original `Sms.Enabled` value in the same effective settings file used in 9a. Restore any SMTP/worker settings changed for sections 8/9 individually. Check the diff to ensure connection strings, certificates and unrelated local settings remain intact. Do not use `git checkout -- Web/Web.config` as cleanup. Package transitions and notification/audit records remain in this disposable database; reseed a new database for another run.
 
 SMS failures are tested with the SMS adapter (T29).

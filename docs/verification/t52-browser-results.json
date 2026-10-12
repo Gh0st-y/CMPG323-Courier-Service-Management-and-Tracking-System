@@ -1,0 +1,13 @@
+{
+  "baseUrl": "http://localhost:48181",
+  "syntheticOnly": true,
+  "passed": 6,
+  "results": [
+    "5b: Storage Staff sees friendly unknown-code feedback",
+    "7b: authenticated lookup returns generic 503 with Retry-After",
+    "7c: authenticated Scan shows outage feedback before logout",
+    "7c: database-backed page returns generic Service Unavailable HTML",
+    "7d: logout succeeds, login fails generically while offline",
+    "7e: re-login and lookup succeed after database recovery"
+  ]
+}
