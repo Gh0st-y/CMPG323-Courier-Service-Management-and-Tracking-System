@@ -1,4 +1,4 @@
-﻿using System.Web;
+using System.Web;
 using System.Web.Mvc;
 using CourierService.Data;
 using CourierService.Data.Repositories;
@@ -96,6 +96,22 @@ namespace CourierService.Web.Controllers
                 paymentStatus = result.PaymentStatus,
                 status = "Registered"
             });
+        }
+
+        /// <summary>Current fees for the registration form; exposes no SMTP settings or secrets.</summary>
+        [RoleAuthorize(RoleNames.IntakeClerk, RoleNames.Supervisor, RoleNames.SystemAdmin)]
+        [HttpGet]
+        [Route("api/packages/fees")]
+        public ActionResult Fees()
+        {
+            var fees = new PackageFeeService(new AppConfigRepository(new SqlConnectionFactory()));
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            return Json(new
+            {
+                Personal = fees.GetFee(PackageRegistrationService.Personal),
+                WorkRelated = fees.GetFee(PackageRegistrationService.WorkRelated)
+            }, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>GET /api/packages/{f20Identifier}/qr: the label's QR code as a PNG. The code holds only the identifier (CON-008).</summary>

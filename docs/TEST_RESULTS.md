@@ -7,13 +7,14 @@ Date: 2026-10-12. Environment: Windows workspace, .NET Framework 4.8, local Visu
 | Audit viewer #119, d3f8345 | Non-integration .NET suite | 343 passed, 0 failed, 0 skipped. |
 | Audit viewer #119 | Malicious suggestion markup/selection regression | Passed; markup is text, selection preserves the value, empty/no-match clears suggestions. |
 | Audit viewer #119 | Release build with Razor view compilation | Passed; existing assembly-version warning remains. |
-| POPIA #118, 75e17ef | Non-integration .NET suite excluding the known main HTTPS port test | 355 passed, 0 failed, 0 skipped among selected tests. HTTPS mismatch handled separately in the UI/verification fix branch. |
+| POPIA #118, 5e55c15 | Full non-integration .NET suite after correcting the inherited HTTPS port mismatch | 356 passed, 0 failed, 0 skipped; no individual test excluded. |
 | POPIA #118 | Identifier regression and Release/Razor build | Passed; existing assembly-version and duplicate-using warnings recorded at that point. |
-| UI/verification fix branch | Full non-integration .NET suite | 343 passed, 0 failed, 0 skipped, including HTTPS configuration test. |
+| UI/verification fix branch after externally merged #113 | Full non-integration .NET suite | 346 passed, 0 failed, 0 skipped, including HTTPS configuration and live fee tests. |
 | UI/verification fix branch | CSV import regression | Passed: multipart, saved/error rows, duplicate submit, auth/network/malformed response, mock mode and stale mock preference with mocks disabled. |
 | UI/verification fix branch | User management regression | Passed: cancel/confirm, duplicate clicks, failed requests, role reset and self-protection. |
 | UI/verification fix branch | Report links regression | Passed: app-relative detail path, encoded identifiers and safe recipient text. Charts intentionally absent from the Node DOM test. |
 | UI/verification fix branch | Package identifier regression | Passed: normal identifiers, quotes, script markup and escape characters. |
+| UI/verification fix branch | Registration fee frontend regression after #113 | Passed: R12.50 display and failed-lookup submission protection. |
 | UI/verification fix branch | Release/Razor build | Passed; existing assembly-version warning remains. Duplicate using removed. |
 
 SQL integration tests were not executed during these changes. No live HTTP/role acceptance pass, performance benchmark, camera/USB/printer check, screenshots, deployment or rehearsal was performed. Earlier PR evidence should be read separately; this record does not claim it was repeated.
