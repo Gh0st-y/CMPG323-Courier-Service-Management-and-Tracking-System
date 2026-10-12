@@ -17,6 +17,7 @@
         public const string UserDeactivated = "UserDeactivated";
         public const string UserReactivated = "UserReactivated";
         public const string PaymentStatusChanged = "PaymentStatusChanged";
+        public const string StorageLocationCreated = "StorageLocationCreated";
     }
 
     // Values for the EntityType column.
@@ -26,5 +27,6 @@
         public const string Package = "Package";
         public const string CsvImport = "CsvImport";
         public const string Config = "Config";
+        public const string StorageLocation = "StorageLocation";
     }
 }
