@@ -1,4 +1,4 @@
-@{
+ï»¿@{
     ViewBag.Title = "Dashboard";
     var canRegister = (bool)ViewBag.CanRegister;
     var canSearch = (bool)ViewBag.CanSearch;
@@ -8,7 +8,8 @@
 <h1 class="app-page-title">F20 Courier Service Dashboard</h1>
 
 <div class="card dashboard-card">
-<!-- TODO This is the Mock toggle remove later (dev tool)-->
+@if (string.Equals(System.Configuration.ConfigurationManager.AppSettings["Frontend.MockEnabled"], "true", StringComparison.OrdinalIgnoreCase))
+{
 <div class="dashboard-mock">
     <label class="mock-switch" for="toggle-mock-mode">
         <input type="checkbox" role="switch" id="toggle-mock-mode" class="mock-switch__input" />
@@ -16,6 +17,7 @@
         <span class="mock-switch__text">Mock mode: <strong id="mock-mode-label">OFF</strong></span>
     </label>
 </div>
+}
 
 <section class="dashboard-alert" id="dashboard-error" role="alert" aria-live="assertive" hidden>
     <p class="dashboard-alert__title">Package counts could not be loaded.</p>
@@ -46,25 +48,25 @@
         <div class="dashboard-stats" id="dashboard-stats" aria-live="polite" aria-busy="true">
             <article class="card dashboard-stat dashboard-stat--received">
                 <span class="dashboard-stat__label">Received Today</span>
-                <strong class="dashboard-stat__value" id="stat-received">—</strong>
+                <strong class="dashboard-stat__value" id="stat-received">â€”</strong>
                 <span class="dashboard-stat__note">Packages received today</span>
             </article>
 
             <article class="card dashboard-stat dashboard-stat--ready">
                 <span class="dashboard-stat__label">Ready for Collection</span>
-                <strong class="dashboard-stat__value" id="stat-ready">—</strong>
+                <strong class="dashboard-stat__value" id="stat-ready">â€”</strong>
                 <span class="dashboard-stat__note">Current packages waiting for pickup</span>
             </article>
 
             <article class="card dashboard-stat dashboard-stat--collected">
                 <span class="dashboard-stat__label">Collected Today</span>
-                <strong class="dashboard-stat__value" id="stat-collected">—</strong>
+                <strong class="dashboard-stat__value" id="stat-collected">â€”</strong>
                 <span class="dashboard-stat__note">Packages collected today</span>
             </article>
 
             <article class="card dashboard-stat dashboard-stat--outstanding">
                 <span class="dashboard-stat__label">Outstanding</span>
-                <strong class="dashboard-stat__value" id="stat-outstanding">—</strong>
+                <strong class="dashboard-stat__value" id="stat-outstanding">â€”</strong>
                 <span class="dashboard-stat__note">Current packages not yet collected</span>
             </article>
         </div>
@@ -152,7 +154,7 @@
 
             function formatCount(value) {
                 if (value === null || value === undefined) {
-                    return "—";
+                    return "â€”";
                 }
 
                 return Number(value).toLocaleString("en-ZA");
@@ -205,22 +207,22 @@
 
             refreshButtonEl.addEventListener("click", loadDashboardStats);
             retryButtonEl.addEventListener("click", loadDashboardStats);
-            //TODO Remove the functioning of the mockmode
             var mockLabelEl = document.getElementById("mock-mode-label");
             var mockToggleEl = document.getElementById("toggle-mock-mode");
 
             function refreshMockLabel() {
+                if (!mockToggleEl || !mockLabelEl) return;
                 mockToggleEl.checked = !!CourierApp.config.mockMode;
                 mockLabelEl.textContent = mockToggleEl.checked ? "ON" : "OFF";
             }
 
-            mockToggleEl.addEventListener("change", function () {
+            if (mockToggleEl) mockToggleEl.addEventListener("change", function () {
                 CourierApp.config.setMockMode(mockToggleEl.checked);
                 refreshMockLabel();
                 loadDashboardStats();
             });
 
-            refreshMockLabel();//END of mockmode
+            refreshMockLabel();
 
             loadDashboardStats();
         })();

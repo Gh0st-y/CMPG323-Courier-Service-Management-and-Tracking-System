@@ -150,6 +150,7 @@
     <script src="~/Scripts/lottie.min.js"></script>
     <script>
         window.CourierApp = window.CourierApp || {};
+        window.CourierApp.allowMockMode = @((string.Equals(System.Configuration.ConfigurationManager.AppSettings["Frontend.MockEnabled"], "true", StringComparison.OrdinalIgnoreCase)) ? "true" : "false");
         window.CourierApp.loaderAnimationUrl = '@Url.Content("~/Content/animations/Loading.json")';
     </script>
     <script src="~/Scripts/app/courier-app.js"></script>
