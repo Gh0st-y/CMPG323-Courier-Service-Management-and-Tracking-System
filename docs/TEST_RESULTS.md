@@ -38,3 +38,5 @@ Candidate: integrated commit `7a991ee` (UI #121, security #118, audit #119 and d
 | Two phones, USB scanner and printer (#56/#57) | Pending | Pending |
 
 Evidence: [browser results](verification/browser-results.json), [final precompiled release: 66/66](verification/browser-release-results.json), [form workflow](verification/workflow-results.json), [Postman summary](verification/postman-results.txt), [SMS results](verification/sms-results.json), [reproduction](verification/README.md), [user guide screenshots](USER_MANUAL.md). Final branch non-integration tests: 359/359; six frontend regression scripts pass; precompiled Release publish passes with the existing assembly-version warning. No real-phone, physical USB/printer, demo-machine deployment, backup laptop or team rehearsal pass is claimed. T52 and T61 remain outside this work.
+
+Second pass: [all open PRs and reviewer comments](verification/PR_REVIEW_20261012.md), including a combined Windows PowerShell 5.1 package, current role labels/filters and the restored notification reason in pending #123.
