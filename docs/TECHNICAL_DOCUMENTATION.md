@@ -188,7 +188,7 @@ The timer prevents overlapping batches in one process. Multi-process claiming, d
 
 Five roles are defined: IntakeClerk, StorageStaff, CollectionStaff, Supervisor, SystemAdmin. Server-side RoleAuthorize filters reject unauthorized actions. Sessions currently keep roles from login; account changes do not immediately revoke them. API anti-forgery protection is outstanding. [Package-page fix #112](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/112) removes unsafe identifier insertion into scripts.
 
-The audit query endpoint exists; its viewer UI is in pending [PR #119](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/119). Main includes SystemAdmin storage-location creation from #70. Camera scanning currently loads a library from external CDNs; pending #116 bundles it locally. Main includes live fee reloads and local SMTP settings from #113. POPIA fixes (#118) and UI/verification guides (#121) still require their PRs to be merged before they are treated as deployed behavior. These dependencies must appear in the release acceptance checklist.
+The audit query endpoint exists; its viewer UI is in pending [PR #119](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/119). Main includes SystemAdmin storage-location creation from #70. Main includes #116 deployment preparation and bundles the scanner library locally. Actual deployment and hardware acceptance remain pending. Main includes live fee reloads and local SMTP settings from #113. POPIA fixes (#118) and UI/verification guides (#121) still require their PRs to be merged before they are treated as deployed behavior. These dependencies must appear in the release acceptance checklist.
 
 ## Verification and handover
 
@@ -196,4 +196,4 @@ The audit query endpoint exists; its viewer UI is in pending [PR #119](https://g
 
 Use [NEGATIVE_TESTS.md](NEGATIVE_TESTS.md) for rejection/outage scenarios and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for release evidence. Device/browser checks, performance at 50,000 packages and 500,000 audit entries, backup restoration, staff training and sponsor approval need recorded results. Do not use real recipient information before the required governance approval. Retention period and anonymisation scope remain unresolved.
 
-Updated 2026-10-12 against main commit 367147b and the explicitly identified pending PRs. Review those dependencies before using this document for a release.
+Updated 2026-10-12 against main commit 86545ee and the explicitly identified pending PRs. Review those dependencies before using this document for a release.
