@@ -1596,6 +1596,24 @@ html, body {
     gap: 10px;
 }
 
+.um-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.um-table-scroll table {
+    min-width: 700px;
+}
+
+.um-role-select {
+    min-width: 140px;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-surface);
+    font: inherit;
+}
+
 .um-search {
     position: relative;
     flex: 1 1 260px;

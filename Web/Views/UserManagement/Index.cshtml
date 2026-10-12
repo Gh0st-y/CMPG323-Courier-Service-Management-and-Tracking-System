@@ -74,6 +74,7 @@
 
     <div class="card">
         <h3 class="card-title mb-3" style="font-size: 16px; font-weight: 600;">All Users</h3>
+        <div class="um-table-scroll" role="region" aria-label="Users" tabindex="0">
         <table style="width: 100%; border-collapse: collapse;">
             <!-- RoleNames comes from the RoleNames constants so it can't drift from dbo.Roles -->
             <thead>
@@ -90,6 +91,7 @@
                 <tr><td colspan="6" style="padding: 8px;">Loading...</td></tr>
             </tbody>
         </table>
+        </div>
         <p id="users-empty" style="display:none; padding:8px;">No users match your search.</p>
     </div>
 </div>

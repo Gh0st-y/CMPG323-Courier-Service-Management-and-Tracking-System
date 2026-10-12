@@ -12,11 +12,12 @@ async function scenario(response, options = {}) {
     const elements = {};
     const document = { body: element(), createElement: element,
         getElementById(id) { return elements[id] ||= element(); },
-        addEventListener(name, handler) { handler(); } };
+        addEventListener(name, handler) { if (name === 'DOMContentLoaded') handler(); } };
     let mock = options.mock || false;
     const calls = [], successes = [], errors = [];
     const window = { localStorage: { getItem() { return String(mock); }, setItem(k, v) { mock = v === 'true'; } },
-        setTimeout() {}, location: { pathname: '/CsvImport', search: '', href: '' } };
+        CourierApp: { allowMockMode: !options.mockDisabled },
+        addEventListener() {}, setTimeout() {}, clearTimeout() {}, location: { pathname: '/CsvImport', search: '', href: '' } };
     const fetch = async (url, request) => {
         calls.push({ url, request });
         if (options.networkError) throw new Error('offline');
@@ -63,5 +64,7 @@ async function scenario(response, options = {}) {
     const mocked = await scenario({}, { mock: true });
     assert.equal(mocked.calls.length, 0);
     assert.match(mocked.elements['file-error'].textContent, /mock mode/);
+    const mockDisabled = await scenario({ importedCount: 1, failedRows: [] }, { mock: true, mockDisabled: true });
+    assert.equal(mockDisabled.calls.length, 1, 'A stale mock preference cannot bypass disabled mock mode');
     console.log('CSV upload regression checks passed: multipart, results, duplicate submit, validation, auth, network, malformed response and mock mode.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

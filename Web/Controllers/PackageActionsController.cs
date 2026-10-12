@@ -1,3 +1,4 @@
+﻿using CourierService.Services.Diagnostics;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -166,7 +167,9 @@ namespace CourierService.Web.Controllers
             }
 
             // Anything unexpected becomes the standard error shape, with no stack trace, SQL or paths in it (SR-03, OR-04)
-            Trace.TraceError(filterContext.Exception.ToString());
+            Trace.TraceError(
+                "An unexpected error occurred in Package Actions. Exception: {0}",
+                ExceptionDiagnostics.Format(filterContext.Exception));
 
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.StatusCode = 500;

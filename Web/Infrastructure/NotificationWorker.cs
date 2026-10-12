@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CourierService.Services.Diagnostics;
+using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.Threading;
@@ -117,8 +118,9 @@ namespace CourierService.Web.Infrastructure
                 _consecutiveErrors++;
                 if (_consecutiveErrors == 1 || _consecutiveErrors % LogEveryNthRepeatedError == 0)
                 {
-                    Trace.TraceError("Notification worker run failed ({0} in a row), will try again: {1}: {2}",
-                        _consecutiveErrors, ex.GetType().Name, ex.Message);
+                    Trace.TraceError(
+                        "Notification worker run failed ({0} in a row), will try again. Exception: {1}",
+                        _consecutiveErrors, ExceptionDiagnostics.Format(ex));
                 }
             }
             finally

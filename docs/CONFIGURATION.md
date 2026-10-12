@@ -20,13 +20,15 @@ The database `Sms.Enabled` seed is legacy and is not read by the application. Us
 ```xml
 <appSettings>
   <add key="Smtp.Host" value="localhost" />
-  <add key="Smtp.Port" value="2525" />
+  <add key="Smtp.Port" value="25" />
   <add key="Smtp.FromAddress" value="courier@demo.test" />
   <add key="Sms.Enabled" value="false" />
 </appSettings>
 ```
 
 External-file values override inline appSettings. This file does not override connectionStrings. Configure the deployed connection string separately in Web.config or an environment transform. Never commit passwords or real recipient data. Web.config changes can recycle the application; they do not require compiling it.
+
+Port 25 matches the default local configuration; change it to the port your SMTP test server actually listens on. Development mock fixtures are disabled by default. See [FRONTEND_MOCKS.md](FRONTEND_MOCKS.md) for explicit local opt-in; live fee acceptance requires real mode.
 
 ## Fee verification
 

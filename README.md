@@ -5,6 +5,10 @@ F20 courier point. See [DECISIONS.md](DECISIONS.md) for the architecture/decisio
 [docs/API_CONTRACT.md](docs/API_CONTRACT.md) for the REST contract, and
 [db/schema.sql](db/schema.sql) for the database schema.
 
+Staff instructions: [user guide](docs/USER_MANUAL.md). Acceptance work:
+[role test script](docs/ROLE_TEST_SCRIPT.md) and [recorded results](docs/TEST_RESULTS.md).
+[Frontend mocks](docs/FRONTEND_MOCKS.md) are disabled by default and require explicit local opt-in.
+
 ## Solution layout
 
 ```

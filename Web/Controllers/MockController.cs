@@ -1,4 +1,6 @@
 using System.IO;
+using System.Configuration;
+using System;
 using System.Web;
 using System.Web.Mvc;
 using CourierService.Web.Infrastructure;
@@ -17,6 +19,10 @@ namespace CourierService.Web.Controllers
         [AllowAnonymous]
         public ActionResult Fixtures()
         {
+            if (!string.Equals(ConfigurationManager.AppSettings["Frontend.MockEnabled"], "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return HttpNotFound();
+            }
             var repoRoot = Path.GetFullPath(Path.Combine(HttpRuntime.AppDomainAppPath, ".."));
             var fixturesPath = Path.Combine(repoRoot, "frontend-mocks", "mock-fixtures.json");
 
