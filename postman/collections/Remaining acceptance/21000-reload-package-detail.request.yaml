@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Reload package detail'
+order: 21000
+method: GET
+url: '{{base_url}}/api/packages/{{package_id}}/detail'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Reload package detail status', () => pm.response.to.have.status(200));
+      pm.test('Collected payment persists', () => { const data=pm.response.json(); pm.expect(data.package.status).to.equal('Collected'); pm.expect(data.package.paymentStatus).to.equal('Paid'); });

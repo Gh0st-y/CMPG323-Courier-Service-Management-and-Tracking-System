@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Admin users'
+order: 31000
+method: GET
+url: '{{base_url}}/api/users'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin users status', () => pm.response.to.have.status(200));
+      pm.test('No password hashes exposed', () => { const users=pm.response.json(); pm.expect(users).to.be.an('array'); users.forEach(u => pm.expect(u).not.to.have.property('passwordHash')); });

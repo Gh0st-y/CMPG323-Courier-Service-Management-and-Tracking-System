@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Intake users forbidden'
+order: 7000
+method: GET
+url: '{{base_url}}/api/users'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Intake users forbidden status', () => pm.response.to.have.status(403));

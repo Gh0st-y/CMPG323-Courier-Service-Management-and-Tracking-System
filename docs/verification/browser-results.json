@@ -1,0 +1,310 @@
+{
+  "baseUrl": "http://localhost:48131",
+  "at": "2026-10-12T20:07:38.548Z",
+  "passed": 66,
+  "failed": 0,
+  "results": [
+    {
+      "name": "chrome intake login",
+      "passed": true
+    },
+    {
+      "name": "chrome intake /Home",
+      "passed": true,
+      "evidence": "chrome-intake--home.png"
+    },
+    {
+      "name": "chrome intake /Packages/Register",
+      "passed": true,
+      "evidence": "chrome-intake--packages-register.png"
+    },
+    {
+      "name": "chrome intake /Packages/Search",
+      "passed": true,
+      "evidence": "chrome-intake--packages-search.png"
+    },
+    {
+      "name": "chrome intake /Packages/Detail/F20-0001",
+      "passed": true,
+      "evidence": "chrome-intake--packages-detail-f20-0001.png"
+    },
+    {
+      "name": "chrome intake /Packages/Label/F20-0001",
+      "passed": true,
+      "evidence": "chrome-intake--packages-label-f20-0001.png"
+    },
+    {
+      "name": "chrome intake no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "chrome storage login",
+      "passed": true
+    },
+    {
+      "name": "chrome storage /Home",
+      "passed": true,
+      "evidence": "chrome-storage--home.png"
+    },
+    {
+      "name": "chrome storage /Scan",
+      "passed": true,
+      "evidence": "chrome-storage--scan.png"
+    },
+    {
+      "name": "chrome storage /Packages/Detail/F20-0001",
+      "passed": true,
+      "evidence": "chrome-storage--packages-detail-f20-0001.png"
+    },
+    {
+      "name": "chrome storage no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "chrome collection login",
+      "passed": true
+    },
+    {
+      "name": "chrome collection /Home",
+      "passed": true,
+      "evidence": "chrome-collection--home.png"
+    },
+    {
+      "name": "chrome collection /Collection",
+      "passed": true,
+      "evidence": "chrome-collection--collection.png"
+    },
+    {
+      "name": "chrome collection /Packages/Detail/F20-0001",
+      "passed": true,
+      "evidence": "chrome-collection--packages-detail-f20-0001.png"
+    },
+    {
+      "name": "chrome collection no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "chrome supervisor login",
+      "passed": true
+    },
+    {
+      "name": "chrome supervisor /Home",
+      "passed": true,
+      "evidence": "chrome-supervisor--home.png"
+    },
+    {
+      "name": "chrome supervisor /Reports",
+      "passed": true,
+      "evidence": "chrome-supervisor--reports.png"
+    },
+    {
+      "name": "chrome supervisor /CsvImport",
+      "passed": true,
+      "evidence": "chrome-supervisor--csvimport.png"
+    },
+    {
+      "name": "chrome supervisor /AuditLog",
+      "passed": true,
+      "evidence": "chrome-supervisor--auditlog.png"
+    },
+    {
+      "name": "chrome supervisor no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "chrome admin login",
+      "passed": true
+    },
+    {
+      "name": "chrome admin /Home",
+      "passed": true,
+      "evidence": "chrome-admin--home.png"
+    },
+    {
+      "name": "chrome admin /Reports",
+      "passed": true,
+      "evidence": "chrome-admin--reports.png"
+    },
+    {
+      "name": "chrome admin /UserManagement",
+      "passed": true,
+      "evidence": "chrome-admin--usermanagement.png"
+    },
+    {
+      "name": "chrome admin /AuditLog",
+      "passed": true,
+      "evidence": "chrome-admin--auditlog.png"
+    },
+    {
+      "name": "chrome admin no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "chrome narrow /Reports",
+      "passed": true
+    },
+    {
+      "name": "chrome narrow /UserManagement",
+      "passed": true
+    },
+    {
+      "name": "chrome narrow /AuditLog",
+      "passed": true
+    },
+    {
+      "name": "chrome narrow /Scan",
+      "passed": true
+    },
+    {
+      "name": "firefox intake login",
+      "passed": true
+    },
+    {
+      "name": "firefox intake /Home",
+      "passed": true,
+      "evidence": "firefox-intake--home.png"
+    },
+    {
+      "name": "firefox intake /Packages/Register",
+      "passed": true,
+      "evidence": "firefox-intake--packages-register.png"
+    },
+    {
+      "name": "firefox intake /Packages/Search",
+      "passed": true,
+      "evidence": "firefox-intake--packages-search.png"
+    },
+    {
+      "name": "firefox intake /Packages/Detail/F20-0001",
+      "passed": true,
+      "evidence": "firefox-intake--packages-detail-f20-0001.png"
+    },
+    {
+      "name": "firefox intake /Packages/Label/F20-0001",
+      "passed": true,
+      "evidence": "firefox-intake--packages-label-f20-0001.png"
+    },
+    {
+      "name": "firefox intake no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "firefox storage login",
+      "passed": true
+    },
+    {
+      "name": "firefox storage /Home",
+      "passed": true,
+      "evidence": "firefox-storage--home.png"
+    },
+    {
+      "name": "firefox storage /Scan",
+      "passed": true,
+      "evidence": "firefox-storage--scan.png"
+    },
+    {
+      "name": "firefox storage /Packages/Detail/F20-0001",
+      "passed": true,
+      "evidence": "firefox-storage--packages-detail-f20-0001.png"
+    },
+    {
+      "name": "firefox storage no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "firefox collection login",
+      "passed": true
+    },
+    {
+      "name": "firefox collection /Home",
+      "passed": true,
+      "evidence": "firefox-collection--home.png"
+    },
+    {
+      "name": "firefox collection /Collection",
+      "passed": true,
+      "evidence": "firefox-collection--collection.png"
+    },
+    {
+      "name": "firefox collection /Packages/Detail/F20-0001",
+      "passed": true,
+      "evidence": "firefox-collection--packages-detail-f20-0001.png"
+    },
+    {
+      "name": "firefox collection no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "firefox supervisor login",
+      "passed": true
+    },
+    {
+      "name": "firefox supervisor /Home",
+      "passed": true,
+      "evidence": "firefox-supervisor--home.png"
+    },
+    {
+      "name": "firefox supervisor /Reports",
+      "passed": true,
+      "evidence": "firefox-supervisor--reports.png"
+    },
+    {
+      "name": "firefox supervisor /CsvImport",
+      "passed": true,
+      "evidence": "firefox-supervisor--csvimport.png"
+    },
+    {
+      "name": "firefox supervisor /AuditLog",
+      "passed": true,
+      "evidence": "firefox-supervisor--auditlog.png"
+    },
+    {
+      "name": "firefox supervisor no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "firefox admin login",
+      "passed": true
+    },
+    {
+      "name": "firefox admin /Home",
+      "passed": true,
+      "evidence": "firefox-admin--home.png"
+    },
+    {
+      "name": "firefox admin /Reports",
+      "passed": true,
+      "evidence": "firefox-admin--reports.png"
+    },
+    {
+      "name": "firefox admin /UserManagement",
+      "passed": true,
+      "evidence": "firefox-admin--usermanagement.png"
+    },
+    {
+      "name": "firefox admin /AuditLog",
+      "passed": true,
+      "evidence": "firefox-admin--auditlog.png"
+    },
+    {
+      "name": "firefox admin no JavaScript exceptions",
+      "passed": true
+    },
+    {
+      "name": "firefox narrow /Reports",
+      "passed": true
+    },
+    {
+      "name": "firefox narrow /UserManagement",
+      "passed": true
+    },
+    {
+      "name": "firefox narrow /AuditLog",
+      "passed": true
+    },
+    {
+      "name": "firefox narrow /Scan",
+      "passed": true
+    }
+  ]
+}

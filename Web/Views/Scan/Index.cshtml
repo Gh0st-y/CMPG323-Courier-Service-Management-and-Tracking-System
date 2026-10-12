@@ -4,25 +4,22 @@
 
 <h1 class="app-page-title"><i class="bi bi-upc-scan"></i> Scan</h1>
 <p>
-    Scan a package with a USB scanner or a phone camera. Both look the package up the same way
-    (<code>GET /api/packages/scan/{f20Identifier}</code>), then you can move it to its next status.
-    You need to be logged in as storage staff, a supervisor or an admin to change a status.
-    Notes on scanners and HTTPS: <code>docs/SCANNING_SPIKE.md</code>.
+    Scan or enter a package identifier to check its details and update its storage status.
 </p>
 
 <div class="card" style="margin-bottom: 16px;">
-    <h2 style="margin-top: 0;">(a) USB scanner (keyboard/HID mode)</h2>
+    <h2 class="card-title" style="margin-top: 0;">Scanner or manual lookup</h2>
     <p>
-        Click into the box below and scan (or, without hardware, type an identifier like
-        <code>F20-0001</code> and press Enter &#8208; that's exactly what a HID-mode scanner sends).
+        Scan the label, or enter the F20 identifier and press Enter.
     </p>
-    <input type="text" id="usb-scan-input" placeholder="Scan or type an F20 identifier, then Enter"
-           style="width: 320px; padding: 8px; font-size: 14px; border: 1px solid var(--color-border); border-radius: var(--radius);" />
+    <label for="usb-scan-input">Package identifier</label>
+    <input type="text" id="usb-scan-input" placeholder="e.g. F20-0001" autocomplete="off"
+           style="width: 320px; max-width: 100%; padding: 8px; font-size: 14px; border: 1px solid var(--color-border); border-radius: var(--radius);" />
     <button type="button" class="btn btn-secondary" id="usb-refocus">Refocus input</button>
 </div>
 
 <div class="card" style="margin-bottom: 16px;">
-    <h2 style="margin-top: 0;">(b) Phone camera (QR, via html5-qrcode)</h2>
+    <h2 class="card-title" style="margin-top: 0;">Camera lookup</h2>
 
     <div id="qr-secure-warning" style="display: none; background: var(--color-error-bg); border-left: 4px solid var(--color-error); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
         <strong>Camera access needs a secure context.</strong> This page is being served over
@@ -31,7 +28,7 @@
         <code>localhost</code> on the same machine) to test the camera path.
     </div>
 
-    <div id="qr-reader" style="width: 320px;"></div>
+    <div id="qr-reader" style="width: 320px; max-width: 100%;"></div>
     <p>
         <button type="button" class="btn btn-primary" id="qr-start">Start camera scan</button>
         <button type="button" class="btn btn-primary" id="qr-start-mobile" style="margin-left: 8px;">Scan with Mobile Camera</button>
@@ -40,8 +37,8 @@
 </div>
 
 <div class="card">
-    <h2 style="margin-top: 0;">Result</h2>
-    <pre id="scan-result" style="background: var(--color-bg); padding: 12px; border-radius: var(--radius); min-height: 40px;">(nothing scanned yet)</pre>
+    <h2 class="card-title" style="margin-top: 0;">Package details</h2>
+    <div id="scan-result" role="status" aria-live="polite" style="background: var(--color-bg); padding: 12px; border-radius: var(--radius); min-height: 40px; overflow-wrap: anywhere;">Scan a label or enter an identifier to begin.</div>
 
     <!-- Status & Storage Location Update Section placed directly below result -->
     <div id="status-update-card" class="card" style="display: none; margin-top: 20px;">

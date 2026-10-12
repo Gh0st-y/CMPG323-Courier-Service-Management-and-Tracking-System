@@ -1,0 +1,20 @@
+$kind: http-request
+name: 'Collect package'
+order: 19000
+method: POST
+url: '{{base_url}}/api/packages/{{package_id}}/collect'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Collect package status', () => pm.response.to.have.status(200));
+      pm.test('Collected timestamp', () => { const data=pm.response.json(); pm.expect(data.status).to.equal('Collected'); pm.expect(data.collectedAtUtc).to.be.a('string'); });

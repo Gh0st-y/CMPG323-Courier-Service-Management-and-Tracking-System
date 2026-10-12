@@ -2,6 +2,10 @@
   T07 shared theme. Colours are NWU-inspired (purple/gold) but not official brand assets —
   see DECISIONS.md (CON-010). Swap these tokens, not individual component rules, once real
   branding is signed off.
+
+  Sections: theme and shared controls; registration/search/detail; dashboard;
+  CSV import; user management; login; responsive navigation; reports; footer;
+  audit viewer. Responsive overrides stay beside their component rules.
 */
 
 :root {
@@ -88,18 +92,7 @@ a {
 
 /* ---------- Header / nav ---------- */
 
-.app-header {
-  height: auto;
-  min-height: var(--header-height);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 16px;
-  padding: 10px 20px;
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  box-shadow: var(--shadow);
-}
+/* Header layout is defined in the responsive layout section below. */
 
 .app-header__brand {
     font-weight: 600;
@@ -229,13 +222,13 @@ a {
 
 .toast-container {
   position: fixed;
-  top: 16px;
+  top: 80px;
   right: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   z-index: 1100;
-  max-width: 360px;
+  max-width: min(360px, calc(100vw - 32px));
 }
 
 .toast {
@@ -840,6 +833,11 @@ a {
     font-size: 0.95em;
     color: #111;
 }
+
+.timeline__item[data-status="Registered"]::before { background: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+.timeline__item[data-status="InStorage"]::before { background: var(--color-info); box-shadow: 0 0 0 1px var(--color-info); }
+.timeline__item[data-status="ReadyForCollection"]::before { background: var(--color-accent); box-shadow: 0 0 0 1px var(--color-accent); }
+.timeline__item[data-status="Collected"]::before { background: var(--color-success); box-shadow: 0 0 0 1px var(--color-success); }
 
 .timeline__meta {
     font-size: 0.82em;
@@ -2147,6 +2145,30 @@ html, body {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 14px 20px;
+}
+
+#reports-root .dashboard-page,
+#reports-root .dashboard-section {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+#reports-root .dashboard-page > *,
+#reports-root .dashboard-section > *,
+#reports-root .dashboard-section__heading,
+.rpt-filters .form-row,
+.rpt-chart {
+    min-width: 0;
+}
+
+.rpt-filters input,
+.rpt-filters select {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 480px) {
+    #reports-root .rpt-filters { grid-template-columns: 1fr; }
+    #reports-root .dashboard-section__header { flex-wrap: wrap; }
 }
 
 /* 6 summary tiles = 2 rows of 3 (the dashboard uses 4 columns) */

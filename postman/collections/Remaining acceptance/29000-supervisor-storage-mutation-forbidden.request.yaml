@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Supervisor storage mutation forbidden'
+order: 29000
+method: POST
+url: '{{base_url}}/api/storage-locations'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "QA-{{run_id}}",
+      "description": "Synthetic"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Supervisor storage mutation forbidden status', () => pm.response.to.have.status(403));

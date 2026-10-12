@@ -1,0 +1,33 @@
+$kind: http-request
+name: 'Register synthetic package'
+order: 5000
+method: POST
+url: '{{base_url}}/api/packages'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "recipient": {
+        "fullName": "Synthetic Acceptance",
+        "identifierNo": "QA-{{run_id}}",
+        "email": "acceptance@example.test",
+        "phone": "0001234567",
+        "department": "Synthetic"
+      },
+      "senderName": "Synthetic Sender",
+      "packageType": "Box",
+      "classification": "Personal",
+      "storageLocationId": 1,
+      "notes": "Isolated acceptance only"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Register synthetic package status', () => pm.response.to.have.status(201));
+      const data=pm.response.json(); pm.test('Saved fee and initial status', () => { pm.expect(data.fee).to.equal(Number(pm.collectionVariables.get('personal_fee'))); pm.expect(data.status).to.equal('Registered'); }); pm.collectionVariables.set('package_id', data.f20Identifier);

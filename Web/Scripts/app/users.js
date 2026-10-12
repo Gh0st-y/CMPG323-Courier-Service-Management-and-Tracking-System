@@ -7,6 +7,10 @@
     const roles = window.USER_ROLES || [];
     const tbody = document.getElementById('users-body');
 
+    function roleLabel(role) {
+        return String(role || '').replace(/([a-z])([A-Z])/g, '$1 $2');
+    }
+
     // Small local helper: GET/POST/PATCH to /api/users, same-origin so the session cookie goes with it.
     // Rejects with { status, error } like CourierApp.api does. ⭐ see footnote 2.
     function api(method, path, body) {
@@ -70,8 +74,9 @@
 
         // Role: dropdown for others, plain text for yourself
         var roleTd = cell('');
+        tr.dataset.role = u.role;
         if (isSelf) {
-            roleTd.textContent = u.role;
+            roleTd.textContent = roleLabel(u.role);
         } else {
             var select = document.createElement('select');
             select.className = 'um-role-select';
@@ -79,7 +84,7 @@
             roles.forEach(function (r) {
                 var opt = document.createElement('option');
                 opt.value = r;
-                opt.textContent = r;
+                opt.textContent = roleLabel(r);
                 if (r === u.role) opt.selected = true;
                 select.appendChild(opt);
             });
@@ -87,7 +92,7 @@
                 if (select.disabled) return;
                 var requestedRole = select.value;
                 select.disabled = true;
-                CourierApp.confirm('Change ' + u.username + ' to ' + requestedRole + '?').then(function (confirmed) {
+                CourierApp.confirm('Change ' + u.username + ' to ' + roleLabel(requestedRole) + '?').then(function (confirmed) {
                     if (!confirmed) { select.value = u.role; return; }
                     return api('PATCH', '/users/' + u.userId, { role: requestedRole }).then(function () {
                         CourierApp.toast.success('Role updated.');

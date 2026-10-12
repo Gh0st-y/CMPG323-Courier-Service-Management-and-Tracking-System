@@ -1,0 +1,29 @@
+{
+  "baseUrl": "http://localhost:48131",
+  "syntheticOnly": true,
+  "package": "F20-0208",
+  "passed": 5,
+  "steps": [
+    {
+      "name": "Intake registration through the form and saved QR label",
+      "passed": true
+    },
+    {
+      "name": "Keyboard Enter scan, stored and ready updates through the UI",
+      "passed": true
+    },
+    {
+      "name": "Identity checkbox, cancellation without mutation and confirmed collection",
+      "passed": true
+    },
+    {
+      "name": "Payment saved through UI and retained after reload",
+      "passed": true
+    },
+    {
+      "name": "Supervisor CSV form displays saved rows and validation errors",
+      "passed": true
+    }
+  ],
+  "browserErrors": []
+}

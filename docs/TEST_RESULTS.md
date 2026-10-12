@@ -1,6 +1,6 @@
 # Verification results
 
-Date: 2026-10-12. Environment: Windows workspace, .NET Framework 4.8, local Visual Studio MSBuild, Node. These are automated local checks; they do not establish a live end-to-end pass.
+Date: 2026-10-12. Environment: Windows workspace, .NET Framework 4.8, Visual Studio MSBuild, Node, IIS Express and SQL Server LocalDB. Earlier unit checks are below; the live acceptance record now includes real HTTP and browser execution.
 
 | Branch/change | Check | Observed result |
 | --- | --- | --- |
@@ -17,24 +17,26 @@ Date: 2026-10-12. Environment: Windows workspace, .NET Framework 4.8, local Visu
 | UI/verification fix branch | Registration fee frontend regression after #113 | Passed: R12.50 display and failed-lookup submission protection. |
 | UI/verification fix branch | Release/Razor build | Passed; existing assembly-version warning remains. Duplicate using removed. |
 
-SQL integration tests were not executed during these changes. No live HTTP/role acceptance pass, performance benchmark, camera/USB/printer check, screenshots, deployment or rehearsal was performed. Earlier PR evidence should be read separately; this record does not claim it was repeated.
+The older branch checks above did not execute live acceptance. The separate pass below used new synthetic databases and a real site with mocks disabled. Unit tests do not substitute for the physical/deployment checks still pending.
 
 ## Live acceptance record
 
-Use [ROLE_TEST_SCRIPT.md](ROLE_TEST_SCRIPT.md) and replace Pending only with observed evidence.
+Candidate: integrated commit `7a991ee` (UI #121, security #118, audit #119 and documentation #115), plus the scan/timeline/report follow-up in this branch. GitHub subsequently merged the earlier implementation PRs; this follow-up still requires review. Acceptance site: `http://localhost:48131`, database `CourierService_TaskVerification_20261012_Remaining`. Performance database: `CourierService_TaskVerification_20261012_Performance`. Both were newly created from schema/seed; no existing recipient database was modified. Tester: Codex automated harnesses.
 
 | Area | Result | Tester/environment/evidence |
 | --- | --- | --- |
-| Unauthenticated and cross-role HTTP access | Pending | Pending |
-| Intake Clerk lifecycle and fee behavior | Pending | Pending |
-| Storage Staff scan/status/notifications | Pending | Pending |
-| Collection Staff identity/collection/payment | Pending | Pending |
-| Supervisor import/reports/audit | Pending | Pending |
-| System Admin users/storage locations | Pending | Pending |
-| SQL integration/fresh database | Pending | Pending |
-| SMTP/SMS/database failure acceptance | Pending | Pending |
-| Chrome/Firefox, 1366x768 and mobile | Pending | Pending |
-| 50,000-row performance targets (#53) | Pending | Pending |
+| Unauthenticated and cross-role HTTP access | Passed sampled role matrix | Local Postman v3 collection: 37 requests, 59 assertions, zero failures. Protected routes return 401/403. This is not an exhaustive security review of every route. |
+| Intake Clerk lifecycle and fee behavior | Passed | Real registration saves configured fee; UI form opens saved QR label. Earlier R12.50 regression and user-observed live config result remain recorded separately. |
+| Storage Staff scan/status/notifications | Passed browser/API paths | Keyboard Enter lookup and Registered -> InStorage -> ReadyForCollection; label action hidden and direct route forbidden. Physical USB/camera pending. |
+| Collection Staff identity/collection/payment | Passed | UI identity checkbox; Cancel leaves ReadyForCollection; Confirm persists Collected; payment saves and survives reload. |
+| Supervisor import/reports/audit | Passed sampled paths | Actual multipart import saves two rows/reports one invalid row; report and audit pages render on integrated candidate. |
+| System Admin users/storage locations | Passed | Real API create/role/disable/enable/storage create; browser creation cancellation clears fields, deactivation cancellation leaves account active; password hashes absent from response. |
+| SQL integration/fresh database | Fresh schema/seed and HTTP persistence passed | Dedicated hard-coded integration suite was not redirected to these databases. Final non-integration suite: 359 passed, zero failed/skipped. |
+| SMS fallback (#38) | Passed | Disabled: email Sent, SMS not queued. Stub enabled: both Sent. Missing synthetic phone: SMS Failed with failed log; email Sent with sent log. Status requests 8.76–11.19 ms. 63 notification unit tests pass, including provider-failure isolation. No external SMS provider exercised. |
+| Chrome/Firefox, 1366x768 and narrow browser | Passed | 66 checks, zero failures or page exceptions; five roles in both browsers. At 390x844, reports/scan/users/audit have no horizontal overflow. Five additional Chrome lifecycle-form checks pass. Screenshots use synthetic data. |
+| 50,000-row performance targets (#53) | Measured; see report | [Performance record](verification/PERFORMANCE.md). Original first page exceeded target; precompiled release retest recorded separately. |
 | Two phones, USB scanner and printer (#56/#57) | Pending | Pending |
 
-Do not close #51, #53, #56 or deployment/rehearsal issues from automated service tests alone.
+Evidence: [browser results](verification/browser-results.json), [final precompiled release: 66/66](verification/browser-release-results.json), [form workflow](verification/workflow-results.json), [Postman summary](verification/postman-results.txt), [SMS results](verification/sms-results.json), [reproduction](verification/README.md), [user guide screenshots](USER_MANUAL.md). Final branch non-integration tests: 359/359; six frontend regression scripts pass; precompiled Release publish passes with the existing assembly-version warning. No real-phone, physical USB/printer, demo-machine deployment, backup laptop or team rehearsal pass is claimed. T52 and T61 remain outside this work.
+
+Second pass: [all open PRs and reviewer comments](verification/PR_REVIEW_20261012.md), including a combined Windows PowerShell 5.1 package, current role labels/filters and the restored notification reason in pending #123.

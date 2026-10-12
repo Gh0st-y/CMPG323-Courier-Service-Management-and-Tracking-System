@@ -1,0 +1,19 @@
+$kind: http-request
+name: 'Supervisor CSV import'
+order: 27000
+method: POST
+url: '{{base_url}}/api/import/csv'
+settings:
+  followRedirects: false
+body:
+  type: formdata
+  content:
+    - key: csvFile
+      type: file
+      src: 'scripts/verification/fixtures/role-import.csv'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Supervisor CSV import status', () => pm.response.to.have.status(200));
+      pm.test('Saved rows and rejected row', () => { const data=pm.response.json(); pm.expect(data.importedCount).to.equal(2); pm.expect(data.failedRows).to.have.lengthOf(1); });

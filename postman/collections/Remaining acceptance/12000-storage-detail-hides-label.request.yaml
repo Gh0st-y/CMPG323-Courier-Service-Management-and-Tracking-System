@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Storage detail hides label'
+order: 12000
+method: GET
+url: '{{base_url}}/Packages/Detail/{{package_id}}'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Storage detail hides label status', () => pm.response.to.have.status(200));
+      pm.test('Forbidden label action hidden', () => pm.expect(pm.response.text()).not.to.include('id="detail-label-link"'));

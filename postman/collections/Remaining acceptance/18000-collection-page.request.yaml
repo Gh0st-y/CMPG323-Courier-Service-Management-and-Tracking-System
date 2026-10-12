@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Collection page'
+order: 18000
+method: GET
+url: '{{base_url}}/Collection'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Collection page status', () => pm.response.to.have.status(200));

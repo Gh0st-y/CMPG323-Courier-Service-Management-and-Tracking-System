@@ -1,0 +1,13 @@
+$kind: collection
+name: Performance reads
+variables:
+  - key: base_url
+    value: 'http://localhost:48141'
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      if (!/^http:\/\/(localhost|127\.0\.0\.1):[0-9]+$/.test(pm.variables.get('base_url'))) throw new Error('Local synthetic benchmark only.');
+      const cookie = pm.iterationData.get('session_cookie');
+      if (!cookie) throw new Error('Supply a locally generated synthetic session per virtual user.');
+      pm.request.headers.upsert({key: 'Cookie', value: cookie});

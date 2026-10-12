@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Supervisor audit page'
+order: 26000
+method: GET
+url: '{{base_url}}/AuditLog'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Supervisor audit page status', () => pm.response.to.have.status(200));

@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Mark ready'
+order: 14000
+method: POST
+url: '{{base_url}}/api/packages/{{package_id}}/status'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "newStatus": "ReadyForCollection"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Mark ready status', () => pm.response.to.have.status(200));
+      pm.test('Ready status', () => pm.expect(pm.response.json().status).to.equal('ReadyForCollection'));

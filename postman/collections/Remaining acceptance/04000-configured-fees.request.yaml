@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Configured fees'
+order: 4000
+method: GET
+url: '{{base_url}}/api/packages/fees'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Configured fees status', () => pm.response.to.have.status(200));
+      const fees = pm.response.json(); pm.test('Fee keys are numeric', () => { pm.expect(fees.Personal).to.be.a('number'); pm.expect(fees.WorkRelated).to.be.a('number'); }); pm.collectionVariables.set('personal_fee', fees.Personal);

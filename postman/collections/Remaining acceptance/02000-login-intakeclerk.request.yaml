@@ -1,0 +1,24 @@
+$kind: http-request
+name: 'Login IntakeClerk'
+order: 2000
+method: POST
+url: '{{base_url}}/api/auth/login'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "intake.demo",
+      "password": "{{demo_password}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Login IntakeClerk status', () => pm.response.to.have.status(200));
+      pm.test('Expected session role', () => pm.expect(pm.response.json().role).to.equal('IntakeClerk'));
+      const cookie=pm.response.headers.get('Set-Cookie'); if (cookie) pm.collectionVariables.set('session_cookie',cookie.split(';')[0]);
