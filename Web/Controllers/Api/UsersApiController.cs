@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CourierService.Services.Diagnostics;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -123,8 +124,8 @@ namespace CourierService.Web.Controllers.Api
 
             // Same as PackageActionsController: no stack traces, SQL or paths in the response (SR-03, OR-04)
             Trace.TraceError(
-                "An unexpected error occurred in the Users API controller. Exception type: {0}",
-                filterContext.Exception.GetType().Name);
+                "An unexpected error occurred in the Users API controller. Exception: {0}",
+                ExceptionDiagnostics.Format(filterContext.Exception));
 
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.StatusCode = 500;

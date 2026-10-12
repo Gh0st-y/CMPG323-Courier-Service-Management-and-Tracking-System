@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CourierService.Services.Diagnostics;
+using System;
 using System.Diagnostics;
 using System.Web.Mvc;
 using CourierService.Data;
@@ -29,10 +30,10 @@ namespace CourierService.Web.Infrastructure
                 return;
             }
 
-            // Avoid logging exception messages or stack traces that may contain sensitive data.
+            // Preserve failure locations without logging exception messages or inner exception data.
             Trace.TraceError(
-                "Database unavailable. Exception type: {0}",
-                filterContext.Exception.GetType().Name);
+                "Database unavailable. Exception: {0}",
+                ExceptionDiagnostics.Format(filterContext.Exception));
 
             var httpContext = filterContext.HttpContext;
             var response = httpContext.Response;

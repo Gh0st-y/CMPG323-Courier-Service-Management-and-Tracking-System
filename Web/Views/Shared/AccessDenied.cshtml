@@ -1,0 +1,22 @@
+@{
+    ViewBag.Title = "Access Denied";
+}
+
+<div class="access-denied">
+    <img class="access-denied__image"
+         src="@Url.Content("~/Content/images/accessDenied.png")"
+         alt="Access denied" />
+
+    <h2 class="app-page-title access-denied__title">Oops! This area is off limits</h2>
+    <p class="access-denied__lead">Looks like this page isn't on your delivery route.</p>
+    <p class="access-denied__hint">
+        Think you should have access? Ask your system administrator to take a look.
+    </p>
+
+    <p class="access-denied__actions">
+        <button type="button" class="btn btn-primary"
+                onclick="if (history.length > 1) { history.back(); } else { window.location.href = '@Url.Action("Index", "Home")'; }">
+            Take me back
+        </button>
+    </p>
+</div>

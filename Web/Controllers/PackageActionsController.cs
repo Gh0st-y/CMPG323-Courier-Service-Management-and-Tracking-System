@@ -1,3 +1,4 @@
+﻿using CourierService.Services.Diagnostics;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -26,7 +27,6 @@ namespace CourierService.Web.Controllers
         private readonly IPackageLookupService _lookup;
         private readonly IPackageStatusService _status;
         private readonly IPackageCollectionService _collection;
-        private readonly IStorageLocationRepository _storageLocations;
 
         public PackageActionsController()
             : this(new SqlConnectionFactory())
@@ -37,21 +37,18 @@ namespace CourierService.Web.Controllers
             : this(
                 CourierServices.Lookup(connectionFactory),
                 CourierServices.Status(connectionFactory),
-                CourierServices.Collection(connectionFactory),
-                new StorageLocationRepository(connectionFactory))
+                CourierServices.Collection(connectionFactory))
         {
         }
 
         public PackageActionsController(
             IPackageLookupService lookup,
             IPackageStatusService status,
-            IPackageCollectionService collection,
-            IStorageLocationRepository storageLocations)
+            IPackageCollectionService collection)
         {
             _lookup = lookup;
             _status = status;
             _collection = collection;
-            _storageLocations = storageLocations;
         }
 
         /// <summary>GET /api/packages/scan/{f20Identifier}: the package record, or a friendly 404 for an unknown or malformed code (IR-006).</summary>
@@ -156,18 +153,8 @@ namespace CourierService.Web.Controllers
             return Json(new { status = PackageStatus.Collected.ToString(), collectedAtUtc = IsoUtc(result.CollectedAtUtc) });
         }
 
-        /// <summary>GET /api/storage-locations: active locations, for the status screen to choose from.</summary>
-        [RoleAuthorize]
-        [HttpGet]
-        [Route("api/storage-locations")]
-        public ActionResult StorageLocations()
-        {
-            var locations = _storageLocations.GetAll(true)
-                .Select(l => new { storageLocationId = l.StorageLocationId, code = l.Code, description = l.Description })
-                .ToList();
-
-            return Json(locations, JsonRequestBehavior.AllowGet);
-        }
+        // GET /api/storage-locations moved to StorageLocationsApiController (T24), next to the POST on the same URL.
+        // MVC refuses a URL whose attribute routes are on two different controllers, even for different HTTP methods.
 
         // ---------------------------------------------------------------------------------
 
@@ -181,8 +168,8 @@ namespace CourierService.Web.Controllers
 
             // Anything unexpected becomes the standard error shape, with no stack trace, SQL or paths in it (SR-03, OR-04)
             Trace.TraceError(
-                "An unexpected error occurred in Package Actions. Exception type: {0}",
-                filterContext.Exception.GetType().Name);
+                "An unexpected error occurred in Package Actions. Exception: {0}",
+                ExceptionDiagnostics.Format(filterContext.Exception));
 
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.StatusCode = 500;
