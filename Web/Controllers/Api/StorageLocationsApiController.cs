@@ -1,3 +1,4 @@
+﻿using CourierService.Services.Diagnostics;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -124,7 +125,7 @@ namespace CourierService.Web.Controllers.Api
             }
 
             // Anything unexpected becomes the standard error shape, with no stack trace, SQL or paths in it (SR-03)
-            Trace.TraceError(filterContext.Exception.ToString());
+            Trace.TraceError(ExceptionDiagnostics.Format(filterContext.Exception));
 
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.StatusCode = 500;

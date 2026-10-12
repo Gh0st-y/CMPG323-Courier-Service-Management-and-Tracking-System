@@ -9,12 +9,17 @@ namespace CourierService.Data.Repositories
 {
     public class AuditLogQueryRepository : IAuditLogQueryRepository
     {
-        // Every filter is optional. A NULL parameter means "don't filter on this one",
-        // so the SQL text never changes and nothing is ever concatenated into it.
+        // Added @SearchTerm check using wildcard matching across multiple columns
         private const string FromAndWhere = @"
             FROM dbo.AuditLog a
             LEFT JOIN dbo.Users u ON u.UserId = a.UserId
-            WHERE (@Username IS NULL OR u.Username = @Username)
+            WHERE (@SearchTerm IS NULL 
+                   OR u.Username LIKE '%' + @SearchTerm + '%'
+                   OR CAST(a.UserId AS NVARCHAR(50)) LIKE '%' + @SearchTerm + '%'
+                   OR a.EntityType LIKE '%' + @SearchTerm + '%'
+                   OR a.EntityId LIKE '%' + @SearchTerm + '%'
+                   OR a.Detail LIKE '%' + @SearchTerm + '%')
+              AND (@Username IS NULL OR u.Username = @Username)
               AND (@Action IS NULL OR a.Action = @Action)
               AND (@FromUtc IS NULL OR a.OccurredAtUtc >= @FromUtc)
               AND (@ToUtc IS NULL OR a.OccurredAtUtc < @ToUtc)";
@@ -71,6 +76,7 @@ namespace CourierService.Data.Repositories
 
         private static void AddFilterParameters(IDbCommand command, AuditLogFilter filter)
         {
+            command.AddParameter("@SearchTerm", DbType.String, filter.SearchTerm);
             command.AddParameter("@Username", DbType.String, filter.Username);
             command.AddParameter("@Action", DbType.String, filter.Action);
             command.AddParameter("@FromUtc", DbType.DateTime2, filter.FromUtc);

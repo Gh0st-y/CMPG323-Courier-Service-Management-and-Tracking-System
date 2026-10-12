@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CourierService.Services.Diagnostics;
+using System;
 using System.Diagnostics;
 using System.Web.Mvc;
 using CourierService.Data;
@@ -29,8 +30,10 @@ namespace CourierService.Web.Infrastructure
                 return;
             }
 
-            // The full error goes to the log only, never to the user (SR-03)
-            Trace.TraceError("Database unavailable: " + filterContext.Exception);
+            // Preserve failure locations without logging exception messages or inner exception data.
+            Trace.TraceError(
+                "Database unavailable. Exception: {0}",
+                ExceptionDiagnostics.Format(filterContext.Exception));
 
             var httpContext = filterContext.HttpContext;
             var response = httpContext.Response;

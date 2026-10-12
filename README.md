@@ -7,6 +7,10 @@ F20 courier point. See [DECISIONS.md](DECISIONS.md) for the architecture/decisio
 [technical documentation](docs/TECHNICAL_DOCUMENTATION.md) for setup, configuration,
 the ERD and the future ingestion extension path.
 
+Staff instructions: [user guide](docs/USER_MANUAL.md). Acceptance work:
+[role test script](docs/ROLE_TEST_SCRIPT.md) and [recorded results](docs/TEST_RESULTS.md).
+[Frontend mocks](docs/FRONTEND_MOCKS.md) are disabled by default and require explicit local opt-in.
+
 ## Solution layout
 
 ```

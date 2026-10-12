@@ -30,14 +30,15 @@ namespace CourierService.Services.Audit
 
             filter = filter ?? new AuditLogFilter();
 
-            if (filter.FromUtc.HasValue && filter.ToUtc.HasValue && filter.FromUtc.Value >= filter.ToUtc.Value)
+            if (filter.FromUtc.HasValue && filter.ToUtc.HasValue && filter.FromUtc.Value > filter.ToUtc.Value)
             {
                 throw new ArgumentException("The start date must be on or before the end date.", nameof(filter));
             }
 
-            // Copy so the caller's filter is left alone
+            // Copy so the caller's filter is left alone, including SearchTerm for keyword filtering
             var cleaned = new AuditLogFilter
             {
+                SearchTerm = NullIfBlank(filter.SearchTerm),
                 Username = NullIfBlank(filter.Username),
                 Action = NullIfBlank(filter.Action),
                 FromUtc = filter.FromUtc,
