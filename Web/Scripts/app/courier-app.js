@@ -257,8 +257,13 @@
         };
 
         if (body !== undefined) {
-            fetchOptions.headers["Content-Type"] = "application/json";
-            fetchOptions.body = JSON.stringify(body);
+            if (body instanceof FormData) {
+                // The browser supplies the multipart boundary for file uploads.
+                fetchOptions.body = body;
+            } else {
+                fetchOptions.headers["Content-Type"] = "application/json";
+                fetchOptions.body = JSON.stringify(body);
+            }
         }
 
         return fetch(CourierApp.config.apiBase + path, fetchOptions).then(function (response) {

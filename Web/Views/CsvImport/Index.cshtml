@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "CSV Data Import";
 }
 
@@ -6,14 +6,14 @@
 <div class="card">
     
     <p style="color: var(--color-text-muted); margin-bottom: 20px;">
-        Upload a <code>.csv</code> file to simulate bulk-importing package records into the system.
+        Upload a <code>.csv</code> file to register packages. Valid rows are saved; invalid rows are reported below.
     </p>
 
     <!-- Sample Template Download Button -->
     <div style="margin-bottom: 24px;">
-        <button type="button" id="btn-download-template" class="btn btn-secondary">
+        <a href="@Url.Content("~/Content/templetes/sample-package-import.csv")" download class="btn btn-secondary">
             <i class="bi bi-download"></i> Download Sample CSV Template
-        </button>
+        </a>
     </div>
 
     <!-- Upload Form -->
@@ -59,30 +59,6 @@
         </div>
     </div>
 
-    <!-- Section: Successfully Processed Packages -->
-    <div id="successful-rows-container" style="margin-top: 24px;">
-        <h4 style="margin-bottom: 10px; color: var(--color-success);">Successfully Imported Packages</h4>
-        <div style="overflow-x: auto;">
-            <table class="results-table">
-                <thead>
-                    <tr>
-                        <th style="width: 60px;">Row</th>
-                        <th>Tracking #</th>
-                        <th>Recipient</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Location</th>
-                        <th>Fee</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="successful-rows-tbody">
-                    <!-- Populated dynamically via JS -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- Section: Failed Rows Detail -->
     <div id="failed-rows-container" style="margin-top: 28px;">
         <h4 style="margin-bottom: 10px; color: var(--color-error);">Failed Rows Detail</h4>
@@ -91,8 +67,6 @@
                 <thead>
                     <tr>
                         <th style="width: 60px;">Row</th>
-                        <th>Raw Data</th>
-                        <th colspan="5"></th>
                         <th>Failure Reason</th>
                     </tr>
                 </thead>
