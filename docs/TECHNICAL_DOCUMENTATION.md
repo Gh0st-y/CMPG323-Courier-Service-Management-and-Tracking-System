@@ -31,7 +31,7 @@ Services depends on Domain, not Data. Web constructs concrete repositories and p
 | Web | HTTP parsing, session/role filters, service composition, Razor, browser scripts |
 | Tests | MSTest unit and SQL integration tests; standalone JavaScript checks in relevant fix branches |
 
-`UnitOfWork` owns one connection and transaction, commits explicitly and otherwise rolls back. Registration atomically creates recipient/package/history/audit records. Status changes atomically update a row-version-checked package, append history/audit entries and enqueue notifications. Payment changes save payment metadata and audit entries together; their concurrency behavior needs the separate review fix.
+`UnitOfWork` owns one connection and transaction, commits explicitly and otherwise rolls back. Registration atomically creates recipient/package/history/audit records. Status changes atomically update a row-version-checked package, append history/audit entries and enqueue notifications. Payment changes save payment metadata and audit entries together. Two staff changing the same package's payment status at the same time are not checked against each other: the last save wins, and both changes stay in the audit log.
 
 ## Installation and build
 
@@ -61,7 +61,7 @@ The project is a legacy web application with SDK-style supporting projects. Use 
 
 `Session.InactivityTimeoutMinutes` is not consumed by the session runtime. The database `Sms.Enabled` default is not consumed by service composition: use the Web appSetting. Avoid maintaining conflicting values.
 
-[Configuration PR #113](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/113) adds a fee-only endpoint for intake/supervisors/admins and removes the registration page's hard-coded fallback. It also makes the optional, ignored `Web.config.Local` appSettings file load. Until that PR is merged, merely creating this file has no effect. Its XML root must be `<appSettings>`; it does not override connectionStrings.
+[Configuration PR #113](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/113) is merged. It adds a fee-only endpoint for intake/supervisors/admins and removes the registration page's hard-coded fallback. An optional, ignored `Web.config.Local` next to Web.config is loaded if present. Its XML root must be `<appSettings>`; it does not override connectionStrings.
 
 Notification placeholders: `{{RecipientName}}`, `{{PackageId}}`, `{{StorageLocation}}`, `{{CollectionTime}}`. Database fees/templates are read afresh without rebuilding. Changing Web.config may recycle the app; this is different from recompiling. Keep SMTP credentials and deployed connection strings outside source control.
 
@@ -182,13 +182,13 @@ No live NWU integration is authorized by this design. Protocol and data-owner ap
 
 Status listeners enqueue ReadyForCollection/Collected work in the package transaction. An ASP.NET timer processes batches in the hosting application. It is not a separately installed, durable worker: application startup, idle shutdown and recycle affect processing. Keep the demo app running and confirm the local SMTP inbox is reachable. Missing SMTP Host selects a trace sender, which does not deliver mail.
 
-The timer prevents overlapping batches in one process. Multi-process claiming, delivery-log durability and staff-visible failure reasons remain review findings. The resend endpoint exists, but the detail-page Resend button is missing. SMS is a development stub and does not send real messages.
+The timer prevents overlapping batches in one process. Multi-process claiming remains a review finding. Attempts are recorded in `NotificationLog` (T28); a log-write failure is traced rather than undoing delivery. The Detail page renders failure reasons when returned by the API; [PR #123](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/123) restores that response field and is pending merge as of this update. The resend endpoint exists, but the detail-page Resend button is missing. SMS is a development stub and does not send real messages.
 
 ## Roles and known limitations
 
 Five roles are defined: IntakeClerk, StorageStaff, CollectionStaff, Supervisor, SystemAdmin. Server-side RoleAuthorize filters reject unauthorized actions. Sessions currently keep roles from login; account changes do not immediately revoke them. API anti-forgery protection is outstanding. [Package-page fix #112](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/112) removes unsafe identifier insertion into scripts.
 
-The audit query endpoint exists; its viewer UI is in pending [PR #119](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/119). Main includes SystemAdmin storage-location creation from #70. Main includes #116 deployment preparation and bundles the scanner library locally. Actual deployment and hardware acceptance remain pending. Main includes live fee reloads and local SMTP settings from #113. POPIA fixes (#118) and UI/verification guides (#121) still require their PRs to be merged before they are treated as deployed behavior. These dependencies must appear in the release acceptance checklist.
+The audit log viewer [#119](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/119) is merged; Supervisors and System Admins open it from Admin > Audit log. Main includes storage-location creation (#70), deployment preparation with the scanner library bundled locally (#116), live fees and local SMTP settings (#113), POPIA masking and safe error logging (#118), and the UI fixes and staff guides from #121. Actual deployment and hardware acceptance remain pending and must appear in the release acceptance checklist.
 
 ## Verification and handover
 
@@ -196,4 +196,4 @@ The audit query endpoint exists; its viewer UI is in pending [PR #119](https://g
 
 Use [NEGATIVE_TESTS.md](NEGATIVE_TESTS.md) for rejection/outage scenarios and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for release evidence. Device/browser checks, performance at 50,000 packages and 500,000 audit entries, backup restoration, staff training and sponsor approval need recorded results. Do not use real recipient information before the required governance approval. Retention period and anonymisation scope remain unresolved.
 
-Updated 2026-10-12 against main commit 86545ee and the explicitly identified pending PRs. Review those dependencies before using this document for a release.
+Updated 2026-10-12 against main commit `0a8c2c6`. Notification response restoration (#123) and the live acceptance/screenshots/precompiled publish follow-up (#124) remain pending PRs. Review their final merge status before using this document for a release.
