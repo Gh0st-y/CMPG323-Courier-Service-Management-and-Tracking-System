@@ -1,0 +1,15 @@
+{
+  "atUtc": "2026-10-12T21:46:37.2568859Z",
+  "sourceCommit": "3d2300d7ecaf573065dfb12759eb3d80a42d94b8",
+  "database": "CourierService_TaskVerification_T52",
+  "baseUrl": "http://localhost:48181",
+  "forbiddenUserNotCreated": true,
+  "recipientAddressesInTrace": 0,
+  "exceptionTypeAndStackCaptured": true,
+  "sqlErrorMessagesAbsent": true,
+  "databaseState": "ONLINE",
+  "smtpCaptured": true,
+  "workerPollSeconds": 1,
+  "retryDelaySeconds": 1,
+  "maxAttempts": 3
+}
