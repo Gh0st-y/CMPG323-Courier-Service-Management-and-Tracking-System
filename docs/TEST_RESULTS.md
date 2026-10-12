@@ -4,10 +4,10 @@ Date: 2026-10-12. Environment: Windows workspace, .NET Framework 4.8, local Visu
 
 | Branch/change | Check | Observed result |
 | --- | --- | --- |
-| Audit viewer #119, d3f8345 | Non-integration .NET suite | 343 passed, 0 failed, 0 skipped. |
+| Audit viewer #119 after merged #113 | Non-integration .NET suite | 346 passed, 0 failed, 0 skipped. |
 | Audit viewer #119 | Malicious suggestion markup/selection regression | Passed; markup is text, selection preserves the value, empty/no-match clears suggestions. |
 | Audit viewer #119 | Release build with Razor view compilation | Passed; existing assembly-version warning remains. |
-| POPIA #118, 5e55c15 | Full non-integration .NET suite after correcting the inherited HTTPS port mismatch | 356 passed, 0 failed, 0 skipped; no individual test excluded. |
+| POPIA #118 after merged #113 | Full non-integration .NET suite after correcting the inherited HTTPS port mismatch | 359 passed, 0 failed, 0 skipped; no individual test excluded. |
 | POPIA #118 | Identifier regression and Release/Razor build | Passed; existing assembly-version and duplicate-using warnings recorded at that point. |
 | UI/verification fix branch after externally merged #113 | Full non-integration .NET suite | 346 passed, 0 failed, 0 skipped, including HTTPS configuration and live fee tests. |
 | UI/verification fix branch | CSV import regression | Passed: multipart, saved/error rows, duplicate submit, auth/network/malformed response, mock mode and stale mock preference with mocks disabled. |
