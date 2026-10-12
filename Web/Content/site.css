@@ -2,6 +2,10 @@
   T07 shared theme. Colours are NWU-inspired (purple/gold) but not official brand assets —
   see DECISIONS.md (CON-010). Swap these tokens, not individual component rules, once real
   branding is signed off.
+
+  Sections: theme and shared controls; registration/search/detail; dashboard;
+  CSV import; user management; login; responsive navigation; reports; footer;
+  audit viewer. Responsive overrides stay beside their component rules.
 */
 
 :root {
@@ -88,18 +92,7 @@ a {
 
 /* ---------- Header / nav ---------- */
 
-.app-header {
-  height: auto;
-  min-height: var(--header-height);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 16px;
-  padding: 10px 20px;
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  box-shadow: var(--shadow);
-}
+/* Header layout is defined in the responsive layout section below. */
 
 .app-header__brand {
     font-weight: 600;
