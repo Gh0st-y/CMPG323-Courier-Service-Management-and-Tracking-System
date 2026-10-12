@@ -67,3 +67,6 @@ appsettings.*.local.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Locally prepared deployment packages
+/artifacts/

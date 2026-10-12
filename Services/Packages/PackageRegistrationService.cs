@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -214,17 +214,7 @@ namespace CourierService.Services.Packages
 
         private decimal ReadFee(string classification)
         {
-            var key = "Fee." + classification;
-            var raw = _config.GetValue(key);
-
-            decimal fee;
-            if (raw == null || !decimal.TryParse(raw.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out fee) || fee < 0)
-            {
-                // A setup problem (db/schema.sql seeds these), not something the clerk can fix
-                throw new InvalidOperationException("dbo.AppConfig has no valid value for " + key + ".");
-            }
-
-            return fee;
+            return new PackageFeeService(_config).GetFee(classification);
         }
 
         private static string Clean(string value)

@@ -6,6 +6,8 @@
 
   "GET /api/dashboard/stats": { "receivedToday": 14, "readyForCollection": 6, "collectedToday": 9, "outstanding": 3 },
 
+  "GET /api/packages/fees": { "Personal": 10.00, "WorkRelated": 0.00 },
+
   "GET /api/packages": {
     "items": [
       { "packageId": 1,  "f20Identifier": "F20-0001", "recipientName": "Thabo Nkosi",      "status": "ReadyForCollection", "classification": "Personal",    "fee": 10.00, "createdAtUtc": "2026-09-22T08:15:00Z", "paymentStatus": "Unpaid", "paymentStatusUpdatedAtUtc": null, "paymentStatusUpdatedBy": null },
