@@ -18,7 +18,7 @@
 
     var homeActive = currentController == "Home" ? "is-active" : "";
     var packagesActive = (currentController == "Packages" || currentController == "Scan" || currentController == "Collection") ? "is-active" : "";
-    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "UserManagement") ? "is-active" : "";
+    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "UserManagement" || currentController == "AuditLog") ? "is-active" : "";
 
     var registerActive = (currentController == "Packages" && currentAction == "Register") ? "is-active" : "";
     var searchActive = (currentController == "Packages" && currentAction == "Search") ? "is-active" : "";
@@ -107,7 +107,7 @@
                             }
                             @if (canSeeAudit)
                             {
-                                <a class="app-nav__dropdown-item" href="#"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
+                                <a class="app-nav__dropdown-item @(currentController == "AuditLog" ? "is-active" : "")" href="@Url.Action("Index", "AuditLog")"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
                             }
                             @if (isSystemAdmin)
                             {
