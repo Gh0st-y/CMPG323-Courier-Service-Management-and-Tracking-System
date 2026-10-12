@@ -1596,6 +1596,24 @@ html, body {
     gap: 10px;
 }
 
+.um-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.um-table-scroll table {
+    min-width: 700px;
+}
+
+.um-role-select {
+    min-width: 140px;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-surface);
+    font: inherit;
+}
+
 .um-search {
     position: relative;
     flex: 1 1 260px;
@@ -2296,5 +2314,108 @@ main {
 @media (max-width: 520px) {
     .d-dash, .d-arc {
         display: none;
+    }
+}
+
+/* ============================================================ */
+/* Audit Log Viewer Styles (T46, SR-04)                         */
+/* ============================================================ */
+.audit-filter-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.audit-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 20px;
+    align-items: end;
+}
+
+.audit-filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+}
+
+.audit-table-container {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+    .audit-table thead th {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 2px solid var(--color-border);
+        background: #f9f9f9;
+        font-weight: 600;
+    }
+
+    .audit-table tbody td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .audit-table tbody tr:hover {
+        background: #f5f8ff;
+    }
+
+.audit-table__id {
+    font-family: "Courier New", monospace;
+    font-weight: 600;
+}
+
+.audit-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    background: #f1f3f5;
+    color: var(--color-primary-dark);
+}
+
+.suggestion-heading {
+    padding: 6px 10px;
+    font-weight: bold;
+    font-size: 11px;
+    background: #f4f0fa;
+    color: #5c2d91;
+    border-bottom: 1px solid #e2d9ed;
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+@media (max-width: 1100px) {
+    .audit-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .audit-filter-grid {
+        grid-template-columns: 1fr;
     }
 }

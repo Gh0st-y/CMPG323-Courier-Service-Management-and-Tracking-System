@@ -1,10 +1,10 @@
-@{
+ï»¿@{
     ViewBag.Title = "Reports";
 }
 
 <h1 class="app-page-title"><i class="bi bi-bar-chart"></i> Reports</h1>
 
-<div class="card" id="reports-root">
+<div class="card" id="reports-root" data-package-detail-url="@Url.Action("Detail", "Packages")">
     <div class="dashboard-page">
 
         <section class="dashboard-alert" id="rptError" role="alert" aria-live="assertive" hidden>
@@ -93,32 +93,32 @@
             <div class="dashboard-stats rpt-stats" id="rptStats" aria-live="polite" aria-busy="true">
                 <article class="card dashboard-stat dashboard-stat--received">
                     <span class="dashboard-stat__label">Received</span>
-                    <strong class="dashboard-stat__value" id="kTotal">—</strong>
+                    <strong class="dashboard-stat__value" id="kTotal">â€”</strong>
                     <span class="dashboard-stat__note">Packages registered in this range</span>
                 </article>
                 <article class="card dashboard-stat dashboard-stat--ready">
                     <span class="dashboard-stat__label">Ready for Collection</span>
-                    <strong class="dashboard-stat__value" id="kReady">—</strong>
+                    <strong class="dashboard-stat__value" id="kReady">â€”</strong>
                     <span class="dashboard-stat__note">Of those, waiting for pickup</span>
                 </article>
                 <article class="card dashboard-stat dashboard-stat--collected">
                     <span class="dashboard-stat__label">Collected</span>
-                    <strong class="dashboard-stat__value" id="kColl">—</strong>
+                    <strong class="dashboard-stat__value" id="kColl">â€”</strong>
                     <span class="dashboard-stat__note">Of those, already collected</span>
                 </article>
                 <article class="card dashboard-stat dashboard-stat--received">
                     <span class="dashboard-stat__label">Avg Days to Collect</span>
-                    <strong class="dashboard-stat__value" id="kAvg">—</strong>
+                    <strong class="dashboard-stat__value" id="kAvg">â€”</strong>
                     <span class="dashboard-stat__note">From registration to collection</span>
                 </article>
                 <article class="card dashboard-stat dashboard-stat--collected">
                     <span class="dashboard-stat__label">Fees Paid</span>
-                    <strong class="dashboard-stat__value" id="kPaid">—</strong>
+                    <strong class="dashboard-stat__value" id="kPaid">â€”</strong>
                     <span class="dashboard-stat__note">Packages marked Paid</span>
                 </article>
                 <article class="card dashboard-stat dashboard-stat--outstanding">
                     <span class="dashboard-stat__label">Fees Unpaid</span>
-                    <strong class="dashboard-stat__value" id="kUnpaid">—</strong>
+                    <strong class="dashboard-stat__value" id="kUnpaid">â€”</strong>
                     <span class="dashboard-stat__note">Packages marked Unpaid</span>
                 </article>
             </div>

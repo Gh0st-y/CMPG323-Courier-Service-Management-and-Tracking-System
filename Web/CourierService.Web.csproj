@@ -60,6 +60,8 @@
     <Compile Include="Controllers\Api\NotificationsApiController.cs" />
     <Compile Include="Controllers\Api\PaymentApiController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\AuditLogController.cs" />
+    <Compile Include="Models\AuditLogViewModel.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
     <Compile Include="Controllers\Api\UsersApiController.cs" />
@@ -101,6 +103,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-icons.min.css" />
+    <Content Include="Content\flatpickr.min.css" />
+    <Content Include="Scripts\app\flatpickr.min.js" />
+    <Content Include="Scripts\app\audit-log-filter.js" />
+    <Content Include="Views\AuditLog\Index.cshtml" />
     <Content Include="Content\Images\accessDenied.png" />
     <Content Include="Content\Images\favicon.ico" />
     <Content Include="Content\Images\profile.png" />

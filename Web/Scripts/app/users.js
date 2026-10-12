@@ -74,6 +74,8 @@
             roleTd.textContent = u.role;
         } else {
             var select = document.createElement('select');
+            select.className = 'um-role-select';
+            select.setAttribute('aria-label', 'Role for ' + u.username);
             roles.forEach(function (r) {
                 var opt = document.createElement('option');
                 opt.value = r;
@@ -82,14 +84,16 @@
                 select.appendChild(opt);
             });
             select.addEventListener('change', function () {
-                if (!confirm('Change ' + u.username + ' to ' + select.value + '?')) {
-                    select.value = u.role;
-                    return;
-                }
-                api('PATCH', '/users/' + u.userId, { role: select.value }).then(function () {
-                    CourierApp.toast.success('Role updated.');
-                    loadUsers();
-                }, function (f) { showFailure(f); select.value = u.role; });
+                if (select.disabled) return;
+                var requestedRole = select.value;
+                select.disabled = true;
+                CourierApp.confirm('Change ' + u.username + ' to ' + requestedRole + '?').then(function (confirmed) {
+                    if (!confirmed) { select.value = u.role; return; }
+                    return api('PATCH', '/users/' + u.userId, { role: requestedRole }).then(function () {
+                        CourierApp.toast.success('Role updated.');
+                        loadUsers();
+                    }, function (f) { showFailure(f); select.value = u.role; });
+                }).finally(function () { select.disabled = false; });
             });
             roleTd.appendChild(select);
         }
@@ -106,11 +110,15 @@
             btn.className = 'btn btn-secondary btn-sm';
             btn.textContent = u.isActive ? 'Deactivate' : 'Activate';
             btn.addEventListener('click', function () {
-                if (!confirm((u.isActive ? 'Deactivate ' : 'Activate ') + u.username + '?')) return;
-                api('PATCH', '/users/' + u.userId, { isActive: !u.isActive }).then(function () {
-                    CourierApp.toast.success(u.isActive ? 'User deactivated.' : 'User activated.');
-                    loadUsers();
-                }, showFailure);
+                if (btn.disabled) return;
+                btn.disabled = true;
+                CourierApp.confirm((u.isActive ? 'Deactivate ' : 'Activate ') + u.username + '?').then(function (confirmed) {
+                    if (!confirmed) return;
+                    return api('PATCH', '/users/' + u.userId, { isActive: !u.isActive }).then(function () {
+                        CourierApp.toast.success(u.isActive ? 'User deactivated.' : 'User activated.');
+                        loadUsers();
+                    }, showFailure);
+                }).finally(function () { btn.disabled = false; });
             });
             actionTd.appendChild(btn);
         }
@@ -120,6 +128,8 @@
 
     // Create user
     document.getElementById('btn-create-user').addEventListener('click', function () {
+        var createButton = this;
+        if (createButton.disabled) return;
         var username = document.getElementById('new-username').value.trim();
         var email = document.getElementById('new-email').value.trim();
         var password = document.getElementById('new-password').value;
@@ -130,12 +140,17 @@
             return;
         }
 
+        createButton.disabled = true;
+        document.getElementById('btn-cancel-create').disabled = true;
         api('POST', '/users', { username: username, email: email, password: password, role: role })
             .then(function () {
                 CourierApp.toast.success('User created.');
                 if (window.closeCreateUserPanel) window.closeCreateUserPanel();
                 loadUsers();
-            }, showFailure);
+            }, showFailure).finally(function () {
+                createButton.disabled = false;
+                document.getElementById('btn-cancel-create').disabled = false;
+            });
     });
 
     loadUsers();

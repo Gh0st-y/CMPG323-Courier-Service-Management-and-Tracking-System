@@ -1,3 +1,4 @@
+﻿using CourierService.Services.Diagnostics;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -108,7 +109,7 @@ namespace CourierService.Web.Controllers
         // Same as DashboardController: log, then let the global filter (T52) choose 503 vs 500.
         protected override void OnException(ExceptionContext filterContext)
         {
-            Trace.TraceError(filterContext.Exception.ToString());
+            Trace.TraceError(ExceptionDiagnostics.Format(filterContext.Exception));
             base.OnException(filterContext);
         }
     }
