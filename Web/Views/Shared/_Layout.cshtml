@@ -1,4 +1,5 @@
-@using CourierService.Web.Infrastructure@{
+@using CourierService.Web.Infrastructure
+@{
     var currentController = (string)ViewContext.RouteData.Values["controller"];
     var currentAction = (string)ViewContext.RouteData.Values["action"];
 
@@ -17,7 +18,7 @@
 
     var homeActive = currentController == "Home" ? "is-active" : "";
     var packagesActive = (currentController == "Packages" || currentController == "Scan" || currentController == "Collection") ? "is-active" : "";
-    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "AuditLog" || currentController == "UserManagement") ? "is-active" : "";
+    var adminActive = (currentController == "CsvImport" || currentController == "Reports" || currentController == "UserManagement" || currentController == "AuditLog") ? "is-active" : "";
 
     var registerActive = (currentController == "Packages" && currentAction == "Register") ? "is-active" : "";
     var searchActive = (currentController == "Packages" && currentAction == "Search") ? "is-active" : "";
@@ -25,7 +26,6 @@
     var collectionActive = currentController == "Collection" ? "is-active" : "";
     var reportsActive = currentController == "Reports" ? "is-active" : "";
     var importActive = currentController == "CsvImport" ? "is-active" : "";
-    var auditLogActive = currentController == "AuditLog" ? "is-active" : "";
     var usersActive = currentController == "UserManagement" ? "is-active" : "";
 
     var homeUrl = Url.Action("Index", "Home");
@@ -35,17 +35,22 @@
     var collectionUrl = Url.Action("Index", "Collection");
     var reportsUrl = Url.Action("Index", "Reports");
     var importUrl = Url.Action("Index", "CsvImport");
-    var auditLogUrl = Url.Action("Index", "AuditLog");
     var usersUrl = Url.Action("Index", "UserManagement");
     var logoUrl = Url.Content("~/Content/images/icon_inverted.png");
     var faviconUrl = Url.Content("~/Content/images/favicon.ico");
-}<!DOCTYPE html><html lang="en"><head>
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewBag.Title - Courier Service</title>
     <link rel="icon" type="image/x-icon" href="@faviconUrl" />
     <link href="~/Content/bootstrap-icons.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/Content/site.css" /></head><body>
+    <link rel="stylesheet" href="~/Content/site.css" />
+</head>
+
+ <body class="@(ViewBag.HideFooter == true ? "" : "has-footer")">
     <header class="app-header">
         <a class="app-header__brand" href="@homeUrl">
             <img class="app-header__logo" src="@logoUrl" alt="" />
@@ -102,7 +107,7 @@
                             }
                             @if (canSeeAudit)
                             {
-                                <a class="app-nav__dropdown-item @auditLogActive" href="@auditLogUrl"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
+                                <a class="app-nav__dropdown-item @(currentController == "AuditLog" ? "is-active" : "")" href="@Url.Action("Index", "AuditLog")"><i class="bi bi-journal-text" aria-hidden="true"></i> Audit log</a>
                             }
                             @if (isSystemAdmin)
                             {
@@ -142,6 +147,11 @@
         @RenderBody()
     </main>
 
+    <script src="~/Scripts/lottie.min.js"></script>
+    <script>
+        window.CourierApp = window.CourierApp || {};
+        window.CourierApp.loaderAnimationUrl = '@Url.Content("~/Content/animations/Loading.json")';
+    </script>
     <script src="~/Scripts/app/courier-app.js"></script>
     @RenderSection("scripts", required: false)
     <script>
@@ -182,4 +192,53 @@
                 if (e.key === "Escape") { setUser(false); setNav(false); }
             });
         })();
-    </script></body></html>
+    </script>
+
+    <button id="jump-top" type="button" aria-label="Back to top" title="Back to top">
+    <i class="bi bi-arrow-up-short"></i>     
+    </button>
+
+<script>
+    (function () {
+        var btn = document.getElementById('jump-top');
+        var SHOW_AFTER_PX = 250;
+
+        function update() { btn.classList.toggle('show', window.scrollY > SHOW_AFTER_PX); }
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+</script>
+
+    @if (ViewBag.HideFooter != true)
+{
+  <footer id="siteFooter" class="site-footer">
+    <div class="footer-doodles" aria-hidden="true">
+
+      <i class="bi bi-qr-code-scan"></i>
+
+      <!-- little dash -->
+      <svg class="d d-dash" viewBox="0 0 40 28"><path d="M3 20 Q16 26 34 6"/></svg>
+
+      <span class="footer-text">F20 Courier Service</span>
+
+      <!-- arc -->
+      <svg class="d d-arc" viewBox="0 0 40 28"><path d="M3 20 Q18 2 36 18"/></svg>
+
+      <!-- arrow swoosh -->
+      <svg class="d d-arrow" viewBox="0 0 60 36">
+        <path d="M4 26 C20 32 38 30 54 16"/>
+        <path d="M45 13 L55 15 L50 24"/>
+      </svg>
+
+      <!-- parcel -->
+      <i class="bi bi-box-seam"></i>
+    </div>
+  </footer>
+}
+
+</body>
+</html>

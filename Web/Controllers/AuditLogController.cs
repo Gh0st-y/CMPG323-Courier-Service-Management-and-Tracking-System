@@ -105,9 +105,6 @@ namespace CourierService.Web.Controllers
                 };
             }
 
-            var isAuth = User.Identity != null && User.Identity.IsAuthenticated &&
-                         (User.IsInRole(RoleNames.Supervisor) || User.IsInRole(RoleNames.SystemAdmin));
-
             var model = new AuditLogViewModel
             {
                 Entries = pagedResult.Items ?? Enumerable.Empty<AuditLogEntry>(),
@@ -118,8 +115,7 @@ namespace CourierService.Web.Controllers
                 ActionType = actionType,
                 StartDate = startDate,
                 EndDate = endDate,
-                ActionTypes = availableActions,
-                IsAuthorized = isAuth
+                ActionTypes = availableActions
             };
 
             ViewBag.UserIds = userIds;

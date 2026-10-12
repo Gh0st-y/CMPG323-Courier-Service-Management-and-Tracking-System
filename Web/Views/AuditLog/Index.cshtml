@@ -13,12 +13,13 @@
     <!-- Hidden data container with explicit id and name attributes for compliance -->
     <div id="searchSuggestionsData"
          name="searchSuggestionsData"
-         data-users='@Html.Raw(Json.Encode(ViewBag.UserIds ?? new List<string>()))'
-         data-types='@Html.Raw(Json.Encode(ViewBag.EntityTypes ?? new List<string>()))'
-         data-ids='@Html.Raw(Json.Encode(ViewBag.EntityIds ?? new List<string>()))'
+         data-users='@Json.Encode(ViewBag.UserIds ?? new List<string>())'
+         data-types='@Json.Encode(ViewBag.EntityTypes ?? new List<string>())'
+         data-ids='@Json.Encode(ViewBag.EntityIds ?? new List<string>())'
          style="display: none;"></div>
 
     <form method="get" action="@Url.Action("Index", "AuditLog")" id="auditFilterForm" name="auditFilterForm" class="audit-filter-card" style="overflow: visible !important;">
+        @Html.ValidationSummary(false, "", new { @class = "field-error" })
         <div class="audit-filter-grid" style="overflow: visible !important;">
             <div class="form-row" style="position: relative !important;">
                 <label for="searchTerm">Search Keywords</label>
@@ -104,6 +105,17 @@
             </tbody>
         </table>
     </div>
+    <nav aria-label="Audit log pages" class="audit-filter-actions">
+        @if (Model.Page > 1)
+        {
+            <a class="btn btn-secondary" href="@Url.Action("Index", "AuditLog", new { page = Model.Page - 1, searchTerm = Model.SearchTerm, actionType = Model.ActionType, startDate = Model.StartDate.HasValue ? Model.StartDate.Value.ToString("yyyy-MM-dd") : null, endDate = Model.EndDate.HasValue ? Model.EndDate.Value.ToString("yyyy-MM-dd") : null })">Previous</a>
+        }
+        <span>Page @Model.Page &middot; @Model.TotalCount records</span>
+        @if ((long)Model.Page * Model.PageSize < Model.TotalCount)
+        {
+            <a class="btn btn-secondary" href="@Url.Action("Index", "AuditLog", new { page = Model.Page + 1, searchTerm = Model.SearchTerm, actionType = Model.ActionType, startDate = Model.StartDate.HasValue ? Model.StartDate.Value.ToString("yyyy-MM-dd") : null, endDate = Model.EndDate.HasValue ? Model.EndDate.Value.ToString("yyyy-MM-dd") : null })">Next</a>
+        }
+    </nav>
 </div>
 
 <script src="~/Scripts/app/flatpickr.min.js"></script>

@@ -1,4 +1,4 @@
-﻿using CourierService.Data;
+using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
 using CourierService.Domain.Models;
@@ -57,7 +57,13 @@ namespace CourierService.Web.Controllers
                 return RedirectToAction("Register");
             }
 
-            return View(model: id);
+            string identifier;
+            if (!PackageIdentifier.TryNormalize(id, out identifier))
+            {
+                return HttpNotFound("No package was found for that code.");
+            }
+
+            return View(model: identifier);
         }
 
         /// <summary>
@@ -81,7 +87,13 @@ namespace CourierService.Web.Controllers
             {
                 return RedirectToAction("Search");
             }
-            return View(model: id);
+            string identifier;
+            if (!PackageIdentifier.TryNormalize(id, out identifier))
+            {
+                return HttpNotFound("No package was found for that code.");
+            }
+
+            return View(model: identifier);
         }
 
         /// <summary>T21: GET /api/packages — JSON data for the Search page above. Any logged-in user (SR-02).</summary>

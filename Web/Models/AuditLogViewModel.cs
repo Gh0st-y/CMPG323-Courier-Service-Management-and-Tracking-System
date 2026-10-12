@@ -26,7 +26,5 @@ namespace CourierService.Web.Models
         public IEnumerable<SelectListItem> KeywordGroups { get; set; }
         public IEnumerable<string> SearchSuggestions { get; set; }
 
-        // Authorization Status
-        public bool IsAuthorized { get; set; }
     }
 }

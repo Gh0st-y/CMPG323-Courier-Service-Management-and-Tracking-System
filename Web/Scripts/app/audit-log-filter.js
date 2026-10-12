@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const startInput = document.getElementById("startDate");
     const endInput = document.getElementById("endDate");
     const errorDiv = document.getElementById("dateRangeError");
@@ -27,7 +27,7 @@
 
             if (query.length === 0) {
                 dropdown.style.display = "none";
-                dropdown.innerHTML = "";
+                dropdown.replaceChildren();
                 return;
             }
 
@@ -37,41 +37,35 @@
 
             if (matchedUsers.length === 0 && matchedTypes.length === 0 && matchedIds.length === 0) {
                 dropdown.style.display = "none";
-                dropdown.innerHTML = "";
+                dropdown.replaceChildren();
                 return;
             }
 
-            let html = "";
-
-            if (matchedUsers.length > 0) {
-                html += `<div style="padding: 6px 10px; font-weight: bold; font-size: 11px; background: #f4f0fa; color: #5c2d91; border-bottom: 1px solid #e2d9ed;">USER IDS</div>`;
-                matchedUsers.forEach(item => {
-                    html += `<div class="suggestion-item" style="padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f9f9f9;" data-value="${item}">${item}</div>`;
+            dropdown.replaceChildren();
+            function addGroup(title, items) {
+                if (!items.length) return;
+                const heading = document.createElement("div");
+                heading.className = "suggestion-heading";
+                heading.textContent = title;
+                dropdown.appendChild(heading);
+                items.forEach(item => {
+                    const option = document.createElement("div");
+                    option.className = "suggestion-item";
+                    option.textContent = item;
+                    option.dataset.value = item;
+                    dropdown.appendChild(option);
                 });
             }
-
-            if (matchedTypes.length > 0) {
-                html += `<div style="padding: 6px 10px; font-weight: bold; font-size: 11px; background: #f4f0fa; color: #5c2d91; border-bottom: 1px solid #e2d9ed;">ENTITY TYPES</div>`;
-                matchedTypes.forEach(item => {
-                    html += `<div class="suggestion-item" style="padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f9f9f9;" data-value="${item}">${item}</div>`;
-                });
-            }
-
-            if (matchedIds.length > 0) {
-                html += `<div style="padding: 6px 10px; font-weight: bold; font-size: 11px; background: #f4f0fa; color: #5c2d91; border-bottom: 1px solid #e2d9ed;">ENTITY IDS</div>`;
-                matchedIds.forEach(item => {
-                    html += `<div class="suggestion-item" style="padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f9f9f9;" data-value="${item}">${item}</div>`;
-                });
-            }
-
-            dropdown.innerHTML = html;
+            addGroup("USER IDS", matchedUsers);
+            addGroup("ENTITY TYPES", matchedTypes);
+            addGroup("ENTITY IDS", matchedIds);
             dropdown.style.display = "block";
         });
 
         dropdown.addEventListener("click", function (e) {
             const target = e.target.closest(".suggestion-item");
             if (target) {
-                searchInput.value = target.getAttribute("data-value");
+                searchInput.value = target.dataset.value;
                 dropdown.style.display = "none";
             }
         });

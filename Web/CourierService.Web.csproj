@@ -14,8 +14,8 @@
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44301</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
-    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
     <UseGlobalApplicationHostFile />
@@ -59,11 +59,13 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Api\NotificationsApiController.cs" />
     <Compile Include="Controllers\Api\PaymentApiController.cs" />
-    <Compile Include="Controllers\AuditLogController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\AuditLogController.cs" />
+    <Compile Include="Models\AuditLogViewModel.cs" />
     <Compile Include="Controllers\Api\AuthController.cs" />
     <Compile Include="Controllers\Api\AuditLogController.cs" />
     <Compile Include="Controllers\Api\UsersApiController.cs" />
+    <Compile Include="Controllers\Api\StorageLocationsApiController.cs" />
     <Compile Include="Controllers\CollectionController.cs" />
     <Compile Include="Controllers\CsvImportController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -85,7 +87,6 @@
     <Compile Include="Models\Api\Packages\PaymentStatusRequest.cs" />
     <Compile Include="Models\Api\Packages\RegisterPackageRequest.cs" />
     <Compile Include="Models\Api\Packages\ResendNotificationRequest.cs" />
-    <Compile Include="Models\AuditLogViewModel.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Infrastructure\CourierServices.cs" />
     <Compile Include="Infrastructure\DatabaseUnavailableFilter.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Models\Api\Auth\LoginRequest.cs" />
     <Compile Include="Models\Api\Packages\CollectRequest.cs" />
     <Compile Include="Models\Api\Packages\StatusChangeRequest.cs" />
+    <Compile Include="Models\Api\StorageLocations\CreateStorageLocationRequest.cs" />
     <Compile Include="Infrastructure\HttpsRedirectModule.cs" />
     <Compile Include="Models\Api\Users\CreateUserRequest.cs" />
     <Compile Include="Models\Api\Users\UpdateUserRequest.cs" />
@@ -102,23 +104,27 @@
   <ItemGroup>
     <Content Include="Content\bootstrap-icons.min.css" />
     <Content Include="Content\flatpickr.min.css" />
+    <Content Include="Scripts\app\flatpickr.min.js" />
+    <Content Include="Scripts\app\audit-log-filter.js" />
+    <Content Include="Views\AuditLog\Index.cshtml" />
     <Content Include="Content\Images\accessDenied.png" />
     <Content Include="Content\Images\favicon.ico" />
     <Content Include="Content\Images\profile.png" />
-    <Content Include="Content\site.css" />
+    <Content Include="Content\login-doodles.css" />
     <Content Include="Global.asax" />
-    <Content Include="Scripts\app\audit-log-filter.js" />
     <Content Include="Scripts\app\collection.js" />
     <Content Include="Scripts\app\csv-import.js" />
-    <Content Include="Scripts\app\flatpickr.min.js" />
     <Content Include="Scripts\app\reports.js" />
     <Content Include="Scripts\app\users.js" />
     <Content Include="Scripts\chart.umd.min.js" />
+    <Content Include="Scripts\login-doodles.js" />
+    <Content Include="Scripts\lottie.min.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Content\site.css" />
     <Content Include="Scripts\app\courier-app.js" />
     <Content Include="Scripts\app\scan-demo.js" />
     <Content Include="Views\Scan\Index.cshtml" />
@@ -194,14 +200,17 @@
     <Content Include="Views\Shared\ServiceUnavailable.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\AuditLog\Index.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Views\Shared\AccessDenied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\fonts\bootstrap-icons.woff" />
     <Content Include="Content\fonts\bootstrap-icons.woff2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Reports\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\animations\Loading.json" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
