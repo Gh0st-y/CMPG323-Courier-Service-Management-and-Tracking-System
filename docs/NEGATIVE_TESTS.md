@@ -25,33 +25,33 @@ If your database has been used for other testing, check them first with step 3a.
 
 ## Results
 
-Run on current `main` before closing #52. Replace each Pending with Pass or Fail (and a short note for a Fail). The first run, on 2026-10-07, passed everything except 2d, 6a and 6b, which were skipped until T43 merged; that run is in the Git history of this file.
+Second run, on current `main`, for closing #52. The first run, on 2026-10-07, passed everything except 2d, 6a and 6b, which were skipped until T43 merged; that run is in the Git history of this file.
 
 | Step | Check | Expected | Result |
 |---|---|---|---|
-| 1a to 1e | Logged out | 401 NotAuthenticated on all five | Pending |
-| 2a to 2c | IntakeClerk on other roles' actions | 403 Forbidden | Pending |
-| 2d | IntakeClerk on user management | 403 Forbidden | Pending |
-| 3a | Scan the Registered package | 200, status Registered | Pending |
-| 3b | Skip a step (Registered to ReadyForCollection) | 409 InvalidTransition | Pending |
-| 3c | Go backwards (Collected to InStorage) | 409 InvalidTransition | Pending |
-| 3d | Collect through the status endpoint | 400 ValidationError | Pending |
-| 3e | Unknown status name | 400 ValidationError | Pending |
-| 3f | Body that isn't JSON | 400 ValidationError | Pending |
-| 3g | Package that doesn't exist | 404 NotFound | Pending |
-| 3h | Malformed package code | 404 NotFound | Pending |
-| 3i | StorageStaff collecting | 403 Forbidden | Pending |
-| 4a, 4b | Collect from InStorage, collect twice | 409 InvalidTransition on both | Pending |
-| 4c | CollectionStaff changing status | 403 Forbidden | Pending |
-| 5a | Unknown QR code (API) | 404 NotFound, friendly message | Pending |
-| 5b | Unknown QR code (scan screen) | Friendly "not found" message, no error page | Pending |
-| 6a, 6b | Supervisor on admin-only endpoints | 403 Forbidden on both, no user created | Pending |
-| 7a to 7d | Database offline | 503 ServiceUnavailable, friendly page and toast, log without the SQL message | Pending |
-| 7e | Database back online | 200 again | Pending |
-| 8a to 8g | Mail server not running | Status change 200, email tried 3 times then Failed, every attempt logged with its reason | Pending |
-| 9a to 9h | SMS failing (SMS on, recipient has no phone) | Status change 200, email Sent, SMS Failed and logged | Pending |
+| 1a to 1e | Logged out | 401 NotAuthenticated on all five | Pass |
+| 2a to 2c | IntakeClerk on other roles' actions | 403 Forbidden | Pass |
+| 2d | IntakeClerk on user management | 403 Forbidden | Pass |
+| 3a | Scan the Registered package | 200, status Registered | Pass |
+| 3b | Skip a step (Registered to ReadyForCollection) | 409 InvalidTransition | Pass |
+| 3c | Go backwards (Collected to InStorage) | 409 InvalidTransition | Pass |
+| 3d | Collect through the status endpoint | 400 ValidationError | Pass |
+| 3e | Unknown status name | 400 ValidationError | Pass |
+| 3f | Body that isn't JSON | 400 ValidationError | Pass |
+| 3g | Package that doesn't exist | 404 NotFound | Pass |
+| 3h | Malformed package code | 404 NotFound | Pass |
+| 3i | StorageStaff collecting | 403 Forbidden | Pass |
+| 4a, 4b | Collect from InStorage, collect twice | 409 InvalidTransition on both | Pass |
+| 4c | CollectionStaff changing status | 403 Forbidden | Pass |
+| 5a | Unknown QR code (API) | 404 NotFound, friendly message | Pass |
+| 5b | Unknown QR code (scan screen) | Friendly "not found" message, no error page | Pass |
+| 6a, 6b | Supervisor on admin-only endpoints | 403 Forbidden on both, no user created | Pass |
+| 7a to 7d | Database offline | 503 ServiceUnavailable, friendly page and toast, log without the SQL message | Pass |
+| 7e | Database back online | 200 again | Pass |
+| 8a to 8g | Mail server not running | Status change 200, email tried 3 times then Failed, every attempt logged with its reason | Pass |
+| 9a to 9h | SMS failing (SMS on, recipient has no phone) | Status change 200, email Sent, SMS Failed and logged | Pass |
 
-Tested by: ________  Date: ________  Commit: ________
+Tested by: Hannu (Visagi1411)  Date: 2026-10-12  Commit: adfef35
 ---
 
 ## 1. Logged out
