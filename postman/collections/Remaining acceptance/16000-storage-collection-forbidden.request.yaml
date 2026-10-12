@@ -1,0 +1,19 @@
+$kind: http-request
+name: 'Storage collection forbidden'
+order: 16000
+method: POST
+url: '{{base_url}}/api/packages/{{package_id}}/collect'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Storage collection forbidden status', () => pm.response.to.have.status(403));

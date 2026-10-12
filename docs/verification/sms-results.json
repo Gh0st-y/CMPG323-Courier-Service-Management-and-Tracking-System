@@ -1,0 +1,32 @@
+[
+  {
+    "scenario": "Disabled",
+    "identifier": "F20-0204",
+    "staffStatus": "ReadyForCollection",
+    "statusRequestMs": 11.19,
+    "email": "Sent",
+    "sms": "Not queued",
+    "emailLog": "Sent",
+    "smsLog": "Not queued"
+  },
+  {
+    "scenario": "StubEnabled",
+    "identifier": "F20-0205",
+    "staffStatus": "ReadyForCollection",
+    "statusRequestMs": 10.97,
+    "email": "Sent",
+    "sms": "Sent",
+    "emailLog": "Sent",
+    "smsLog": "Sent"
+  },
+  {
+    "scenario": "MissingPhone",
+    "identifier": "F20-0206",
+    "staffStatus": "ReadyForCollection",
+    "statusRequestMs": 8.76,
+    "email": "Sent",
+    "sms": "Failed",
+    "emailLog": "Sent",
+    "smsLog": "Failed"
+  }
+]

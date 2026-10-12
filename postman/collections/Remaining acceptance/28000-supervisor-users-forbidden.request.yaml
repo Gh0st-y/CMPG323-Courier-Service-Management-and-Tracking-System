@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Supervisor users forbidden'
+order: 28000
+method: GET
+url: '{{base_url}}/api/users'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Supervisor users forbidden status', () => pm.response.to.have.status(403));

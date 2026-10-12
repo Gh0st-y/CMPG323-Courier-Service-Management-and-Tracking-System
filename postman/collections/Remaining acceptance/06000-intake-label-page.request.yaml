@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Intake label page'
+order: 6000
+method: GET
+url: '{{base_url}}/Packages/Label/{{package_id}}'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Intake label page status', () => pm.response.to.have.status(200));

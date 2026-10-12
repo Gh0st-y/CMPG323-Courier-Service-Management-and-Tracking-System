@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Change created role'
+order: 33000
+method: PATCH
+url: '{{base_url}}/api/users/{{created_user}}'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "role": "StorageStaff"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Change created role status', () => pm.response.to.have.status(200));
+      pm.test('Role persisted', () => pm.expect(pm.response.json().role).to.equal('StorageStaff'));

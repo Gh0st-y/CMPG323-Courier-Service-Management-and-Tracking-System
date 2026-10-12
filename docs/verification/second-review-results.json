@@ -1,0 +1,12 @@
+{
+  "baseUrl": "http://localhost:48171",
+  "syntheticOnly": true,
+  "passed": 4,
+  "results": [
+    "Role labels match the header; API role values stay unchanged",
+    "System Admin filter retains the current administrator row",
+    "Search accepts displayed and internal role names",
+    "PR #123 returns and displays the existing failed SMS reason"
+  ],
+  "browserErrors": []
+}

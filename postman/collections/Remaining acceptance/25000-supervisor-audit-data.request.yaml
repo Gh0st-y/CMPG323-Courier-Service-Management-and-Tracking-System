@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Supervisor audit data'
+order: 25000
+method: GET
+url: '{{base_url}}/api/audit-log?page=1&pageSize=10'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Supervisor audit data status', () => pm.response.to.have.status(200));
+      pm.test('Paged audit shape', () => pm.expect(pm.response.json().items).to.be.an('array'));

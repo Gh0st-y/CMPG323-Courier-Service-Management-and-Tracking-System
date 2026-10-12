@@ -1,0 +1,4 @@
+RecipientFullName,RecipientIdentifierNo,RecipientEmail,RecipientPhone,SenderName,PackageType,Classification,StorageLocation,RecipientDepartment,Notes
+Synthetic Import One,QA-IMPORT-ONE,one@example.test,0001234567,Synthetic Sender,Box,Personal,Shelf A-1,Synthetic,Acceptance fixture
+Synthetic Import Two,QA-IMPORT-TWO,two@example.test,0001234568,Synthetic Sender,Envelope,WorkRelated,Shelf A-1,Synthetic,Acceptance fixture
+,QA-IMPORT-INVALID,invalid@example.test,0001234569,Synthetic Sender,Box,Personal,Shelf A-1,Synthetic,Intentionally invalid recipient
