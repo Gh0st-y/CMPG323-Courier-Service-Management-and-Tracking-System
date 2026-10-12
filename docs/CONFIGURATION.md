@@ -30,6 +30,8 @@ External-file values override inline appSettings. This file does not override co
 
 ## Fee verification
 
+Turn mock mode off when verifying live fee configuration. With mock mode on, `/api/packages/fees` uses the static values in `frontend-mocks/mock-fixtures.json` (Personal: R10.00, WorkRelated: R0.00), so changes to `dbo.AppConfig` are not reflected on the Register page. These fixture values are for frontend demonstrations only.
+
 On a synthetic database, read the current value and save it for restoration. Update `Fee.Personal` to `12.50`, then reload registration as intake.demo. The displayed amount and a newly saved personal package must both be R12.50. Restore the original setting afterwards. Existing packages must retain their original fee. Fees must be between 0 and 9999.99 inclusive, with no more than two decimal places.
 
 The staff fee endpoint exposes only the two fees, not configuration credentials. The full `/api/config` management API remains unimplemented; database configuration changes currently require an administrator using SQL tools. A staff-facing configuration editor and audited updates are separate work.
@@ -38,4 +40,4 @@ The staff fee endpoint exposes only the two fees, not configuration credentials.
 
 Change a subject/body on a synthetic database, trigger ReadyForCollection, and inspect the local SMTP inbox. Restore the template. Supported placeholders are `{{RecipientName}}`, `{{PackageId}}`, `{{StorageLocation}}`, `{{CollectionTime}}`.
 
-Merge the database seed fix (#110) before initializing a fresh database. Do not treat skipped SQL tests as verification of database setup.
+This branch includes the database seed fix (#110) from `main`. Use the updated `db/schema.sql` when initializing a fresh database. Do not treat skipped SQL tests as verification of database setup.
