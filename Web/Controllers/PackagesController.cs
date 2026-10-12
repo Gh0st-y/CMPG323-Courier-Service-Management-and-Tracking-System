@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
-using CourierService.Services.Security;
 
 namespace CourierService.Web.Controllers
 {

@@ -221,9 +221,16 @@
                     { text: o.storageLocation || "-" },
                     { text: o.ageDays }
                 ];
-                cells.forEach(function (c) {
+                cells.forEach(function (c, index) {
                     var td = document.createElement("td");
-                    td.textContent = c.text; // textContent keeps recipient data XSS-safe (SR-03)
+                    if (index === 0) {
+                        var link = document.createElement("a");
+                        link.href = root.dataset.packageDetailUrl + "/" + encodeURIComponent(o.f20Identifier);
+                        link.textContent = c.text;
+                        td.appendChild(link);
+                    } else {
+                        td.textContent = c.text; // textContent keeps recipient data XSS-safe (SR-03)
+                    }
                     if (c.cls) { td.className = c.cls; }
                     tr.appendChild(td);
                 });

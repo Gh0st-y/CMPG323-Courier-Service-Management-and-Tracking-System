@@ -19,11 +19,11 @@
         mockFixturesUrl: "/mock/fixtures",
 
         get mockMode() {
-            return window.localStorage.getItem(STORAGE_KEY_MOCK_MODE) === "true";
+            return CourierApp.allowMockMode === true && window.localStorage.getItem(STORAGE_KEY_MOCK_MODE) === "true";
         },
 
         setMockMode: function (enabled) {
-            window.localStorage.setItem(STORAGE_KEY_MOCK_MODE, enabled ? "true" : "false");
+            window.localStorage.setItem(STORAGE_KEY_MOCK_MODE, enabled && CourierApp.allowMockMode === true ? "true" : "false");
         }
     };
 
