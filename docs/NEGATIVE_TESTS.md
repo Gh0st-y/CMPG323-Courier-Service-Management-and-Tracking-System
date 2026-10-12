@@ -10,7 +10,7 @@ Spec references: NFR-022, NFR-023, NRF-016, NRF-011, IR-006, OR-04.
 2. Press F5 and open the browser console (F12) on `https://localhost:44301/`.
 3. Paste each step on its own, in order, and compare the status code and `code` with the expected result.
 
-Steps 2d, 6a and 6b use `/api/users`, which comes with T43. Before T43 is merged they return a 404 page instead of 403; skip them until then.
+Steps 2d, 6a and 6b use `/api/users` (T43, merged). Section 9 needs T29 (SMS stub, merged) and switches SMS on in Web.config for the duration of the test.
 
 The script uses four seeded packages. In `seed.sql` the status depends on the package number: numbers divisible by 4 are Registered, then the pattern repeats as In Storage, Ready for Collection and Collected.
 
@@ -25,30 +25,33 @@ If your database has been used for other testing, check them first with step 3a.
 
 ## Results
 
+Run on current `main` before closing #52. Replace each Pending with Pass or Fail (and a short note for a Fail). The first run, on 2026-10-07, passed everything except 2d, 6a and 6b, which were skipped until T43 merged; that run is in the Git history of this file.
+
 | Step | Check | Expected | Result |
 |---|---|---|---|
-| 1a to 1e | Logged out | 401 NotAuthenticated on all five | Pass |
-| 2a to 2c | IntakeClerk on other roles' actions | 403 Forbidden | Pass |
-| 2d | IntakeClerk on user management | 403 Forbidden | Skipped, needs T43 |
-| 3a | Scan the Registered package | 200, status Registered | Pass |
-| 3b | Skip a step (Registered to ReadyForCollection) | 409 InvalidTransition | Pass |
-| 3c | Go backwards (Collected to InStorage) | 409 InvalidTransition | Pass |
-| 3d | Collect through the status endpoint | 400 ValidationError | Pass |
-| 3e | Unknown status name | 400 ValidationError | Pass |
-| 3f | Body that isn't JSON | 400 ValidationError | Pass |
-| 3g | Package that doesn't exist | 404 NotFound | Pass |
-| 3h | Malformed package code | 404 NotFound | Pass |
-| 3i | StorageStaff collecting | 403 Forbidden | Pass |
-| 4a, 4b | Collect from InStorage, collect twice | 409 InvalidTransition on both | Pass |
-| 4c | CollectionStaff changing status | 403 Forbidden | Pass |
-| 5a | Unknown QR code (API) | 404 NotFound, friendly message | Pass |
-| 5b | Unknown QR code (scan screen) | Friendly "not found" message, no error page | Pass |
-| 6a, 6b | Supervisor on admin-only endpoints | 403 Forbidden on both | Skipped, needs T43 |
-| 7a to 7d | Database offline | 503 ServiceUnavailable, friendly page and toast | Pass |
-| 7e | Database back online | 200 again | Pass |
-| 8a to 8f | Mail server not running | Status change 200, email tried 3 times then marked Failed | Pass |
+| 1a to 1e | Logged out | 401 NotAuthenticated on all five | Pending |
+| 2a to 2c | IntakeClerk on other roles' actions | 403 Forbidden | Pending |
+| 2d | IntakeClerk on user management | 403 Forbidden | Pending |
+| 3a | Scan the Registered package | 200, status Registered | Pending |
+| 3b | Skip a step (Registered to ReadyForCollection) | 409 InvalidTransition | Pending |
+| 3c | Go backwards (Collected to InStorage) | 409 InvalidTransition | Pending |
+| 3d | Collect through the status endpoint | 400 ValidationError | Pending |
+| 3e | Unknown status name | 400 ValidationError | Pending |
+| 3f | Body that isn't JSON | 400 ValidationError | Pending |
+| 3g | Package that doesn't exist | 404 NotFound | Pending |
+| 3h | Malformed package code | 404 NotFound | Pending |
+| 3i | StorageStaff collecting | 403 Forbidden | Pending |
+| 4a, 4b | Collect from InStorage, collect twice | 409 InvalidTransition on both | Pending |
+| 4c | CollectionStaff changing status | 403 Forbidden | Pending |
+| 5a | Unknown QR code (API) | 404 NotFound, friendly message | Pending |
+| 5b | Unknown QR code (scan screen) | Friendly "not found" message, no error page | Pending |
+| 6a, 6b | Supervisor on admin-only endpoints | 403 Forbidden on both, no user created | Pending |
+| 7a to 7d | Database offline | 503 ServiceUnavailable, friendly page and toast, log without the SQL message | Pending |
+| 7e | Database back online | 200 again | Pending |
+| 8a to 8g | Mail server not running | Status change 200, email tried 3 times then Failed, every attempt logged with its reason | Pending |
+| 9a to 9h | SMS failing (SMS on, recipient has no phone) | Status change 200, email Sent, SMS Failed and logged | Pending |
 
-Tested by: Hannu (Visagi1411)  Date: 2026-10-07
+Tested by: ________  Date: ________  Commit: ________
 ---
 
 ## 1. Logged out
@@ -243,7 +246,7 @@ fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.
 fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: "supervisor.demo", password: "Demo@2026!" }) }).then(r => r.text().then(t => console.log(r.status, t)));
 ```
 
-7d. Open the Scan page and scan `F20-0001`. Expected: a toast with the "can't reach its database" message, and the page keeps working. Visual Studio's Output window shows the full error starting with "Database unavailable:" (that is the log, OR-04).
+7d. Open the Scan page and scan `F20-0001`. Expected: a toast with the "can't reach its database" message, and the page keeps working. Visual Studio's Output window shows a line starting with "Database unavailable. Exception: System.Data.SqlClient.SqlException" followed by a stack trace (that is the log, OR-04). Since T54 it shows the exception type and where it happened, but not the SQL error message, which can contain personal data.
 
 7e. Bring the database back in the same query window:
 
@@ -287,9 +290,67 @@ ORDER BY q.NotificationQueueId DESC;
 ```
 Expected: one ReadyForCollection row. After a few seconds it is Pending with AttemptCount 1, after about a minute Pending with 2, and after about two minutes Failed with 3. Visual Studio's Output window shows "attempt 1 of 3 failed, will retry: The mail server could not be used (GeneralFailure, ConnectionRefused)." and finally "failed after 3 attempt(s), not retrying". The recipient's address appears nowhere in the output.
 
-8f. Log out. Expected: 204.
+8f. Every attempt is also logged (T28). Run this after the queue row shows Failed. Expected: three Failed rows for F20-0005, newest first: "The mail server could not be used (...)", then "... Will try again (attempt 2 of 3).", then "... Will try again (attempt 1 of 3)."
+```sql
+USE CourierService;
+SELECT l.Channel, l.Status, l.ErrorDetail, l.SentAtUtc
+FROM dbo.NotificationLog l JOIN dbo.Packages p ON p.PackageId = l.PackageId
+WHERE p.F20Identifier = 'F20-0005'
+ORDER BY l.NotificationLogId DESC;
+```
+Then open `https://localhost:44301/Packages/Detail/F20-0005`. Expected: under Notifications, the Email entries show a red Failed badge with the reason underneath (needs #123).
+
+8g. Log out. Expected: 204.
 ```js
 fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.status));
+```
+
+## 9. SMS failure (NFR-022, IR-002)
+
+This checks that a failing SMS never stops the staff workflow or the email. It switches SMS on in Web.config for the test and changes one package: F20-0009 moves from In Storage to Ready for Collection (use F20-0013, F20-0017 and so on if it has already moved on). The SMS stub never sends a real message.
+
+9a. Stop debugging. In `Web/Web.config` change `<add key="Sms.Enabled" value="false"/>` to `value="true"` and save. **Do not commit this change.** Start smtp4dev (`smtp4dev`) so the email can go through, then press F5.
+
+9b. In a SQL query window on CourierService, remove the recipient's phone number so the SMS must fail:
+```sql
+USE CourierService;
+UPDATE r SET r.PhoneNumber = NULL
+FROM dbo.Recipients r JOIN dbo.Packages p ON p.RecipientId = r.RecipientId
+WHERE p.F20Identifier = 'F20-0009';
+```
+
+9c. Log in as storage.demo. Expected: 200.
+```js
+fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: "storage.demo", password: "Demo@2026!" }) }).then(r => r.text().then(t => console.log(r.status, t)));
+```
+
+9d. Check the package. Expected: 200 with status InStorage.
+```js
+fetch("/api/packages/scan/F20-0009").then(r => r.json().then(j => console.log(r.status, j.f20Identifier, j.status)));
+```
+
+9e. Move it to Ready for Collection. Expected: 200 with status ReadyForCollection, even though the SMS will fail.
+```js
+fetch("/api/packages/F20-0009/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newStatus: "ReadyForCollection" }) }).then(r => r.json().then(j => console.log(r.status, j.status)));
+```
+
+9f. Wait 5 seconds, then check the log. Expected: an Email row with Sent (and the email visible in smtp4dev at http://localhost:5000), and an SMS row with Failed and "The recipient has no phone number." The SMS is not retried, because a missing number won't fix itself.
+```sql
+USE CourierService;
+SELECT l.Channel, l.Status, l.ErrorDetail, l.SentAtUtc
+FROM dbo.NotificationLog l JOIN dbo.Packages p ON p.PackageId = l.PackageId
+WHERE p.F20Identifier = 'F20-0009'
+ORDER BY l.NotificationLogId;
+```
+
+9g. Log out. Expected: 204.
+```js
+fetch("/api/auth/logout", { method: "POST" }).then(r => console.log("logout", r.status));
+```
+
+9h. Stop debugging and put Web.config back, so SMS is off again:
+```
+git checkout -- Web/Web.config
 ```
 
 SMS failures are tested with the SMS adapter (T29).
