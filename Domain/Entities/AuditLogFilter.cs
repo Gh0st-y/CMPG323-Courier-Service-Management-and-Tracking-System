@@ -5,6 +5,7 @@ namespace CourierService.Domain.Entities
     // What the audit log viewer can filter on. Anything left null is not filtered.
     public class AuditLogFilter
     {
+        public string SearchTerm { get; set; }
         public string Username { get; set; }
         public string Action { get; set; }
 
