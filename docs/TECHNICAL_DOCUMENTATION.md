@@ -36,7 +36,7 @@ Services depends on Domain, not Data. Web constructs concrete repositories and p
 ## Installation and build
 
 1. Install Visual Studio with the ASP.NET/web workload and .NET Framework 4.8 targeting pack; install SQL Server Express or LocalDB.
-2. Check out the agreed release commit. Merge [seed fix #110](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/110) before initializing a fresh database.
+2. Check out the agreed release commit. Current main includes [seed fix #110](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/110); use its updated schema before initializing a fresh database.
 3. Run `db/schema.sql`, then `db/seed.sql` on a development database containing synthetic data only. Scripts target `CourierService`; check the connection before execution. The optional `db/seed-50k.sql` adds performance fixtures.
 4. Configure the `CourierServiceDb` connection string in Web/Web.config. LocalDB uses `Server=(localdb)\MSSQLLocalDB;Database=CourierService;Trusted_Connection=True;`. IIS hosting normally uses SQL Express and the app-pool identity; do not assume developer LocalDB is accessible to IIS.
 5. Restore and build with Visual Studio/MSBuild. Use Release for a deployment package and enable `MvcBuildViews=true` to compile Razor views.
@@ -166,7 +166,7 @@ AppConfig has no foreign keys. NotificationLog references the package, not a que
 
 The backend path is `ImportController.Csv -> CsvPackageImport -> IPackageRegistrationService.Register`. The translator resolves storage codes and maps columns; the shared service applies recipient validation, classification, configured fee, payment defaults, identifier allocation, history and audit. Structural header errors reject the file; invalid data rows are skipped and reported. Each valid row commits separately, so an unexpected failure after some rows have committed requires checking saved records before retrying.
 
-Required columns are `RecipientFullName, RecipientIdentifierNo, RecipientEmail, RecipientPhone, SenderName, PackageType, Classification, StorageLocation`; `RecipientDepartment` and `Notes` are optional. The server generates identifiers and fees. [CSV fix #111](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/111) connects the browser page to this backend; the old page only simulates imports locally.
+Required columns are `RecipientFullName, RecipientIdentifierNo, RecipientEmail, RecipientPhone, SenderName, PackageType, Classification, StorageLocation`; `RecipientDepartment` and `Notes` are optional. The server generates identifiers and fees. Main includes [CSV fix #111](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/111), which connects the browser page to this backend. Mock mode cannot save imports.
 
 To add an approved live ingestion source later:
 
@@ -188,7 +188,7 @@ The timer prevents overlapping batches in one process. Multi-process claiming, d
 
 Five roles are defined: IntakeClerk, StorageStaff, CollectionStaff, Supervisor, SystemAdmin. Server-side RoleAuthorize filters reject unauthorized actions. Sessions currently keep roles from login; account changes do not immediately revoke them. API anti-forgery protection is outstanding. [Package-page fix #112](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/112) removes unsafe identifier insertion into scripts.
 
-The audit query endpoint exists; audit viewer UI is missing. Storage-location listing exists; the pending creation PR needs integration corrections. Camera scanning currently loads a library from external CDNs. These limitations must appear in the release acceptance checklist rather than being hidden by documentation.
+The audit query endpoint exists; its viewer UI is in pending [PR #119](https://github.com/Gh0st-y/CMPG323-Courier-Service-Management-and-Tracking-System/pull/119). Main includes SystemAdmin storage-location creation from #70. Camera scanning currently loads a library from external CDNs; pending #116 bundles it locally. Live fee reloads (#113), POPIA fixes (#118), and UI/verification guides (#121) require their PRs to be merged before they are treated as deployed behavior. These dependencies must appear in the release acceptance checklist.
 
 ## Verification and handover
 
@@ -196,4 +196,4 @@ The audit query endpoint exists; audit viewer UI is missing. Storage-location li
 
 Use [NEGATIVE_TESTS.md](NEGATIVE_TESTS.md) for rejection/outage scenarios and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for release evidence. Device/browser checks, performance at 50,000 packages and 500,000 audit entries, backup restoration, staff training and sponsor approval need recorded results. Do not use real recipient information before the required governance approval. Retention period and anonymisation scope remain unresolved.
 
-Updated 2026-10-10 against the reviewed main commit b8af68c and the explicitly identified pending PRs. Review those dependencies before using this document for a release.
+Updated 2026-10-12 against main commit e5e6ea5 and the explicitly identified pending PRs. Review those dependencies before using this document for a release.
