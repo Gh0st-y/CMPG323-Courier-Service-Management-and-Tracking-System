@@ -1,0 +1,25 @@
+﻿[
+    {
+        "scenario":  "SMTP refused",
+        "identifier":  "F20-0005",
+        "staffStatus":  "ReadyForCollection",
+        "statusRequestMs":  32.5,
+        "attempts":  3,
+        "failedLogs":  3
+    },
+    {
+        "scenario":  "SMS missing phone",
+        "identifier":  "F20-0009",
+        "staffStatus":  "ReadyForCollection",
+        "statusRequestMs":  30.31,
+        "email":  "Sent",
+        "sms":  "Failed",
+        "smsAttempts":  1,
+        "phoneRestored":  true
+    },
+    {
+        "scenario":  "Selective settings cleanup",
+        "smsRestored":  true,
+        "otherSettingsPreserved":  true
+    }
+]
