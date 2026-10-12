@@ -1,0 +1,41 @@
+/* ===== Login doodles ===== */
+.login-doodles {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+    .login-doodles i {
+        position: absolute;
+        color: #5b2d8e;
+        line-height: 1;
+        will-change: transform;
+    }
+
+        .login-doodles i.float {
+            animation: doodle-float 7s ease-in-out infinite;
+        }
+
+@keyframes doodle-float {
+    0%, 100% {
+        transform: translateY(0) rotate(var(--r));
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(calc(var(--r) + 4deg));
+    }
+}
+
+/* keep the login card above the doodles */
+.login-wrap {
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-doodles i.float {
+        animation: none;
+    }
+}
