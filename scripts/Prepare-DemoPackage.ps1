@@ -22,6 +22,7 @@ $tagExit = $LASTEXITCODE
 $ErrorActionPreference = 'Stop'
 if ($commitExit -ne 0 -or -not $commit) { throw 'ReleaseRef must identify an existing commit.' }
 if (-not $Candidate -and $tagExit -ne 0) { throw 'Final packages require a tagged commit. Use -Candidate only for preparation checks.' }
+if ($tagExit -ne 0) { $tag = $null } else { $tag = "$tag".Trim() }
 $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw 'Choose a new output directory; existing packages are never overwritten.' }
 if (-not $MSBuildPath) {
