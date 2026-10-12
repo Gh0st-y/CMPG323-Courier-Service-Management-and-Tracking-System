@@ -86,7 +86,7 @@ async function main() {
         statusUpdate: { ...stats(status), targetMs: null }, pageUsable: { ...stats(pageLoad), targetMs: 2000, definition: 'DOM ready plus dashboard data and minimum spinner duration; ten navigations, cold first sample retained.' },
         import500: { ms: importMs, importedCount: 500, failedRows: 0, targetMs: null },
         concurrent: { users: 5, durationMs: Date.now() - concurrentStarted, scan: stats(concurrentScan), search: stats(concurrentSearch), failures: failures.length, errors: failures },
-        cliLimitation: 'Postman local performance mode rejected v3 and then failed parsing createdBy for generated v2; this report uses the local Node/browser harness, not a successful Postman performance run.' };
+        cliLimitation: 'Postman local performance mode rejected v3 and then failed parsing createbBy for generated v2; this report uses the local Node/browser harness, not a successful Postman performance run.' };
     fs.writeFileSync(path.join(output, 'performance-results.json'), JSON.stringify(result, null, 2));
     console.log(JSON.stringify(result, null, 2));
     assert.ok(result.scan.maxMs <= 1500 && result.search.maxMs <= 3000 && result.pageUsable.maxMs <= 2000, 'A documented performance target was exceeded');

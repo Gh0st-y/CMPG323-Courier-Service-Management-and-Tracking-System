@@ -16,6 +16,6 @@ Five independent StorageStaff sessions then alternated scan/search for 60 second
 
 Raw [original results](performance-before-precompile.json) and [precompiled results](performance-results.json) preserve the failed baseline and passing documented targets. Status/import targets still require the authoritative specification or owner confirmation; neither is silently assigned a passing target.
 
-Postman CLI 1.73.0 successfully ran the functional v3 collection. Its local performance mode rejected v3; a generated classic collection then failed with `error while parsing createdBy`. The benchmark therefore uses the checked-in Node/Playwright harness. It is **not** reported as a successful Postman performance run. The maintained Postman read collection still lints cleanly.
+Postman CLI 1.73.0 successfully ran the functional v3 collection. Its local performance mode rejected v3; a generated classic collection then failed with `error while parsing createbBy`. The benchmark therefore uses the checked-in Node/Playwright harness. It is **not** reported as a successful Postman performance run. The maintained Postman read collection still lints cleanly.
 
 Use [reproduction instructions](README.md); benchmark writes must target only the isolated synthetic database. Demo hardware, HTTPS/phone scanning and a public network were not part of this measurement.

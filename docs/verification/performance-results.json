@@ -69,5 +69,5 @@
     "failures": 0,
     "errors": []
   },
-  "cliLimitation": "Postman local performance mode rejected v3 and then failed parsing createdBy for generated v2; this report uses the local Node/browser harness, not a successful Postman performance run."
+  "cliLimitation": "Postman local performance mode rejected v3 and then failed parsing createbBy for generated v2; this report uses the local Node/browser harness, not a successful Postman performance run."
 }
