@@ -1,3 +1,4 @@
+﻿using CourierService.Services.Diagnostics;
 using CourierService.Data;
 using CourierService.Data.Repositories;
 using CourierService.Domain.Entities;
@@ -169,7 +170,9 @@ namespace CourierService.Web.Controllers
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.ToString());
+                Trace.TraceError(
+                    "An unexpected error occurred while searching packages. Exception: {0}",
+                    ExceptionDiagnostics.Format(ex));
                 return ErrorJson(500, "ServerError", "Something went wrong while searching. Please try again.");
             }
         }
@@ -202,7 +205,10 @@ namespace CourierService.Web.Controllers
                 .Select(n => new
                 {
                     channel = n.Channel,
-                    recipientAddress = PersonalData.MaskPhone(n.RecipientAddress),
+                    recipientAddress = string.Equals(
+                        n.Channel, "Email", StringComparison.OrdinalIgnoreCase)
+                            ? PersonalData.MaskEmail(n.RecipientAddress)
+                            : PersonalData.MaskPhone(n.RecipientAddress),
                     subject = n.Subject,
                     status = n.Status,
                     sentAtUtc = IsoUtc(n.SentAtUtc)
