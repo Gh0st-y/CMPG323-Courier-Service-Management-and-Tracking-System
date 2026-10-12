@@ -1,0 +1,18 @@
+$kind: collection
+name: Remaining acceptance
+variables:
+  - key: base_url
+    value: 'http://localhost:48131'
+  - key: run_id
+    value: '1791837140493'
+  - key: demo_password
+    value: 'Demo@2026!'
+    description: 'Public synthetic seed password, never a production credential.'
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      const base = pm.variables.get('base_url');
+      if (!/^http:\/\/(localhost|127\.0\.0\.1):[0-9]+$/.test(base)) throw new Error('Acceptance writes require an isolated loopback test site.');
+      const cookie = pm.collectionVariables.get('session_cookie');
+      if (cookie) pm.request.headers.upsert({key: 'Cookie', value: cookie});

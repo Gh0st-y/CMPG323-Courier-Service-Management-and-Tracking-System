@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Create synthetic location'
+order: 36000
+method: POST
+url: '{{base_url}}/api/storage-locations'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "QA-{{run_id}}",
+      "description": "Synthetic acceptance location"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Create synthetic location status', () => pm.response.to.have.status(201));

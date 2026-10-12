@@ -1,0 +1,10 @@
+$kind: http-request
+order: 2000
+method: GET
+url: '{{base_url}}/api/packages?query=F20-100&page=1&pageSize=25'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Successful search', () => pm.response.to.have.status(200));
+      pm.test('Real results', () => pm.expect(pm.response.json().items.length).to.be.above(0));

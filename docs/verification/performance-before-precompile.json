@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-12T20:11:40.673Z",
+  "baseUrl": "http://localhost:48141",
+  "syntheticOnly": true,
+  "seededPackages": 50200,
+  "afterCsvPackages": 50700,
+  "scan": {
+    "samples": 30,
+    "minMs": 4.0219999999999345,
+    "medianMs": 5.910900000000083,
+    "p95Ms": 6.9138000000000375,
+    "maxMs": 7.006600000000162,
+    "averageMs": 5.616866666666673,
+    "targetMs": 1500
+  },
+  "search": {
+    "samples": 30,
+    "minMs": 77.79039999999986,
+    "medianMs": 81.72939999999994,
+    "p95Ms": 85.20080000000007,
+    "maxMs": 98.19470000000001,
+    "averageMs": 82.32895333333332,
+    "targetMs": 3000
+  },
+  "statusUpdate": {
+    "samples": 20,
+    "minMs": 5.082800000000134,
+    "medianMs": 6.710900000000038,
+    "p95Ms": 7.849299999999857,
+    "maxMs": 31.366700000000037,
+    "averageMs": 7.652050000000031,
+    "targetMs": null
+  },
+  "pageUsable": {
+    "samples": 10,
+    "minMs": 730.2584999999999,
+    "medianMs": 739.7737000000016,
+    "p95Ms": 5131.9246,
+    "maxMs": 5131.9246,
+    "averageMs": 1179.2010699999998,
+    "targetMs": 2000,
+    "definition": "DOM ready plus dashboard data and minimum spinner duration; ten navigations, cold first sample retained."
+  },
+  "import500": {
+    "ms": 16483.7951,
+    "importedCount": 500,
+    "failedRows": 0,
+    "targetMs": null
+  },
+  "concurrent": {
+    "users": 5,
+    "durationMs": 60322,
+    "scan": {
+      "samples": 827,
+      "minMs": 2.968699999997625,
+      "medianMs": 5.124800000005052,
+      "p95Ms": 7.7929000000003725,
+      "maxMs": 19.866799999996147,
+      "averageMs": 5.315746432889896
+    },
+    "search": {
+      "samples": 827,
+      "minMs": 79.10239999999612,
+      "medianMs": 93.6131000000023,
+      "p95Ms": 163.83810000000085,
+      "maxMs": 228.70720000000438,
+      "averageMs": 102.54399649334921
+    },
+    "failures": 0,
+    "errors": []
+  },
+  "cliLimitation": "Postman local performance mode rejected v3 and then failed parsing createdBy for generated v2; this report uses the local Node/browser harness, not a successful Postman performance run."
+}

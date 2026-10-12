@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-12T20:32:46.102Z",
+  "baseUrl": "http://localhost:48151",
+  "syntheticOnly": true,
+  "seededPackages": 50700,
+  "afterCsvPackages": 51200,
+  "scan": {
+    "samples": 30,
+    "minMs": 3.9594999999999345,
+    "medianMs": 4.501499999999851,
+    "p95Ms": 6.6296000000002095,
+    "maxMs": 7.76279999999997,
+    "averageMs": 4.866103333333354,
+    "targetMs": 1500
+  },
+  "search": {
+    "samples": 30,
+    "minMs": 77.38400000000001,
+    "medianMs": 80.85900000000015,
+    "p95Ms": 85.46730000000025,
+    "maxMs": 111.67039999999997,
+    "averageMs": 82.24093666666674,
+    "targetMs": 3000
+  },
+  "statusUpdate": {
+    "samples": 20,
+    "minMs": 4.417399999999816,
+    "medianMs": 4.941499999999905,
+    "p95Ms": 6.824100000000271,
+    "maxMs": 29.446500000000015,
+    "averageMs": 6.3566299999999725,
+    "targetMs": null
+  },
+  "pageUsable": {
+    "samples": 10,
+    "minMs": 738.7911000000004,
+    "medianMs": 740.6015000000007,
+    "p95Ms": 858.8436000000002,
+    "maxMs": 858.8436000000002,
+    "averageMs": 754.8578399999999,
+    "targetMs": 2000,
+    "definition": "DOM ready plus dashboard data and minimum spinner duration; ten navigations, cold first sample retained."
+  },
+  "import500": {
+    "ms": 15686.655800000002,
+    "importedCount": 500,
+    "failedRows": 0,
+    "targetMs": null
+  },
+  "concurrent": {
+    "users": 5,
+    "durationMs": 60336,
+    "scan": {
+      "samples": 833,
+      "minMs": 2.9166000000041095,
+      "medianMs": 5.006999999997788,
+      "p95Ms": 8.648199999999633,
+      "maxMs": 21.24649999999383,
+      "averageMs": 5.364118727491242
+    },
+    "search": {
+      "samples": 833,
+      "minMs": 75.65060000000085,
+      "medianMs": 95.80939999999828,
+      "p95Ms": 133.9436999999889,
+      "maxMs": 177.23049999999057,
+      "averageMs": 99.9503440576231
+    },
+    "failures": 0,
+    "errors": []
+  },
+  "cliLimitation": "Postman local performance mode rejected v3 and then failed parsing createdBy for generated v2; this report uses the local Node/browser harness, not a successful Postman performance run."
+}

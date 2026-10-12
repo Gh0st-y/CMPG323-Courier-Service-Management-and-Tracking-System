@@ -1,0 +1,10 @@
+$kind: http-request
+order: 1000
+method: GET
+url: '{{base_url}}/api/packages/scan/F20-10001'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Successful scan', () => pm.response.to.have.status(200));
+      pm.test('Correct seeded package', () => pm.expect(pm.response.json().f20Identifier).to.equal('F20-10001'));

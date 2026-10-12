@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Logout'
+order: 37000
+method: POST
+url: '{{base_url}}/api/auth/logout'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Logout status', () => pm.response.to.have.status(204));

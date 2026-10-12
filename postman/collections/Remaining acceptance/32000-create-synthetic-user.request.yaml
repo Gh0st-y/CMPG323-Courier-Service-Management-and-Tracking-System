@@ -1,0 +1,25 @@
+$kind: http-request
+name: 'Create synthetic user'
+order: 32000
+method: POST
+url: '{{base_url}}/api/users'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "qa.{{run_id}}",
+      "email": "qa.{{run_id}}@example.test",
+      "password": "Synthetic123!",
+      "role": "IntakeClerk"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Create synthetic user status', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('created_user',pm.response.json().userId);

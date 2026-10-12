@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Supervisor report data'
+order: 24000
+method: GET
+url: '{{base_url}}/api/reports'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Supervisor report data status', () => pm.response.to.have.status(200));
+      pm.test('Report sections', () => { const data=pm.response.json(); pm.expect(data).to.have.property('kpis'); pm.expect(data.outstanding).to.be.an('array'); });

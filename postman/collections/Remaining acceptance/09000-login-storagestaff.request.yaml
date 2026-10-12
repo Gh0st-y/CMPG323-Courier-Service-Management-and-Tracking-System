@@ -1,0 +1,24 @@
+$kind: http-request
+name: 'Login StorageStaff'
+order: 9000
+method: POST
+url: '{{base_url}}/api/auth/login'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "storage.demo",
+      "password": "{{demo_password}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Login StorageStaff status', () => pm.response.to.have.status(200));
+      pm.test('Expected session role', () => pm.expect(pm.response.json().role).to.equal('StorageStaff'));
+      const cookie=pm.response.headers.get('Set-Cookie'); if (cookie) pm.collectionVariables.set('session_cookie',cookie.split(';')[0]);

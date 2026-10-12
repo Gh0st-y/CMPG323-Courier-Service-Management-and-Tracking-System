@@ -1,0 +1,23 @@
+$kind: http-request
+name: 'Store package'
+order: 13000
+method: POST
+url: '{{base_url}}/api/packages/{{package_id}}/status'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "newStatus": "InStorage",
+      "storageLocationId": 1
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Store package status', () => pm.response.to.have.status(200));
+      pm.test('Stored status', () => pm.expect(pm.response.json().status).to.equal('InStorage'));

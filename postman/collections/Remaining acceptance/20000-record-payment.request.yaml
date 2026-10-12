@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Record payment'
+order: 20000
+method: PATCH
+url: '{{base_url}}/api/packages/{{package_id}}/payment'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "paymentStatus": "Paid"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Record payment status', () => pm.response.to.have.status(200));
+      pm.test('Payment stored with actor and time', () => { const data=pm.response.json(); pm.expect(data.paymentStatus).to.equal('Paid'); pm.expect(data.paymentStatusUpdatedBy).to.equal('collection.demo'); pm.expect(data.paymentStatusUpdatedAtUtc).to.be.a('string'); });

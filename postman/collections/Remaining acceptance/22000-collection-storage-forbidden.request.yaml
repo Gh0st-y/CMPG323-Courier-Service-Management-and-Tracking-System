@@ -1,0 +1,21 @@
+$kind: http-request
+name: 'Collection storage forbidden'
+order: 22000
+method: POST
+url: '{{base_url}}/api/packages/{{package_id}}/status'
+settings:
+  followRedirects: false
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "newStatus": "InStorage"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Collection storage forbidden status', () => pm.response.to.have.status(403));

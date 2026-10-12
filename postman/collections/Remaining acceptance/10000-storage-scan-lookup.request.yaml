@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Storage scan lookup'
+order: 10000
+method: GET
+url: '{{base_url}}/api/packages/scan/{{package_id}}'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Storage scan lookup status', () => pm.response.to.have.status(200));
+      pm.test('Same registered identifier', () => pm.expect(pm.response.json().f20Identifier).to.equal(pm.collectionVariables.get('package_id')));

@@ -1,0 +1,18 @@
+$kind: http-request
+name: 'Unauthenticated package lookup'
+order: 1000
+method: GET
+url: '{{base_url}}/api/packages/scan/F20-0001'
+settings:
+  followRedirects: false
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.collectionVariables.set('run_id', String(Date.now()));
+      pm.collectionVariables.unset('session_cookie');
+      pm.request.headers.remove('Cookie');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Unauthenticated package lookup status', () => pm.response.to.have.status(401));

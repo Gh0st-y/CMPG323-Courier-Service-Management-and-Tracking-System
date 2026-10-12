@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Storage registration forbidden'
+order: 15000
+method: GET
+url: '{{base_url}}/Packages/Register'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Storage registration forbidden status', () => pm.response.to.have.status(403));

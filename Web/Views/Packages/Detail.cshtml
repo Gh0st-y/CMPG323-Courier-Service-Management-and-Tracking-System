@@ -206,6 +206,7 @@
                         history.forEach(function (entry) {
                             var li = document.createElement("li");
                             li.className = "timeline__item";
+                            li.dataset.status = entry.toStatus;
 
                             var transition = entry.fromStatus
                                 ? statusLabel(entry.fromStatus) + " \u2192 " + statusLabel(entry.toStatus)

@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Intake registration page'
+order: 3000
+method: GET
+url: '{{base_url}}/Packages/Register'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Intake registration page status', () => pm.response.to.have.status(200));
+      pm.test('UTF-8 dash', () => { pm.expect(pm.response.text()).to.include('— Select —'); pm.expect(pm.response.text()).not.to.include('â€'); });

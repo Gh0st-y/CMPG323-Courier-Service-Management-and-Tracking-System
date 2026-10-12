@@ -1,6 +1,6 @@
 # End-to-end test script by role (T51)
 
-Status: prepared, not executed against a live site. Record actual observations in [TEST_RESULTS.md](TEST_RESULTS.md), including browser, URL, release commit, test database and tester. Use an isolated synthetic database and restore it after destructive checks. Never run these acceptance steps against live recipient data.
+Status: live API and browser paths executed on 2026-10-12; observations and remaining physical checks are recorded in [TEST_RESULTS.md](TEST_RESULTS.md). Reproduction commands are in [verification/README.md](verification/README.md). Use an isolated synthetic database. Never run these acceptance steps against live recipient data.
 
 Before starting, deploy all intended PRs, create the database with the updated schema and seed, disable mock mode, configure a visible test SMTP inbox, and prepare a synthetic CSV from the site's template. Record the original configured fees and restore them after fee checks. Use separate browser sessions or log out between roles.
 
