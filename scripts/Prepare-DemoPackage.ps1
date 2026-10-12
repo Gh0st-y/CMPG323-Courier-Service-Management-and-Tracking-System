@@ -7,10 +7,22 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $repository = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$commit = (& git -C $repository rev-parse --verify "$ReleaseRef^{commit}").Trim()
-if ($LASTEXITCODE -ne 0) { throw 'ReleaseRef must identify an existing commit.' }
-$tag = & git -C $repository describe --exact-match --tags $commit 2>$null
-if (-not $Candidate -and $LASTEXITCODE -ne 0) { throw 'Final packages require a tagged commit. Use -Candidate only for preparation checks.' }
+# Windows PowerShell 5.1 turns anything a native command writes to stderr into a terminating error while
+# ErrorActionPreference is Stop, even with 2>$null. The two git queries below can fail on purpose (unknown ref,
+# untagged candidate commit), so they run with Continue and are judged by their exit codes instead.
+$ErrorActionPreference = 'Continue'
+$commit = & git -C $repository rev-parse --verify --quiet "$ReleaseRef^{commit}" 2>$null
+$commitExit = $LASTEXITCODE
+$tag = $null
+if ($commitExit -eq 0 -and $commit) {
+    $commit = "$commit".Trim()
+    $tag = & git -C $repository describe --exact-match --tags $commit 2>$null
+}
+$tagExit = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
+if ($commitExit -ne 0 -or -not $commit) { throw 'ReleaseRef must identify an existing commit.' }
+if (-not $Candidate -and $tagExit -ne 0) { throw 'Final packages require a tagged commit. Use -Candidate only for preparation checks.' }
+if ($tagExit -ne 0) { $tag = $null } else { $tag = "$tag".Trim() }
 $output = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw 'Choose a new output directory; existing packages are never overwritten.' }
 if (-not $MSBuildPath) {
