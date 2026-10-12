@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -18,32 +18,16 @@ namespace CourierService.Data.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        // Same local-time handling as DashboardRepository: filter dates are SAST calendar days.
-        private const string LocalTimeZoneId = "South Africa Standard Time";
-        private static readonly TimeZoneInfo LocalTimeZone = ResolveLocalTimeZone();
-
-        private static TimeZoneInfo ResolveLocalTimeZone()
-        {
-            try { return TimeZoneInfo.FindSystemTimeZoneById(LocalTimeZoneId); }
-            catch (TimeZoneNotFoundException) { return TimeZoneInfo.Local; }
-            catch (InvalidTimeZoneException) { return TimeZoneInfo.Local; }
-        }
-
-        private static DateTime LocalDateToUtc(DateTime localDate)
-        {
-            return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(localDate.Date, DateTimeKind.Unspecified), LocalTimeZone);
-        }
-
         public ReportData GetReport(ReportFilter filter)
         {
             filter = filter ?? new ReportFilter();
 
-            var todayLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, LocalTimeZone).Date;
-            var fromLocal = (filter.FromDate ?? todayLocal.AddDays(-29)).Date;
-            var toLocal = (filter.ToDate ?? todayLocal).Date;
-            var fromUtc = LocalDateToUtc(fromLocal);
-            var toUtc = LocalDateToUtc(toLocal.AddDays(1)); // exclusive upper bound = inclusive end date
-            var offsetMinutes = (int)LocalTimeZone.BaseUtcOffset.TotalMinutes;
+            var window = ReportDateWindow.For(filter.FromDate, filter.ToDate, DateTime.UtcNow);
+            var fromLocal = window.FromLocal;
+            var toLocal = window.ToLocal;
+            var fromUtc = window.FromUtc;
+            var toUtc = window.ToUtcExclusive;
+            const int offsetMinutes = 120;
 
             var where = new StringBuilder("WHERE p.CreatedAtUtc >= @FromUtc AND p.CreatedAtUtc < @ToUtc");
             if (!string.IsNullOrEmpty(filter.Status)) where.Append(" AND p.Status = @Status");

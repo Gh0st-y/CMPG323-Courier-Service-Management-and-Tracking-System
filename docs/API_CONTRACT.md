@@ -144,7 +144,14 @@ These were only described as "the record" above; this is what the implemented en
 - Only works from `ReadyForCollection`; otherwise `409 InvalidTransition`.
 - The package records who verified the collector and when; the history row and audit entry record the logged-in user who processed it.
 
-**`GET /api/storage-locations`** (any logged-in user) returns the active locations as `[{ storageLocationId, code, description }]`. Adding a location (`POST`, SystemAdmin) is not built yet (T24).
+**`GET /api/storage-locations`** (any logged-in user) returns the active locations as `[{ storageLocationId, code, description }]`. Inactive locations are left out.
+
+**`POST /api/storage-locations`** (SystemAdmin) with `{ "code": "Shelf D-1", "description": "Bottom shelf" }` adds an active location (T24).
+- 201 → `{ storageLocationId, code, description }`, the same shape as the list.
+- `code` is required, up to 50 characters, and is trimmed. `description` is optional, up to 200 characters; blank is saved as null. Otherwise 400 `ValidationError`.
+- 409 `DuplicateCode` when a location with that code already exists, in any case and including inactive ones.
+- Writes a `StorageLocationCreated` audit entry in the same transaction (SR-04).
+- Other roles get 403 and logged-out users 401, as usual.
 
 ## Response details: payment status (T41)
 
